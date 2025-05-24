@@ -60,8 +60,11 @@ function App() {
 
   const handleRankingChange = (index: number, field: keyof ArtistRanking, value: string | number) => {
     const updated = [...rankings]
-    updated[index][field] = field === 'rank' ? Number(value) : value
-    setRankings(updated)
+      if (field === 'rank') {
+        updated[index].rank = Number(value)
+      } else if (field === 'artist_id') {
+        updated[index].artist_id = value as string
+}    setRankings(updated)
   }
 
   const addRanking = () => {
