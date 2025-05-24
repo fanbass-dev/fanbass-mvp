@@ -1,11 +1,14 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core'
 
 import { SearchBar } from './components/SearchBar'
 import { Queue } from './components/Queue'
-import LineupCanvas from './components/LineupCanvas'
+import { StageGrid } from './components/StageGrid'
+import type { Artist, Tier } from './types'
 
-import type { Artist } from './types'
+const tiers: Tier[] = ['headliner', 'support', 'opener']
+const stages = ['Dreamy', 'Heavy', 'Groovy']
 
 function App() {
   const [user, setUser] = useState<any>(null)
@@ -13,6 +16,7 @@ function App() {
   const [searchResults, setSearchResults] = useState<Artist[]>([])
   const [searching, setSearching] = useState(false)
   const [queue, setQueue] = useState<Artist[]>([])
+  const [placements, setPlacements] = useState<Record<string, Artist[]>>({})
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -72,6 +76,25 @@ function App() {
     })
   }
 
+  const dropKey = (stage: string, tier: Tier) => `${stage}-${tier}`
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over) return
+
+    const artist = queue.find((a) => a.id === active.id)
+    if (!artist) return
+
+    const targetKey = over.id.toString()
+    setPlacements((prev) => {
+      const updated = { ...prev }
+      updated[targetKey] = [...(updated[targetKey] ?? []), artist]
+      return updated
+    })
+
+    setQueue((prev) => prev.filter((a) => a.id !== artist.id))
+  }
+
   return (
     <div style={{ padding: '2rem', fontFamily: 'sans-serif' }}>
       <h1>FanBass MVP</h1>
@@ -90,10 +113,17 @@ function App() {
             queue={queue}
           />
 
-          <Queue queue={queue} />
+          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <Queue queue={queue} />
 
-          <h2 style={{ marginTop: '2rem' }}>Lineup Canvas</h2>
-          <LineupCanvas queuedArtists={queue} />
+            <h2 style={{ marginTop: '2rem' }}>Lineup Grid</h2>
+            <StageGrid
+              stages={stages}
+              tiers={tiers}
+              placements={placements}
+              dropKey={dropKey}
+            />
+          </DndContext>
         </>
       ) : (
         <button onClick={signInWithGoogle}>Log in with Google</button>

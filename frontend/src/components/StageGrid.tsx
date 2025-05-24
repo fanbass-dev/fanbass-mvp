@@ -1,6 +1,5 @@
-import { DroppableCell } from './DroppableCell'
-import type { Artist } from '../types'
-import type { Tier } from '../types'
+import { GridCell } from './GridCell'
+import type { Artist, Tier } from '../types'
 
 type Props = {
   stages: string[]
@@ -11,54 +10,39 @@ type Props = {
 
 export function StageGrid({ stages, tiers, placements, dropKey }: Props) {
   return (
-    <div
-      style={{
-        display: 'flex',
-        overflowX: 'auto',
-        gap: '1rem',
-        alignItems: 'flex-start',
-      }}
-    >
-      {stages.map((stage) => (
-        <div
-          key={stage}
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            flexGrow: 1,
-            width: 'auto', // allow it to grow
-          }}
-        >
-          <h3>{stage}</h3>
+    <div style={{ overflowX: 'auto' }}>
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: `repeat(${stages.length}, 220px)`,
+          gap: '12px',
+        }}
+      >
+        {stages.map((stage) => (
+          <div key={stage}>
+            <h3 style={{ textAlign: 'center' }}>{stage}</h3>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateRows: `repeat(${tiers.length}, 160px)`,
+                gap: '12px',
+              }}
+            >
+              {tiers.map((tier) => {
+                const id = dropKey(stage, tier)
+                const artists = placements[id] ?? []
 
-          <div
-            style={{
-              display: 'flex',
-              flexDirection: 'column',
-              gap: '0.75rem',
-            }}
-          >
-            {tiers.map((tier) => {
-              const id = dropKey(stage, tier)
-              const artists = placements[id] ?? []
-
-              return (
-                <div
-                  key={tier}
-                  style={{
-                    height: '150px',
-                    display: 'flex',
-                    flexDirection: 'column',
-                  }}
-                >
-                  <strong style={{ marginBottom: '4px' }}>{tier.toUpperCase()}</strong>
-                  <DroppableCell id={id} artists={artists} />
-                </div>
-              )
-            })}
+                return (
+                  <div key={tier}>
+                    <strong style={{ fontSize: 12 }}>{tier.toUpperCase()}</strong>
+                    <GridCell id={id} artists={artists} />
+                  </div>
+                )
+              })}
+            </div>
           </div>
-        </div>
-      ))}
+        ))}
+      </div>
     </div>
   )
 }
