@@ -1,8 +1,12 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import events, rankings
+from app.routes import events, rankings, artists
+
 
 app = FastAPI()
+
+app.include_router(artists.router, prefix="/artists", tags=["artists"])
+
 
 # ✅ CORS setup to allow frontend to talk to backend
 origins = [
