@@ -12,12 +12,16 @@ type Event = {
   reordered_lineup: string[]
 }
 
+type Artist = {
+  id: string
+  name: string
+}
+
 function App() {
   const [user, setUser] = useState<any>(null)
-  const [rankings, setRankings] = useState<ArtistRanking[]>([
-    { artist_id: '', rank: 1 },
-  ])
+  const [rankings, setRankings] = useState<ArtistRanking[]>([{ artist_id: '', rank: 1 }])
   const [events, setEvents] = useState<Event[] | null>(null)
+  const [artists, setArtists] = useState<Artist[]>([])
 
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
@@ -30,7 +34,9 @@ function App() {
       setUser(session?.user ?? null)
     })
 
-    return () => subscription.unsubscribe()
+    fetch(`${process.env.REACT_APP_API_BASE_URL}/artists`)
+      .then((res) => res.json())
+      .then((data) => setArtists(data))
   }, [])
 
   const signInWithGoogle = async () => {
@@ -45,7 +51,7 @@ function App() {
 
   const handleRankingChange = (index: number, field: keyof ArtistRanking, value: string | number) => {
     const updated = [...rankings]
-    ;(updated[index] as any)[field] = field === 'rank' ? Number(value) : value
+    updated[index][field] = field === 'rank' ? Number(value) : value
     setRankings(updated)
   }
 
@@ -55,9 +61,7 @@ function App() {
 
   const submitRankings = async () => {
     const token = (await supabase.auth.getSession()).data.session?.access_token
-  const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000'
-    console.log("Using API base URL:", baseUrl)
-    console.log("Submitting Rankings:", rankings)
+    const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000'
 
     const res = await fetch(`${baseUrl}/rankings`, {
       method: 'POST',
@@ -73,12 +77,14 @@ function App() {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await eventsRes.json()
-      console.log("Received Events:", data)
       setEvents(data)
     } else {
-      console.error("Failed to submit rankings", res.status)
       alert('Failed to submit rankings')
     }
+  }
+
+  const getArtistName = (id: string) => {
+    return artists.find((a) => a.id === id)?.name || id
   }
 
   return (
@@ -117,8 +123,8 @@ function App() {
               <div key={event.id}>
                 <h3>{event.name}</h3>
                 <ul>
-                  {event.reordered_lineup.map((artist) => (
-                    <li key={artist}>{artist}</li>
+                  {event.reordered_lineup.map((artistId) => (
+                    <li key={artistId}>{getArtistName(artistId)}</li>
                   ))}
                 </ul>
               </div>
