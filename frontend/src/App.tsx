@@ -55,7 +55,7 @@ function App() {
 
   const submitRankings = async () => {
     const token = (await supabase.auth.getSession()).data.session?.access_token
-    const baseUrl = import.meta.env.VITE_API_BASE_URL
+  const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000'
     console.log("Using API base URL:", baseUrl)
     console.log("Submitting Rankings:", rankings)
 
