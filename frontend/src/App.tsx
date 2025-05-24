@@ -106,10 +106,10 @@ function App() {
             queue={queue}
           />
 
-          <Queue queue={queue} />
-
-          <h2 style={{ marginTop: '2rem' }}>Lineup Grid</h2>
           <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <Queue queue={queue} />
+
+            <h2 style={{ marginTop: '2rem' }}>Lineup Grid</h2>
             <StageGrid
               stages={stages}
               tiers={tiers}
