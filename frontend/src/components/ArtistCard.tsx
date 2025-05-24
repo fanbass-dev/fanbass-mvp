@@ -16,6 +16,23 @@ export function ArtistCard({ artist }: Props) {
     opacity: isDragging ? 0.5 : 1,
     transition: 'box-shadow 0.2s ease',
     boxShadow: isDragging ? '0 0 6px rgba(0,0,0,0.2)' : undefined,
+    width: '100px',
+    height: '48px',
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    textAlign: 'center',
+    background: '#eee',
+    padding: '6px',
+    borderRadius: '6px',
+    fontSize: 13,
+    fontWeight: 500,
+    cursor: 'grab',
+    userSelect: 'none',
+    overflow: 'hidden',
+    lineHeight: '1.2',
+    wordBreak: 'break-word',
+    whiteSpace: 'normal',
   }
 
   return (
@@ -23,17 +40,7 @@ export function ArtistCard({ artist }: Props) {
       ref={setNodeRef}
       {...attributes}
       {...listeners}
-      style={{
-        ...style,
-        background: '#eee',
-        padding: '6px 10px',
-        borderRadius: '6px',
-        margin: '4px 0',
-        cursor: 'grab',
-        fontSize: 14,
-        fontWeight: 500,
-        userSelect: 'none',
-      }}
+      style={style}
     >
       {artist.name}
     </div>
