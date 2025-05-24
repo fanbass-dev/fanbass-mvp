@@ -25,8 +25,8 @@ export function StageGrid({ stages, tiers, placements, dropKey }: Props) {
           style={{
             display: 'flex',
             flexDirection: 'column',
-            minWidth: '180px',
-            flexShrink: 0,
+            flexGrow: 1,
+            width: 'auto', // allow it to grow
           }}
         >
           <h3>{stage}</h3>
@@ -35,8 +35,6 @@ export function StageGrid({ stages, tiers, placements, dropKey }: Props) {
             style={{
               display: 'flex',
               flexDirection: 'column',
-              flexGrow: 1,
-              height: '100%',
               gap: '0.75rem',
             }}
           >
@@ -48,8 +46,7 @@ export function StageGrid({ stages, tiers, placements, dropKey }: Props) {
                 <div
                   key={tier}
                   style={{
-                    flex: 1,
-                    minHeight: '150px',
+                    height: '150px',
                     display: 'flex',
                     flexDirection: 'column',
                   }}
