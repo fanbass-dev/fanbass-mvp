@@ -34,9 +34,18 @@ function App() {
       setUser(session?.user ?? null)
     })
 
+    // Fetch artist list
     fetch(`${process.env.REACT_APP_API_BASE_URL}/artists`)
       .then((res) => res.json())
-      .then((data) => setArtists(data))
+      .then((data) => {
+        console.log("Received artists:", data)
+        setArtists(data)
+      })
+      .catch((err) => {
+        console.error("Failed to fetch artists:", err)
+      })
+
+    return () => subscription.unsubscribe()
   }, [])
 
   const signInWithGoogle = async () => {
@@ -63,6 +72,9 @@ function App() {
     const token = (await supabase.auth.getSession()).data.session?.access_token
     const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000'
 
+    console.log("Using API base URL:", baseUrl)
+    console.log("Submitting Rankings:", rankings)
+
     const res = await fetch(`${baseUrl}/rankings`, {
       method: 'POST',
       headers: {
@@ -77,14 +89,17 @@ function App() {
         headers: { Authorization: `Bearer ${token}` },
       })
       const data = await eventsRes.json()
+      console.log("Received Events:", data)
       setEvents(data)
     } else {
+      console.error("Failed to submit rankings", res.status)
       alert('Failed to submit rankings')
     }
   }
 
   const getArtistName = (id: string) => {
-    return artists.find((a) => a.id === id)?.name || id
+    const artist = artists.find((a) => a.id === id)
+    return artist?.name || id
   }
 
   return (
