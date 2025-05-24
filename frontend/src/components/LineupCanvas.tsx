@@ -47,7 +47,7 @@ export default function LineupCanvas({ queuedArtists }: Props) {
   }
 
   const handleNodeDragStop = useCallback(
-    (_event, node) => {
+    (_event: any, node: any) => {
       const snapped = snapToGrid(node.position.x, node.position.y)
       setNodes((nds) =>
         nds.map((n) =>
