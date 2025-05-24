@@ -38,7 +38,8 @@ type Props = {
 }
 
 function CanvasGrid() {
-  const { viewport } = useReactFlow()
+  const { getViewport } = useReactFlow()
+  const { x, y, zoom } = getViewport()
 
   return (
     <svg
@@ -49,9 +50,7 @@ function CanvasGrid() {
         pointerEvents: 'none',
       }}
     >
-      <g
-        transform={`translate(${viewport.x}, ${viewport.y}) scale(${viewport.zoom})`}
-      >
+      <g transform={`translate(${x}, ${y}) scale(${zoom})`}>
         {tiers.map((tier) => (
           <rect
             key={tier}
