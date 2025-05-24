@@ -12,12 +12,13 @@ export function DroppableCell({ id, artists }: Props) {
   return (
     <div
       ref={setNodeRef}
-      style={{
-        minHeight: '60px',
-        padding: '8px',
-        border: '1px dashed #aaa',
-        background: isOver ? '#f0f0f0' : 'white',
-      }}
+        style={{
+          minHeight: '100px',
+          height: '100%',
+          padding: '8px',
+          border: '1px dashed #aaa',
+          background: isOver ? '#f0f0f0' : 'white',
+        }}
     >
       {artists.map((artist) => (
         <div

@@ -11,21 +11,39 @@ type Props = {
 
 export function StageGrid({ stages, tiers, placements, dropKey }: Props) {
   return (
-    <div style={{ display: 'flex', overflowX: 'auto' }}>
+    <div
+      style={{
+        display: 'flex',
+        overflowX: 'auto',
+        gap: '1rem',
+        alignItems: 'flex-start',
+      }}
+    >
       {stages.map((stage) => (
-        <div key={stage} style={{ marginRight: '1rem', minWidth: '150px' }}>
+        <div
+          key={stage}
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            minWidth: '180px',
+            flexShrink: 0,
+          }}
+        >
           <h3>{stage}</h3>
-          {tiers.map((tier) => {
-            const id = dropKey(stage, tier)
-            const artists = placements[id] ?? []
 
-            return (
-              <div key={tier} style={{ marginBottom: '1rem' }}>
-                <strong>{tier.toUpperCase()}</strong>
-                <DroppableCell id={id} artists={artists} />
-              </div>
-            )
-          })}
+          <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, height: '100%' }}>
+            {tiers.map((tier) => {
+              const id = dropKey(stage, tier)
+              const artists = placements[id] ?? []
+
+              return (
+                <div key={tier} style={{ marginBottom: '1rem', flex: 1 }}>
+                  <strong>{tier.toUpperCase()}</strong>
+                  <DroppableCell id={id} artists={artists} />
+                </div>
+              )
+            })}
+          </div>
         </div>
       ))}
     </div>
