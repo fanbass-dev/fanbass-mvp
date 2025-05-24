@@ -7,10 +7,6 @@ import {
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
-  OnNodesChange,
-  OnEdgesChange,
-  OnNodeDragStop,
-  NodeDragHandler,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { useEffect, useCallback } from 'react'
@@ -44,15 +40,13 @@ export default function LineupCanvas({ queuedArtists }: Props) {
   const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
 
-  // Snap position to the center of the nearest cell
   const snapToGrid = (x: number, y: number): { x: number; y: number } => {
     const snapX = Math.round(x / CELL_WIDTH) * CELL_WIDTH
     const snapY = Math.round(y / CELL_HEIGHT) * CELL_HEIGHT
     return { x: snapX, y: snapY }
   }
 
-  // On drag stop, snap node to grid
-  const handleNodeDragStop: OnNodeDragStop = useCallback(
+  const handleNodeDragStop = useCallback(
     (_event, node) => {
       const snapped = snapToGrid(node.position.x, node.position.y)
       setNodes((nds) =>
@@ -64,7 +58,6 @@ export default function LineupCanvas({ queuedArtists }: Props) {
     [setNodes]
   )
 
-  // Inject new queued artists into the canvas (Queue column only)
   useEffect(() => {
     const newNodes: Node[] = queuedArtists.map((artist, i) => ({
       id: `queue-${artist.id}`,
@@ -88,7 +81,7 @@ export default function LineupCanvas({ queuedArtists }: Props) {
 
   return (
     <div style={{ height: '80vh', border: '1px solid #ccc', position: 'relative' }}>
-      {/* TIER GUIDES */}
+      {/* Tier Guides */}
       {tiers.map((tier) => (
         <div
           key={tier}
@@ -120,7 +113,7 @@ export default function LineupCanvas({ queuedArtists }: Props) {
         </div>
       ))}
 
-      {/* STAGE GUIDES */}
+      {/* Stage Guides */}
       {stages.map((stage) => (
         <div
           key={stage}
@@ -155,9 +148,9 @@ export default function LineupCanvas({ queuedArtists }: Props) {
         <ReactFlow
           nodes={nodes}
           edges={edges}
-          onNodesChange={onNodesChange as OnNodesChange}
-          onEdgesChange={onEdgesChange as OnEdgesChange}
-          onNodeDragStop={handleNodeDragStop as NodeDragHandler}
+          onNodesChange={onNodesChange}
+          onEdgesChange={onEdgesChange}
+          onNodeDragStop={handleNodeDragStop}
           fitView
         >
           <Background gap={24} />
