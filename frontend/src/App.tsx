@@ -45,7 +45,7 @@ function App() {
 
   const handleRankingChange = (index: number, field: keyof ArtistRanking, value: string | number) => {
     const updated = [...rankings]
-    updated[index][field] = field === 'rank' ? Number(value) : value
+    ;(updated[index] as any)[field] = field === 'rank' ? Number(value) : value
     setRankings(updated)
   }
 
