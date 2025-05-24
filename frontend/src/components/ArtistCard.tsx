@@ -11,7 +11,7 @@ export function ArtistCard({ artist }: Props) {
     id: artist.id,
   })
 
-  const style = {
+    const style: React.CSSProperties = {
     transform: CSS.Translate.toString(transform),
     opacity: isDragging ? 0.5 : 1,
     transition: 'box-shadow 0.2s ease',
@@ -33,7 +33,8 @@ export function ArtistCard({ artist }: Props) {
     lineHeight: '1.2',
     wordBreak: 'break-word',
     whiteSpace: 'normal',
-  }
+    }
+
 
   return (
     <div
