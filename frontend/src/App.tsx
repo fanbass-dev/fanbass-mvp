@@ -1,35 +1,30 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
+import { DndContext, closestCenter, DragEndEvent } from '@dnd-kit/core'
 
-type Artist = {
-  id: string
-  name: string
-}
+import { SearchBar } from './components/SearchBar'
+import { Queue } from './components/Queue'
+import { StageGrid } from './components/StageGrid'
 
-type Event = {
-  id: string
-  name: string
-  reordered_lineup: string[]
-}
+import type { Artist, Tier } from './types'
+
+const tiers: Tier[] = ['headliner', 'support', 'opener']
+const stages = ['Dreamy', 'Heavy', 'Groovy']
 
 function App() {
   const [user, setUser] = useState<any>(null)
-  const [events, setEvents] = useState<Event[] | null>(null)
-
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<Artist[]>([])
   const [searching, setSearching] = useState(false)
   const [queue, setQueue] = useState<Artist[]>([])
+  const [placements, setPlacements] = useState<Record<string, Artist[]>>({})
 
-  // Auth setup
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setUser(data?.session?.user ?? null)
     })
 
-    const {
-      data: { subscription },
-    } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
 
@@ -43,7 +38,6 @@ function App() {
   const signOut = async () => {
     await supabase.auth.signOut()
     setUser(null)
-    setEvents(null)
   }
 
   const handleSearchChange = async (term: string) => {
@@ -75,9 +69,23 @@ function App() {
     setQueue([...queue, artist])
   }
 
-  const getArtistName = (id: string) => {
-    const match = queue.find((a) => a.id === id)
-    return match?.name || id
+  const dropKey = (stage: string, tier: Tier) => `${stage}-${tier}`
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event
+    if (!over) return
+
+    const artist = queue.find((a) => a.id === active.id)
+    if (!artist) return
+
+    const targetKey = over.id.toString()
+    setPlacements((prev) => {
+      const updated = { ...prev }
+      updated[targetKey] = [...(updated[targetKey] ?? []), artist]
+      return updated
+    })
+
+    setQueue((prev) => prev.filter((a) => a.id !== artist.id))
   }
 
   return (
@@ -89,63 +97,26 @@ function App() {
           <p>Logged in as: <strong>{user.email}</strong></p>
           <button onClick={signOut}>Log out</button>
 
-          {/* 🎧 Live Search + Queue */}
-          <h2>Search Artists</h2>
-          <input
-            type="text"
-            placeholder="Search artists"
-            style={{ padding: '0.5rem', marginBottom: '1rem', display: 'block', width: '100%' }}
-            value={searchTerm}
-            onChange={(e) => handleSearchChange(e.target.value)}
+          <SearchBar
+            searchTerm={searchTerm}
+            searchResults={searchResults}
+            searching={searching}
+            onChange={handleSearchChange}
+            onAdd={addToQueue}
+            queue={queue}
           />
 
-          <div>
-            {searching ? (
-              <p>Searching...</p>
-            ) : (
-              searchResults
-                .filter((artist) => !queue.some((q) => q.id === artist.id))
-                .map((artist) => (
-                  <div
-                    key={artist.id}
-                    style={{
-                      display: 'flex',
-                      justifyContent: 'space-between',
-                      marginBottom: '0.5rem',
-                    }}
-                  >
-                    <span>{artist.name}</span>
-                    <button onClick={() => addToQueue(artist)}>+ Add</button>
-                  </div>
-                ))
-            )}
-          </div>
+          <Queue queue={queue} />
 
-          <h2>Your Queue</h2>
-          <ul>
-            {queue.map((artist) => (
-              <li key={artist.id} style={{ marginBottom: '0.25rem' }}>
-                {artist.name}
-              </li>
-            ))}
-          </ul>
-
-          {/* 🎉 Personalized Events */}
-          <h2>Personalized Event Lineup</h2>
-          {events ? (
-            events.map((event) => (
-              <div key={event.id}>
-                <h3>{event.name}</h3>
-                <ul>
-                  {event.reordered_lineup.map((artistId) => (
-                    <li key={artistId}>{getArtistName(artistId)}</li>
-                  ))}
-                </ul>
-              </div>
-            ))
-          ) : (
-            <p>No events loaded yet.</p>
-          )}
+          <h2 style={{ marginTop: '2rem' }}>Lineup Grid</h2>
+          <DndContext collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+            <StageGrid
+              stages={stages}
+              tiers={tiers}
+              placements={placements}
+              dropKey={dropKey}
+            />
+          </DndContext>
         </>
       ) : (
         <button onClick={signInWithGoogle}>Log in with Google</button>
