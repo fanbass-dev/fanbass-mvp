@@ -14,14 +14,18 @@ export function GridCell({ id, artists }: Props) {
     <div
       ref={setNodeRef}
       style={{
-        minHeight: '150px',
+        height: '150px',
         minWidth: '200px',
         border: '1px dashed #aaa',
-        padding: '8px',
+        padding: '6px',
         background: isOver ? '#f0f0f0' : 'white',
-        display: 'flex',
-        flexDirection: 'column',
-        flexWrap: 'wrap',
+        display: 'grid',
+        gridAutoFlow: 'column',
+        gridAutoRows: 'min-content',
+        gridTemplateColumns: 'repeat(auto-fill, 100px)',
+        overflow: 'hidden',
+        gap: '6px',
+        alignContent: 'start',
       }}
     >
       {artists.map((artist) => (
