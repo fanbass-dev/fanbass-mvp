@@ -17,20 +17,21 @@ export function DroppableCell({ id, artists }: Props) {
         padding: '8px',
         border: '1px dashed #aaa',
         background: isOver ? '#f0f0f0' : 'white',
-        columnWidth: '100px',
-        columnGap: '8px',
-        overflow: 'visible', // 🔁 changed
+        display: 'grid',
+        gridAutoFlow: 'column',
+        gridAutoRows: 'min-content',
+        gap: '6px',
+        overflow: 'hidden', // optional, can use 'auto' if you want scroll
       }}
     >
       {artists.map((artist) => (
         <div
           key={artist.id}
           style={{
-            breakInside: 'avoid',
             background: '#ddd',
             padding: '4px 6px',
-            marginBottom: '6px',
             borderRadius: '4px',
+            whiteSpace: 'nowrap',
           }}
         >
           {artist.name}
