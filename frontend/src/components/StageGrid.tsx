@@ -31,14 +31,30 @@ export function StageGrid({ stages, tiers, placements, dropKey }: Props) {
         >
           <h3>{stage}</h3>
 
-          <div style={{ display: 'flex', flexDirection: 'column', flexGrow: 1, height: '100%' }}>
+          <div
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              flexGrow: 1,
+              height: '100%',
+              gap: '0.75rem',
+            }}
+          >
             {tiers.map((tier) => {
               const id = dropKey(stage, tier)
               const artists = placements[id] ?? []
 
               return (
-                <div key={tier} style={{ marginBottom: '1rem', flex: 1 }}>
-                  <strong>{tier.toUpperCase()}</strong>
+                <div
+                  key={tier}
+                  style={{
+                    flex: 1,
+                    minHeight: '150px',
+                    display: 'flex',
+                    flexDirection: 'column',
+                  }}
+                >
+                  <strong style={{ marginBottom: '4px' }}>{tier.toUpperCase()}</strong>
                   <DroppableCell id={id} artists={artists} />
                 </div>
               )
