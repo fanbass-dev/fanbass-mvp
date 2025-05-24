@@ -1,9 +1,9 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 
-type ArtistRanking = {
-  artist_id: string
-  rank: number
+type Artist = {
+  id: string
+  name: string
 }
 
 type Event = {
@@ -12,17 +12,15 @@ type Event = {
   reordered_lineup: string[]
 }
 
-type Artist = {
-  id: string
-  name: string
-}
-
 function App() {
   const [user, setUser] = useState<any>(null)
-  const [rankings, setRankings] = useState<ArtistRanking[]>([{ artist_id: '', rank: 1 }])
-  const [events, setEvents] = useState<Event[] | null>(null)
   const [artists, setArtists] = useState<Artist[]>([])
+  const [events, setEvents] = useState<Event[] | null>(null)
 
+  const [searchTerm, setSearchTerm] = useState('')
+  const [queue, setQueue] = useState<Artist[]>([])
+
+  // Load user + artist data
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setUser(data?.session?.user ?? null)
@@ -34,17 +32,20 @@ function App() {
       setUser(session?.user ?? null)
     })
 
-    // Fetch artist list
-    fetch(`${process.env.REACT_APP_API_BASE_URL}/artists`)
-      .then((res) => res.json())
-      .then((data) => {
-        console.log("Received artists:", data)
-        setArtists(data)
-      })
-      .catch((err) => {
-        console.error("Failed to fetch artists:", err)
-      })
+    // Fetch artists from Supabase
+    const fetchArtists = async () => {
+      const { data, error } = await supabase
+        .from('artists')
+        .select('id, name')
 
+      if (error) {
+        console.error('Failed to fetch artists:', error)
+      } else {
+        setArtists(data ?? [])
+      }
+    }
+
+    fetchArtists()
     return () => subscription.unsubscribe()
   }, [])
 
@@ -58,46 +59,14 @@ function App() {
     setEvents(null)
   }
 
-  const handleRankingChange = (index: number, field: keyof ArtistRanking, value: string | number) => {
-    const updated = [...rankings]
-      if (field === 'rank') {
-        updated[index].rank = Number(value)
-      } else if (field === 'artist_id') {
-        updated[index].artist_id = value as string
-}    setRankings(updated)
-  }
+  const filteredArtists = artists.filter(
+    (artist) =>
+      artist.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
+      !queue.some((q) => q.id === artist.id)
+  )
 
-  const addRanking = () => {
-    setRankings([...rankings, { artist_id: '', rank: rankings.length + 1 }])
-  }
-
-  const submitRankings = async () => {
-    const token = (await supabase.auth.getSession()).data.session?.access_token
-    const baseUrl = process.env.REACT_APP_API_BASE_URL || 'http://localhost:8000'
-
-    console.log("Using API base URL:", baseUrl)
-    console.log("Submitting Rankings:", rankings)
-
-    const res = await fetch(`${baseUrl}/rankings`, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        Authorization: `Bearer ${token}`,
-      },
-      body: JSON.stringify(rankings),
-    })
-
-    if (res.ok) {
-      const eventsRes = await fetch(`${baseUrl}/events`, {
-        headers: { Authorization: `Bearer ${token}` },
-      })
-      const data = await eventsRes.json()
-      console.log("Received Events:", data)
-      setEvents(data)
-    } else {
-      console.error("Failed to submit rankings", res.status)
-      alert('Failed to submit rankings')
-    }
+  const addToQueue = (artist: Artist) => {
+    setQueue([...queue, artist])
   }
 
   const getArtistName = (id: string) => {
@@ -114,27 +83,33 @@ function App() {
           <p>Logged in as: <strong>{user.email}</strong></p>
           <button onClick={signOut}>Log out</button>
 
-          <h2>Rank Artists</h2>
-          {rankings.map((r, i) => (
-            <div key={i} style={{ marginBottom: '0.5rem' }}>
-              <input
-                placeholder="Artist ID"
-                value={r.artist_id}
-                onChange={(e) => handleRankingChange(i, 'artist_id', e.target.value)}
-                style={{ marginRight: '0.5rem' }}
-              />
-              <input
-                type="number"
-                placeholder="Rank"
-                value={r.rank}
-                onChange={(e) => handleRankingChange(i, 'rank', e.target.value)}
-                style={{ width: '60px' }}
-              />
-            </div>
-          ))}
-          <button onClick={addRanking} style={{ marginRight: '0.5rem' }}>+ Add Another</button>
-          <button onClick={submitRankings}>Submit Rankings</button>
+          {/* 🎧 Artist Search & Queue */}
+          <h2>Search Artists</h2>
+          <input
+            type="text"
+            placeholder="Search artists"
+            style={{ padding: '0.5rem', marginBottom: '1rem', display: 'block', width: '100%' }}
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
 
+          <div>
+            {filteredArtists.map((artist) => (
+              <div key={artist.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
+                <span>{artist.name}</span>
+                <button onClick={() => addToQueue(artist)}>+ Add</button>
+              </div>
+            ))}
+          </div>
+
+          <h2>Your Queue</h2>
+          <ul>
+            {queue.map((artist) => (
+              <li key={artist.id} style={{ marginBottom: '0.25rem' }}>{artist.name}</li>
+            ))}
+          </ul>
+
+          {/* 🎉 Personalized Events (unchanged) */}
           <h2>Personalized Event Lineup</h2>
           {events ? (
             events.map((event) => (
