@@ -19,7 +19,7 @@ export function DroppableCell({ id, artists }: Props) {
         background: isOver ? '#f0f0f0' : 'white',
         columnWidth: '100px',
         columnGap: '8px',
-        overflow: 'hidden',
+        overflow: 'visible', // 🔁 changed
       }}
     >
       {artists.map((artist) => (
