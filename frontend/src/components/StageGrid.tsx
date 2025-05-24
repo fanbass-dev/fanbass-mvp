@@ -13,33 +13,34 @@ export function StageGrid({ stages, tiers, placements, dropKey }: Props) {
     <div style={{ overflowX: 'auto' }}>
       <div
         style={{
-          display: 'grid',
-          gridTemplateColumns: `repeat(${stages.length}, 220px)`,
-          gap: '12px',
+          display: 'flex',
+          gap: '16px',
+          alignItems: 'flex-start',
         }}
       >
         {stages.map((stage) => (
-          <div key={stage}>
+          <div
+            key={stage}
+            style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'stretch',
+              minWidth: 220, // start small
+              flexGrow: 1, // grow to fit widest tier cell
+            }}
+          >
             <h3 style={{ textAlign: 'center' }}>{stage}</h3>
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateRows: `repeat(${tiers.length}, 160px)`,
-                gap: '12px',
-              }}
-            >
-              {tiers.map((tier) => {
-                const id = dropKey(stage, tier)
-                const artists = placements[id] ?? []
+            {tiers.map((tier) => {
+              const id = dropKey(stage, tier)
+              const artists = placements[id] ?? []
 
-                return (
-                  <div key={tier}>
-                    <strong style={{ fontSize: 12 }}>{tier.toUpperCase()}</strong>
-                    <GridCell id={id} artists={artists} />
-                  </div>
-                )
-              })}
-            </div>
+              return (
+                <div key={tier} style={{ height: '170px', marginBottom: '12px' }}>
+                  <strong style={{ fontSize: 12 }}>{tier.toUpperCase()}</strong>
+                  <GridCell id={id} artists={artists} />
+                </div>
+              )
+            })}
           </div>
         ))}
       </div>
