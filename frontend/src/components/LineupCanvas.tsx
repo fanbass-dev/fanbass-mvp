@@ -7,6 +7,7 @@ import {
   ReactFlowProvider,
   useEdgesState,
   useNodesState,
+  useReactFlow,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
 import { useEffect, useCallback } from 'react'
@@ -34,6 +35,64 @@ const CELL_HEIGHT = 150
 
 type Props = {
   queuedArtists: Artist[]
+}
+
+function CanvasGrid() {
+  const { viewport } = useReactFlow()
+
+  return (
+    <svg
+      style={{
+        position: 'absolute',
+        inset: 0,
+        zIndex: 0,
+        pointerEvents: 'none',
+      }}
+    >
+      <g
+        transform={`translate(${viewport.x}, ${viewport.y}) scale(${viewport.zoom})`}
+      >
+        {tiers.map((tier) => (
+          <rect
+            key={tier}
+            x={-1000}
+            y={tierY[tier]}
+            width={3000}
+            height={CELL_HEIGHT}
+            fill="rgba(0,0,0,0.03)"
+            stroke="lightgray"
+            strokeDasharray="2 2"
+          />
+        ))}
+
+        {tiers.map((tier) => (
+          <text
+            key={`label-${tier}`}
+            x={-290}
+            y={tierY[tier] + 20}
+            fill="#555"
+            fontSize={12}
+            fontWeight="bold"
+          >
+            {tier.toUpperCase()}
+          </text>
+        ))}
+
+        {stages.map((stage) => (
+          <text
+            key={`stage-${stage}`}
+            x={stageX[stage] + 4}
+            y={-10}
+            fill="#555"
+            fontSize={12}
+            fontWeight="bold"
+          >
+            {stage}
+          </text>
+        ))}
+      </g>
+    </svg>
+  )
 }
 
 export default function LineupCanvas({ queuedArtists }: Props) {
@@ -81,69 +140,6 @@ export default function LineupCanvas({ queuedArtists }: Props) {
 
   return (
     <div style={{ height: '80vh', border: '1px solid #ccc', position: 'relative' }}>
-      {/* Tier Guides */}
-      {tiers.map((tier) => (
-        <div
-          key={tier}
-          style={{
-            position: 'absolute',
-            top: `${tierY[tier]}px`,
-            left: 0,
-            right: 0,
-            height: `${CELL_HEIGHT}px`,
-            background: 'rgba(0,0,0,0.03)',
-            borderTop: '1px solid #aaa',
-            pointerEvents: 'none',
-            zIndex: 1,
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              left: 4,
-              top: 4,
-              fontSize: 12,
-              background: 'rgba(255,255,255,0.6)',
-              padding: '2px 4px',
-              borderRadius: 4,
-            }}
-          >
-            {tier.toUpperCase()}
-          </div>
-        </div>
-      ))}
-
-      {/* Stage Guides */}
-      {stages.map((stage) => (
-        <div
-          key={stage}
-          style={{
-            position: 'absolute',
-            left: `${stageX[stage]}px`,
-            top: 0,
-            height: '100%',
-            width: `${CELL_WIDTH}px`,
-            borderLeft: '1px solid #aaa',
-            pointerEvents: 'none',
-            zIndex: 1,
-          }}
-        >
-          <div
-            style={{
-              position: 'absolute',
-              top: 4,
-              left: 4,
-              fontSize: 12,
-              background: 'rgba(255,255,255,0.6)',
-              padding: '2px 4px',
-              borderRadius: 4,
-            }}
-          >
-            {stage}
-          </div>
-        </div>
-      ))}
-
       <ReactFlowProvider>
         <ReactFlow
           nodes={nodes}
@@ -153,6 +149,7 @@ export default function LineupCanvas({ queuedArtists }: Props) {
           onNodeDragStop={handleNodeDragStop}
           fitView
         >
+          <CanvasGrid />
           <Background gap={24} />
           <Controls />
           <MiniMap />
