@@ -17,10 +17,8 @@ export function DroppableCell({ id, artists }: Props) {
         padding: '8px',
         border: '1px dashed #aaa',
         background: isOver ? '#f0f0f0' : 'white',
-        display: 'flex',
-        flexWrap: 'wrap',
-        alignContent: 'flex-start',
-        gap: '6px',
+        columnWidth: '100px',
+        columnGap: '8px',
         overflow: 'hidden',
       }}
     >
@@ -28,11 +26,11 @@ export function DroppableCell({ id, artists }: Props) {
         <div
           key={artist.id}
           style={{
-            padding: '4px 6px',
+            breakInside: 'avoid',
             background: '#ddd',
+            padding: '4px 6px',
+            marginBottom: '6px',
             borderRadius: '4px',
-            minWidth: '60px',
-            flex: '0 0 auto',
           }}
         >
           {artist.name}
