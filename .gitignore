@@ -1,0 +1,24 @@
+# Python (backend)
+venv/
+__pycache__/
+*.pyc
+
+# Node (frontend)
+node_modules/
+.pnp
+.pnp.js
+/build
+.DS_Store
+
+# Supabase or environment files
+.env
+.env.*
+!.env.example
+
+# Logs and debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# Coverage/test
+coverage/
