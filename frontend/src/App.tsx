@@ -66,7 +66,10 @@ function App() {
   }
 
   const addToQueue = (artist: Artist) => {
-    setQueue([...queue, artist])
+    setQueue((prev) => {
+      if (prev.some((a) => a.id === artist.id)) return prev
+      return [...prev, artist]
+    })
   }
 
   return (
@@ -90,7 +93,7 @@ function App() {
           <Queue queue={queue} />
 
           <h2 style={{ marginTop: '2rem' }}>Lineup Canvas</h2>
-          <LineupCanvas />
+          <LineupCanvas queuedArtists={queue} />
         </>
       ) : (
         <button onClick={signInWithGoogle}>Log in with Google</button>

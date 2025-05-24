@@ -1,58 +1,63 @@
-import ReactFlow, {
+import {
   Background,
   Controls,
   MiniMap,
-  ReactFlowProvider,
   Node,
-  useNodesState,
+  ReactFlow,
+  ReactFlowProvider,
   useEdgesState,
+  useNodesState,
 } from 'reactflow'
 import 'reactflow/dist/style.css'
-
-import type { Tier } from '../types'
+import { useEffect } from 'react'
+import type { Artist, Tier } from '../types'
 
 const tiers: Tier[] = ['headliner', 'support', 'opener']
-const stages = ['Dreamy', 'Heavy', 'Groovy']
+const stages = ['Queue', 'Dreamy', 'Heavy', 'Groovy']
 
-// Maps each tier to a vertical Y-coordinate
 const tierY: Record<Tier, number> = {
   headliner: 0,
   support: 200,
   opener: 400,
 }
 
-// Maps each stage to an X-coordinate
+// Add a queue staging area at x = -300
 const stageX: Record<string, number> = {
+  Queue: -300,
   Dreamy: 0,
   Heavy: 300,
   Groovy: 600,
 }
 
-// Sample static artist nodes for demo purposes
-const initialNodes: Node[] = [
-  {
-    id: 'a1',
-    data: { label: 'Artist One' },
-    position: { x: stageX['Dreamy'], y: tierY['headliner'] },
-    type: 'default',
-  },
-  {
-    id: 'a2',
-    data: { label: 'Artist Two' },
-    position: { x: stageX['Heavy'], y: tierY['support'] },
-    type: 'default',
-  },
-  {
-    id: 'a3',
-    data: { label: 'Artist Three' },
-    position: { x: stageX['Groovy'], y: tierY['opener'] },
-    type: 'default',
-  },
-]
+type Props = {
+  queuedArtists: Artist[]
+}
 
-export default function LineupCanvas() {
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodes)
+export default function LineupCanvas({ queuedArtists }: Props) {
+  const [nodes, setNodes, onNodesChange] = useNodesState([])
   const [edges, setEdges, onEdgesChange] = useEdgesState([])
+
+  // Inject new queued artists into the canvas, in the "Queue" column
+  useEffect(() => {
+    const newNodes: Node[] = queuedArtists.map((artist, i) => ({
+      id: `queue-${artist.id}`,
+      data: { label: artist.name },
+      position: {
+        x: stageX['Queue'],
+        y: tierY.opener + i * 60,
+      },
+      type: 'default',
+    }))
+
+    setNodes((prev) => {
+      const existingIds = new Set(prev.map((n) => n.id))
+      const merged = [...prev]
+      for (const n of newNodes) {
+        if (!existingIds.has(n.id)) merged.push(n)
+      }
+      return merged
+    })
+  }, [queuedArtists])
 
   return (
     <div style={{ height: '80vh', border: '1px solid #ccc' }}>
