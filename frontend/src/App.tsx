@@ -14,13 +14,14 @@ type Event = {
 
 function App() {
   const [user, setUser] = useState<any>(null)
-  const [artists, setArtists] = useState<Artist[]>([])
   const [events, setEvents] = useState<Event[] | null>(null)
 
   const [searchTerm, setSearchTerm] = useState('')
+  const [searchResults, setSearchResults] = useState<Artist[]>([])
+  const [searching, setSearching] = useState(false)
   const [queue, setQueue] = useState<Artist[]>([])
 
-  // Load user + artist data
+  // Auth setup
   useEffect(() => {
     supabase.auth.getSession().then(({ data }) => {
       setUser(data?.session?.user ?? null)
@@ -32,20 +33,6 @@ function App() {
       setUser(session?.user ?? null)
     })
 
-    // Fetch artists from Supabase
-    const fetchArtists = async () => {
-      const { data, error } = await supabase
-        .from('artists')
-        .select('id, name')
-
-      if (error) {
-        console.error('Failed to fetch artists:', error)
-      } else {
-        setArtists(data ?? [])
-      }
-    }
-
-    fetchArtists()
     return () => subscription.unsubscribe()
   }, [])
 
@@ -59,19 +46,38 @@ function App() {
     setEvents(null)
   }
 
-  const filteredArtists = artists.filter(
-    (artist) =>
-      artist.name.toLowerCase().includes(searchTerm.toLowerCase()) &&
-      !queue.some((q) => q.id === artist.id)
-  )
+  const handleSearchChange = async (term: string) => {
+    setSearchTerm(term)
+    setSearching(true)
+
+    if (term.length < 2) {
+      setSearchResults([])
+      setSearching(false)
+      return
+    }
+
+    const { data, error } = await supabase
+      .from('artists')
+      .select('id, name')
+      .ilike('name', `%${term}%`)
+      .limit(10)
+
+    if (error) {
+      console.error('Search error:', error)
+    } else {
+      setSearchResults(data ?? [])
+    }
+
+    setSearching(false)
+  }
 
   const addToQueue = (artist: Artist) => {
     setQueue([...queue, artist])
   }
 
   const getArtistName = (id: string) => {
-    const artist = artists.find((a) => a.id === id)
-    return artist?.name || id
+    const match = queue.find((a) => a.id === id)
+    return match?.name || id
   }
 
   return (
@@ -83,33 +89,48 @@ function App() {
           <p>Logged in as: <strong>{user.email}</strong></p>
           <button onClick={signOut}>Log out</button>
 
-          {/* 🎧 Artist Search & Queue */}
+          {/* 🎧 Live Search + Queue */}
           <h2>Search Artists</h2>
           <input
             type="text"
             placeholder="Search artists"
             style={{ padding: '0.5rem', marginBottom: '1rem', display: 'block', width: '100%' }}
             value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+            onChange={(e) => handleSearchChange(e.target.value)}
           />
 
           <div>
-            {filteredArtists.map((artist) => (
-              <div key={artist.id} style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '0.5rem' }}>
-                <span>{artist.name}</span>
-                <button onClick={() => addToQueue(artist)}>+ Add</button>
-              </div>
-            ))}
+            {searching ? (
+              <p>Searching...</p>
+            ) : (
+              searchResults
+                .filter((artist) => !queue.some((q) => q.id === artist.id))
+                .map((artist) => (
+                  <div
+                    key={artist.id}
+                    style={{
+                      display: 'flex',
+                      justifyContent: 'space-between',
+                      marginBottom: '0.5rem',
+                    }}
+                  >
+                    <span>{artist.name}</span>
+                    <button onClick={() => addToQueue(artist)}>+ Add</button>
+                  </div>
+                ))
+            )}
           </div>
 
           <h2>Your Queue</h2>
           <ul>
             {queue.map((artist) => (
-              <li key={artist.id} style={{ marginBottom: '0.25rem' }}>{artist.name}</li>
+              <li key={artist.id} style={{ marginBottom: '0.25rem' }}>
+                {artist.name}
+              </li>
             ))}
           </ul>
 
-          {/* 🎉 Personalized Events (unchanged) */}
+          {/* 🎉 Personalized Events */}
           <h2>Personalized Event Lineup</h2>
           {events ? (
             events.map((event) => (
