@@ -4,3 +4,5 @@ export type Artist = {
 }
 
 export type Tier = 'headliner' | 'support' | 'opener'
+
+
