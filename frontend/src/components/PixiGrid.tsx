@@ -1,3 +1,4 @@
+// frontend/src/components/PixiGrid.tsx
 import { useEffect, useRef } from 'react'
 import * as PIXI from 'pixi.js'
 import { Viewport } from 'pixi-viewport'
@@ -28,7 +29,7 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       screenHeight: window.innerHeight,
       worldWidth: 5000,
       worldHeight: 2000,
-      events: app.renderer.events, // ✅ Updated for compatibility
+      events: app.renderer.events, // ✅ This is the key fix for your TS error
     })
 
     app.stage.addChild(viewport)
