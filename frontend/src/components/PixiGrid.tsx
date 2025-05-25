@@ -35,6 +35,7 @@ export function PixiGrid({ placements, tiers, stages }: PixiGridProps) {
       screenHeight: app.renderer.height,
       worldWidth: stages.length * 340 + 40,
       worldHeight: tiers.length * 200 + 40,
+      events: app.renderer.events, // ✅ required in pixi-viewport@6
     }
 
 
