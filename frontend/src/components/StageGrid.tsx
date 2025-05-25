@@ -25,8 +25,8 @@ export function StageGrid({ stages, tiers, placements, dropKey }: Props) {
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'stretch',
-              minWidth: 220, // start small
-              flex: '0 0 auto', // grow to fit widest tier cell
+              width: 'max-content',
+              flex: '0 0 auto',
             }}
           >
             <h3 style={{ textAlign: 'center' }}>{stage}</h3>
