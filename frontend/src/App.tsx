@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
-import PixiGrid from './components/PixiGrid'
+import { PixiGrid } from './components/PixiGrid'
 import type { Artist, Tier } from './types'
 
 const tiers: Tier[] = ['headliner', 'support', 'opener']
