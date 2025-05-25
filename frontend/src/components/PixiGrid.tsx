@@ -22,12 +22,12 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       autoDensity: true,
     })
 
-    // ——— APPEND THE RENDERER CANVAS ———
-    const canvas = app.renderer.view as unknown as HTMLCanvasElement
-    canvas.style.display = 'block'
-    canvas.style.width = '100%'
-    canvas.style.height = '100%'
-    containerRef.current?.appendChild(canvas)
+    // ——— APPEND THE PIXI APPLICATION VIEW ———
+    const viewEl = app.view as HTMLCanvasElement
+    viewEl.style.display = 'block'
+    viewEl.style.width   = '100%'
+    viewEl.style.height  = '100%'
+    containerRef.current?.appendChild(viewEl)
 
     // ——— VIEWPORT SETUP ———
     const viewport = new Viewport({
