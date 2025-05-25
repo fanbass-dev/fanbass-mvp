@@ -21,8 +21,8 @@ export function GridCell({ id, artists }: Props) {
         background: isOver ? '#f0f0f0' : 'white',
         display: 'grid',
         gridAutoFlow: 'column',
-        gridAutoRows: '48px', // match ArtistCard height
-        gridTemplateColumns: 'repeat(auto-fill, 100px)', // snap to card width
+        gridAutoRows: '48px',
+        gridAutoColumns: '100px', // 👈 this replaces template-columns
         gap: '8px',
         alignContent: 'start',
       }}
