@@ -87,7 +87,7 @@ function App() {
             Logged in as: <strong>{user.email}</strong>
             <button style={{ marginLeft: '1rem' }} onClick={signOut}>Log out</button>
           </div>
-          <PixiGrid placements={placements} tiers={tiers} stages={stages} />
+          <PixiGrid />
         </>
       ) : (
         <button onClick={signInWithGoogle}>Log in with Google</button>
