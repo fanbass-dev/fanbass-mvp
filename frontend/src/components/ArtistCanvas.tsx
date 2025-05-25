@@ -30,7 +30,7 @@ const ArtistCanvas = ({ artists }: Props) => {
     })
 
     appRef.current = app
-    canvasRef.current.appendChild(app.view)
+    canvasRef.current.appendChild(app.canvas)
 
     const padding = 20
     const nodeHeight = 60
