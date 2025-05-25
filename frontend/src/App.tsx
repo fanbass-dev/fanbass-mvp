@@ -6,32 +6,52 @@ import type { Artist, Tier } from './types'
 const tiers: Tier[] = ['headliner', 'support', 'opener']
 const stages = ['Dreamy', 'Heavy', 'Groovy']
 
+type Placement = {
+  stage: string
+  tier: Tier
+  artist: Artist
+}
+
 function App() {
   const [user, setUser] = useState<any>(null)
-  const [artists, setArtists] = useState<Artist[]>([])
+  const [placements, setPlacements] = useState<Record<string, Artist[]>>({})
 
   useEffect(() => {
+    // Get current session
     supabase.auth.getSession().then(({ data }) => {
       setUser(data?.session?.user ?? null)
     })
 
+    // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
 
-    supabase
-      .from('artists')
-      .select('id, name, stage, tier')
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('Failed to fetch artists:', error)
-        } else {
-          setArtists(data || [])
-        }
-      })
-
     return () => subscription.unsubscribe()
   }, [])
+
+  useEffect(() => {
+    if (!user) return
+
+    // Fetch user-specific placements
+    supabase
+      .from('artist_placements')
+      .select('stage, tier, artist:artist_id(id, name)')
+      .eq('user_id', user.id)
+      .then(({ data, error }) => {
+        if (error) {
+          console.error('Failed to fetch placements:', error)
+        } else {
+          const grouped: Record<string, Artist[]> = {}
+          for (const row of data as Placement[]) {
+            const key = `${row.stage}-${row.tier}`
+            if (!grouped[key]) grouped[key] = []
+            grouped[key].push(row.artist)
+          }
+          setPlacements(grouped)
+        }
+      })
+  }, [user])
 
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
@@ -45,13 +65,6 @@ function App() {
   const signOut = async () => {
     await supabase.auth.signOut()
     setUser(null)
-  }
-
-  const placements: Record<string, Artist[]> = {}
-  for (const artist of artists) {
-    const key = `${artist.stage}-${artist.tier}`
-    if (!placements[key]) placements[key] = []
-    placements[key].push(artist)
   }
 
   return (
