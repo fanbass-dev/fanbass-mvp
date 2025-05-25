@@ -79,7 +79,17 @@ function App() {
     setUser(null)
   }
   
-  const flattenedArtists = Object.values(placements).flat()
+const flattenedArtists = Object.values(placements).flat()
+
+// TEMP: Add a mock artist if placements are empty
+if (flattenedArtists.length === 0) {
+  flattenedArtists.push({
+    id: 'test-1',
+    name: 'Test Artist',
+    stage: 'Dreamy',
+    tier: 'headliner',
+  })
+}
 
   return (
     <div style={{ fontFamily: 'sans-serif', height: '100vh', overflow: 'hidden' }}>
