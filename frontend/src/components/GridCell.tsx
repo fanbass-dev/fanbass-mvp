@@ -19,17 +19,14 @@ export function GridCell({ id, artists }: Props) {
         border: '1px dashed #aaa',
         padding: '6px',
         background: isOver ? '#f0f0f0' : 'white',
-        display: 'block',
-        columnWidth: '100px',
-        columnGap: '8px',
-        breakInside: 'avoid',
-        whiteSpace: 'normal',
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignContent: 'flex-start',
+        gap: '8px',
       }}
     >
       {artists.map((artist) => (
-        <div key={artist.id} style={{ breakInside: 'avoid' }}>
-          <ArtistCard artist={artist} />
-        </div>
+        <ArtistCard key={artist.id} artist={artist} />
       ))}
     </div>
   )
