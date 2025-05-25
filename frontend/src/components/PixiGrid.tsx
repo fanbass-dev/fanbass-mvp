@@ -26,8 +26,9 @@ export default function PixiGrid({ artists, tiers, stages }: Props) {
       screenHeight: window.innerHeight,
       worldWidth: 5000,
       worldHeight: 2000,
-      interaction: app.renderer.plugins.interaction,
     })
+
+    viewport.interaction = app.renderer.plugins.interaction
 
     app.stage.addChild(viewport)
 
@@ -40,7 +41,7 @@ export default function PixiGrid({ artists, tiers, stages }: Props) {
     const cellWidth = 120
     const cellHeight = 160
 
-    // Draw grid
+    // Draw grid background
     tiers.forEach((tier, row) => {
       stages.forEach((stage, col) => {
         const box = new PIXI.Graphics()
@@ -49,12 +50,10 @@ export default function PixiGrid({ artists, tiers, stages }: Props) {
         box.drawRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight)
         box.endFill()
         viewport.addChild(box)
-
-        // Optional: add stage/tier labels later
       })
     })
 
-    // Text style
+    // Text style for artist names
     const style = new PIXI.TextStyle({
       fontSize: 12,
       fill: '#000',
@@ -63,7 +62,7 @@ export default function PixiGrid({ artists, tiers, stages }: Props) {
       align: 'center',
     })
 
-    // Add artist cards
+    // Add draggable artist cards
     artists.forEach((artist, i) => {
       const card = new PIXI.Container()
       const background = new PIXI.Graphics()
