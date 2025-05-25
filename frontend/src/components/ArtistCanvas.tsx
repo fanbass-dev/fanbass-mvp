@@ -1,11 +1,5 @@
 import { useEffect, useRef } from 'react'
-import {
-  Application,
-  Container,
-  Graphics,
-  Text,
-  TextStyle,
-} from 'pixi.js'
+import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js'
 
 type Artist = {
   id: string
@@ -21,50 +15,57 @@ const ArtistCanvas = ({ artists }: Props) => {
   const appRef = useRef<Application | null>(null)
 
   useEffect(() => {
-    if (!canvasRef.current) return
+    let app: Application
 
-    const app = new Application({
-      resizeTo: window,
-      backgroundColor: 0x0d0d0d,
-      antialias: true,
-    })
+    const init = async () => {
+      app = new Application()
+      await app.init({
+        resizeTo: window,
+        background: '#0d0d0d',
+        antialias: true,
+      })
 
-    appRef.current = app
-    canvasRef.current.appendChild(app.canvas)
+      appRef.current = app
 
-    const padding = 20
-    const nodeHeight = 60
-    const nodeWidth = 300
+      if (canvasRef.current) {
+        canvasRef.current.appendChild(app.canvas)
+      }
 
-    artists.forEach((artist, index) => {
-      const y = padding + index * (nodeHeight + padding)
+      const padding = 20
+      const nodeHeight = 60
+      const nodeWidth = 300
 
-      const node = new Container()
-      node.x = padding
-      node.y = y
+      artists.forEach((artist, index) => {
+        const y = padding + index * (nodeHeight + padding)
 
-      const box = new Graphics()
-      box.beginFill(0x1e1e1e)
-      box.lineStyle(2, 0xffffff, 0.2)
-      box.drawRoundedRect(0, 0, nodeWidth, nodeHeight, 10)
-      box.endFill()
+        const node = new Container()
+        node.x = padding
+        node.y = y
 
-      const text = new Text(artist.name, new TextStyle({
-        fill: '#ffffff',
-        fontSize: 20,
-        fontFamily: 'sans-serif',
-      }))
-      text.x = 20
-      text.y = nodeHeight / 2 - text.height / 2
+        const box = new Graphics()
+        box.beginFill(0x1e1e1e)
+        box.lineStyle(2, 0xffffff, 0.2)
+        box.drawRoundedRect(0, 0, nodeWidth, nodeHeight, 10)
+        box.endFill()
 
-      node.addChild(box)
-      node.addChild(text)
+        const text = new Text(artist.name, new TextStyle({
+          fill: '#ffffff',
+          fontSize: 20,
+          fontFamily: 'sans-serif',
+        }))
+        text.x = 20
+        text.y = nodeHeight / 2 - text.height / 2
 
-      app.stage.addChild(node)
-    })
+        node.addChild(box)
+        node.addChild(text)
+        app.stage.addChild(node)
+      })
+    }
+
+    init()
 
     return () => {
-      app.destroy(true, true)
+      appRef.current?.destroy(true, { children: true })
     }
   }, [artists])
 
