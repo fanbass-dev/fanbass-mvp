@@ -19,10 +19,9 @@ function App() {
       setUser(session?.user ?? null)
     })
 
-    // Fetch artists from Supabase
     supabase
       .from('artists')
-      .select('id, name')
+      .select('id, name, stage, tier')
       .then(({ data, error }) => {
         if (error) {
           console.error('Failed to fetch artists:', error)
@@ -48,6 +47,13 @@ function App() {
     setUser(null)
   }
 
+  const placements: Record<string, Artist[]> = {}
+  for (const artist of artists) {
+    const key = `${artist.stage}-${artist.tier}`
+    if (!placements[key]) placements[key] = []
+    placements[key].push(artist)
+  }
+
   return (
     <div style={{ fontFamily: 'sans-serif', height: '100vh', overflow: 'hidden' }}>
       {user ? (
@@ -56,21 +62,13 @@ function App() {
             Logged in as: <strong>{user.email}</strong>
             <button style={{ marginLeft: '1rem' }} onClick={signOut}>Log out</button>
           </div>
-            <PixiGrid placements={placements} tiers={tiers} stages={stages} />
+          <PixiGrid placements={placements} tiers={tiers} stages={stages} />
         </>
       ) : (
         <button onClick={signInWithGoogle}>Log in with Google</button>
       )}
     </div>
   )
-}
-
-const placements: Record<string, Artist[]> = {}
-
-for (const artist of artists) {
-  const key = `${artist.stage}-${artist.tier}`
-  if (!placements[key]) placements[key] = []
-  placements[key].push(artist)
 }
 
 export default App
