@@ -14,7 +14,6 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // ✨ Use the constructor so app.view is defined
     const app = new PIXI.Application({
       width: window.innerWidth,
       height: window.innerHeight,
@@ -23,10 +22,14 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       autoDensity: true,
     })
 
-    // Append the <canvas> element
-    containerRef.current?.appendChild(app.view)
+    // ——— APPEND THE REAL CANVAS ———
+    const canvas = app.renderer.view as HTMLCanvasElement
+    canvas.style.display = 'block'
+    canvas.style.width = '100%'
+    canvas.style.height = '100%'
+    containerRef.current?.appendChild(canvas)
 
-    // Set up panning/zooming
+    // ——— VIEWPORT SETUP ———
     const viewport = new Viewport({
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
@@ -37,26 +40,23 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
     app.stage.addChild(viewport)
     viewport.drag().pinch().wheel().decelerate()
 
-    // Layout constants
+    // ——— DRAW GRID & ARTISTS ———
     const stageWidth = 300
     const tierHeight = 150
     const padding = 20
 
     stages.forEach((stage, si) => {
       const x = si * (stageWidth + padding)
-      // Stage label
       const stageLabel = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
       stageLabel.position.set(x + stageWidth / 2 - stageLabel.width / 2, 10)
       viewport.addChild(stageLabel)
 
       tiers.forEach((tier, ti) => {
         const y = 50 + ti * (tierHeight + padding)
-        // Tier label
         const tierLabel = new PIXI.Text(tier.toUpperCase(), { fill: '#555', fontSize: 14 })
         tierLabel.position.set(x, y)
         viewport.addChild(tierLabel)
 
-        // Cell border
         const border = new PIXI.Graphics()
         border.lineStyle(2, 0xaaaaaa)
         border.beginFill(0xffffff)
@@ -64,7 +64,6 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
         border.endFill()
         viewport.addChild(border)
 
-        // Place artists
         const key = `${stage}-${tier}`
         const artists = placements[key] || []
         artists.forEach((artist, i) => {
@@ -97,7 +96,7 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       })
     })
 
-    // Cleanup
+    // ——— CLEANUP ———
     return () => {
       app.destroy(true, { children: true, texture: true })
     }
