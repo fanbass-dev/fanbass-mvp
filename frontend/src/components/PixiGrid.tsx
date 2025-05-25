@@ -1,22 +1,24 @@
 import { useEffect, useRef } from 'react'
 import * as PIXI from 'pixi.js'
 import { Viewport } from 'pixi-viewport'
-import type { Artist, Tier } from '../types'
+import { Artist, Tier } from '../types'
 
-type Props = {
-  artists: Artist[]
+type PixiGridProps = {
   tiers: Tier[]
   stages: string[]
+  placements: Record<string, Artist[]>
 }
 
-export default function PixiGrid({ artists, tiers, stages }: Props) {
+export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const app = new PIXI.Application({
-      resizeTo: window,
+      width: window.innerWidth,
+      height: window.innerHeight,
       backgroundColor: 0xffffff,
-      antialias: true,
+      resolution: window.devicePixelRatio || 1,
+      autoDensity: true,
     })
 
     containerRef.current?.appendChild(app.view as HTMLCanvasElement)
@@ -26,98 +28,77 @@ export default function PixiGrid({ artists, tiers, stages }: Props) {
       screenHeight: window.innerHeight,
       worldWidth: 5000,
       worldHeight: 2000,
+      events: app.renderer.events, // ✅ Updated for compatibility
     })
-
-    viewport.interaction = app.renderer.plugins.interaction
 
     app.stage.addChild(viewport)
 
-    viewport
-      .drag()
-      .pinch()
-      .wheel()
-      .decelerate()
+    const stageWidth = 300
+    const tierHeight = 150
+    const padding = 20
 
-    const cellWidth = 120
-    const cellHeight = 160
+    stages.forEach((stage, stageIndex) => {
+      const stageX = stageIndex * (stageWidth + padding)
 
-    // Draw grid background
-    tiers.forEach((tier, row) => {
-      stages.forEach((stage, col) => {
-        const box = new PIXI.Graphics()
-        box.lineStyle(1, 0xcccccc)
-        box.beginFill(0xfafafa)
-        box.drawRect(col * cellWidth, row * cellHeight, cellWidth, cellHeight)
-        box.endFill()
-        viewport.addChild(box)
+      // Stage label
+      const stageLabel = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
+      stageLabel.position.set(stageX + stageWidth / 2 - stageLabel.width / 2, 10)
+      viewport.addChild(stageLabel)
+
+      tiers.forEach((tier, tierIndex) => {
+        const tierY = 50 + tierIndex * (tierHeight + padding)
+
+        // Tier label
+        const tierLabel = new PIXI.Text(tier.toUpperCase(), { fill: '#555', fontSize: 14 })
+        tierLabel.position.set(stageX, tierY)
+        viewport.addChild(tierLabel)
+
+        // Border
+        const border = new PIXI.Graphics()
+        border.lineStyle(2, 0xaaaaaa, 1)
+        border.beginFill(0xffffff)
+        border.drawRect(stageX, tierY + 20, stageWidth, tierHeight)
+        border.endFill()
+        viewport.addChild(border)
+
+        // Artists
+        const key = `${stage}-${tier}`
+        const artists = placements[key] || []
+        artists.forEach((artist, i) => {
+          const col = i % 3
+          const row = Math.floor(i / 3)
+          const cardWidth = 90
+          const cardHeight = 40
+          const spacing = 10
+          const artistX = stageX + spacing + col * (cardWidth + spacing)
+          const artistY = tierY + 30 + row * (cardHeight + spacing)
+
+          const card = new PIXI.Graphics()
+          card.beginFill(0xeeeeee)
+          card.drawRoundedRect(0, 0, cardWidth, cardHeight, 6)
+          card.endFill()
+          card.x = artistX
+          card.y = artistY
+          viewport.addChild(card)
+
+          const text = new PIXI.Text(artist.name, {
+            fontSize: 12,
+            fill: 0x000000,
+            wordWrap: true,
+            wordWrapWidth: cardWidth - 10,
+            align: 'center',
+          })
+          text.x = artistX + (cardWidth - text.width) / 2
+          text.y = artistY + (cardHeight - text.height) / 2
+          viewport.addChild(text)
+        })
       })
-    })
-
-    // Text style for artist names
-    const style = new PIXI.TextStyle({
-      fontSize: 12,
-      fill: '#000',
-      wordWrap: true,
-      wordWrapWidth: cellWidth - 16,
-      align: 'center',
-    })
-
-    // Add draggable artist cards
-    artists.forEach((artist, i) => {
-      const card = new PIXI.Container()
-      const background = new PIXI.Graphics()
-      background.beginFill(0xeeeeee)
-      background.drawRoundedRect(0, 0, 100, 48, 6)
-      background.endFill()
-      card.addChild(background)
-
-      const label = new PIXI.Text(artist.name, style)
-      label.x = 50 - label.width / 2
-      label.y = 24 - label.height / 2
-      card.addChild(label)
-
-      card.x = 50 + (i * 110)
-      card.y = 20
-
-      card.eventMode = 'static'
-      card.cursor = 'grab'
-
-      card.on('pointerdown', (event: PIXI.FederatedPointerEvent) => {
-        card.cursor = 'grabbing'
-        card.alpha = 0.6
-        card.dragData = event.data
-        card.dragOffset = event.data.getLocalPosition(card)
-        card.dragging = true
-      })
-
-      card.on('pointerup', () => {
-        card.dragging = false
-        card.cursor = 'grab'
-        card.alpha = 1
-
-        const global = card.dragData.getLocalPosition(viewport)
-        const col = Math.floor(global.x / cellWidth)
-        const row = Math.floor(global.y / cellHeight)
-
-        card.x = col * cellWidth + 10
-        card.y = row * cellHeight + 10
-      })
-
-      card.on('pointermove', () => {
-        if (card.dragging) {
-          const pos = card.dragData.getLocalPosition(viewport)
-          card.x = pos.x - card.dragOffset.x
-          card.y = pos.y - card.dragOffset.y
-        }
-      })
-
-      viewport.addChild(card)
     })
 
     return () => {
-      app.destroy(true, true)
+      app.destroy(true, { children: true, texture: true, baseTexture: true })
     }
-  }, [artists, tiers, stages])
+  }, [tiers, stages, placements])
 
   return <div ref={containerRef} style={{ width: '100%', height: '100vh' }} />
 }
