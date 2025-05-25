@@ -1,4 +1,3 @@
-// frontend/src/components/PixiGrid.tsx
 import { useEffect, useRef } from 'react'
 import * as PIXI from 'pixi.js'
 import { Viewport } from 'pixi-viewport'
@@ -14,6 +13,7 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    // 1) Create PIXI Application via constructor so renderer is set up
     const app = new PIXI.Application({
       width: window.innerWidth,
       height: window.innerHeight,
@@ -22,56 +22,55 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       autoDensity: true,
     })
 
-    // ——— APPEND THE PIXI APPLICATION VIEW ———
-    const viewEl = app.view as HTMLCanvasElement
-    viewEl.style.display = 'block'
-    viewEl.style.width   = '100%'
-    viewEl.style.height  = '100%'
-    containerRef.current?.appendChild(viewEl)
+    // 2) ALWAYS grab the canvas from the renderer
+    const canvasEl = app.renderer.view
+    canvasEl.style.display = 'block'
+    canvasEl.style.width   = '100%'
+    canvasEl.style.height  = '100%'
+    containerRef.current?.appendChild(canvasEl)
 
-    // ——— VIEWPORT SETUP ———
+    // 3) Set up pan/zoom
     const viewport = new Viewport({
-      screenWidth: window.innerWidth,
+      screenWidth:  window.innerWidth,
       screenHeight: window.innerHeight,
-      worldWidth: 5000,
-      worldHeight: 2000,
-      events: app.renderer.events,
+      worldWidth:   5000,
+      worldHeight:  2000,
+      events:       app.renderer.events,
     })
     app.stage.addChild(viewport)
     viewport.drag().pinch().wheel().decelerate()
 
-    // ——— DRAW GRID & ARTISTS ———
-    const stageWidth = 300
-    const tierHeight = 150
-    const padding = 20
-
+    // 4) Draw tiers × stages
+    const stageW = 300, tierH = 150, pad = 20
     stages.forEach((stage, si) => {
-      const x = si * (stageWidth + padding)
-      const stageLabel = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
-      stageLabel.position.set(x + stageWidth / 2 - stageLabel.width / 2, 10)
-      viewport.addChild(stageLabel)
+      const x = si * (stageW + pad)
+      // Stage label
+      const sLabel = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
+      sLabel.position.set(x + stageW/2 - sLabel.width/2, 10)
+      viewport.addChild(sLabel)
 
       tiers.forEach((tier, ti) => {
-        const y = 50 + ti * (tierHeight + padding)
-        const tierLabel = new PIXI.Text(tier.toUpperCase(), { fill: '#555', fontSize: 14 })
-        tierLabel.position.set(x, y)
-        viewport.addChild(tierLabel)
+        const y = 50 + ti * (tierH + pad)
+        // Tier label
+        const tLabel = new PIXI.Text(tier.toUpperCase(), { fill: '#555', fontSize: 14 })
+        tLabel.position.set(x, y)
+        viewport.addChild(tLabel)
 
+        // Border
         const border = new PIXI.Graphics()
         border.lineStyle(2, 0xaaaaaa)
         border.beginFill(0xffffff)
-        border.drawRect(x, y + 20, stageWidth, tierHeight)
+        border.drawRect(x, y + 20, stageW, tierH)
         border.endFill()
         viewport.addChild(border)
 
         const key = `${stage}-${tier}`
-        const artists = placements[key] || []
-        artists.forEach((artist, i) => {
-          const col = i % 3
-          const row = Math.floor(i / 3)
+        const list = placements[key] || []
+        list.forEach((artist, i) => {
+          const col = i % 3, row = Math.floor(i/3)
           const cw = 90, ch = 40, gap = 10
-          const ax = x + gap + col * (cw + gap)
-          const ay = y + 30 + row * (ch + gap)
+          const ax = x + gap + col*(cw+gap)
+          const ay = y + 30 + row*(ch+gap)
 
           const card = new PIXI.Graphics()
           card.beginFill(0xeeeeee)
@@ -80,23 +79,23 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
           card.position.set(ax, ay)
           viewport.addChild(card)
 
-          const text = new PIXI.Text(artist.name, {
+          const txt = new PIXI.Text(artist.name, {
             fontSize: 12,
             fill: 0x000000,
             wordWrap: true,
-            wordWrapWidth: cw - 10,
+            wordWrapWidth: cw-10,
             align: 'center',
           })
-          text.position.set(
-            ax + (cw - text.width) / 2,
-            ay + (ch - text.height) / 2
+          txt.position.set(
+            ax + (cw - txt.width)/2,
+            ay + (ch - txt.height)/2
           )
-          viewport.addChild(text)
+          viewport.addChild(txt)
         })
       })
     })
 
-    // ——— CLEANUP ———
+    // 5) Clean up on unmount
     return () => {
       app.destroy(true, { children: true, texture: true })
     }
