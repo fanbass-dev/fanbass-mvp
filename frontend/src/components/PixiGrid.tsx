@@ -16,7 +16,7 @@ export function PixiGrid({ placements, tiers, stages }: PixiGridProps) {
   useEffect(() => {
     // Create the PIXI application
     const app = new PIXI.Application({
-      width:  containerRef.current?.clientWidth  || window.innerWidth,
+      width: containerRef.current?.clientWidth || window.innerWidth,
       height: containerRef.current?.clientHeight || window.innerHeight,
       backgroundColor: 0xffffff,
       resolution: window.devicePixelRatio || 1,
@@ -31,12 +31,12 @@ export function PixiGrid({ placements, tiers, stages }: PixiGridProps) {
 
     // Build the viewport options and cast to any so TS won’t complain
     const vpOpts = {
-      screenWidth:  app.renderer.width,
+      screenWidth: app.renderer.width,
       screenHeight: app.renderer.height,
-      worldWidth:   stages.length * 340 + 40,
-      worldHeight:  tiers.length * 200 + 40,
-      interaction:  (app.renderer.plugins as any).interaction,
-    } as any
+      worldWidth: stages.length * 340 + 40,
+      worldHeight: tiers.length * 200 + 40,
+    }
+
 
     const viewport = new Viewport(vpOpts)
     app.stage.addChild(viewport)
@@ -50,7 +50,7 @@ export function PixiGrid({ placements, tiers, stages }: PixiGridProps) {
       const x0 = pad + si * (stageW + pad)
       // Stage header
       const sLab = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
-      sLab.x = x0 + stageW/2 - sLab.width/2
+      sLab.x = x0 + stageW / 2 - sLab.width / 2
       sLab.y = pad
       viewport.addChild(sLab)
 
@@ -76,8 +76,8 @@ export function PixiGrid({ placements, tiers, stages }: PixiGridProps) {
           const col = idx % cols
           const row = Math.floor(idx / cols)
           const w = 100, h = 50, g = 10
-          const ax = x0 + g + col*(w+g)
-          const ay = y0 + 30 + row*(h+g)
+          const ax = x0 + g + col * (w + g)
+          const ay = y0 + 30 + row * (h + g)
 
           const card = new PIXI.Graphics()
           card.beginFill(0xeeeeee)
@@ -94,8 +94,8 @@ export function PixiGrid({ placements, tiers, stages }: PixiGridProps) {
             wordWrapWidth: w - 10,
             align: 'center',
           })
-          txt.x = ax + (w - txt.width)/2
-          txt.y = ay + (h - txt.height)/2
+          txt.x = ax + (w - txt.width) / 2
+          txt.y = ay + (h - txt.height) / 2
           viewport.addChild(txt)
         })
       })
