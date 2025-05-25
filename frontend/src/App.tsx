@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
-import { PixiGrid } from './components/PixiGrid'
+import ArtistCanvas from './components/ArtistCanvas'
 import type { Artist, Tier } from './types'
 
 const tiers: Tier[] = ['headliner', 'support', 'opener']
@@ -78,6 +78,8 @@ function App() {
     await supabase.auth.signOut()
     setUser(null)
   }
+  
+  const flattenedArtists = Object.values(placements).flat()
 
   return (
     <div style={{ fontFamily: 'sans-serif', height: '100vh', overflow: 'hidden' }}>
@@ -87,7 +89,7 @@ function App() {
             Logged in as: <strong>{user.email}</strong>
             <button style={{ marginLeft: '1rem' }} onClick={signOut}>Log out</button>
           </div>
-          <PixiGrid />
+          <ArtistCanvas artists={flattenedArtists} />
         </>
       ) : (
         <button onClick={signInWithGoogle}>Log in with Google</button>
