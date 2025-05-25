@@ -19,9 +19,11 @@ export function GridCell({ id, artists }: Props) {
         border: '1px dashed #aaa',
         padding: '6px',
         background: isOver ? '#f0f0f0' : 'white',
+        display: 'block',
         columnWidth: '100px',
         columnGap: '8px',
-        overflow: 'hidden',
+        breakInside: 'avoid',
+        whiteSpace: 'normal',
       }}
     >
       {artists.map((artist) => (
