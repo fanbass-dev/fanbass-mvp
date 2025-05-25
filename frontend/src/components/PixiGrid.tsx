@@ -26,7 +26,7 @@ export function PixiGrid({ placements, tiers, stages }: PixiGridProps) {
 
     // Append its canvas to our div
     if (containerRef.current) {
-      containerRef.current.appendChild(app.view)
+      containerRef.current.appendChild(app.canvas)
     }
 
     // Build the viewport options and cast to any so TS won’t complain
