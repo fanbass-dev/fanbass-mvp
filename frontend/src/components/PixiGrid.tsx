@@ -14,7 +14,9 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const app = new PIXI.Application({
+    // 1️⃣ Create & initialize the PIXI application
+    const app = new PIXI.Application()
+    app.init({
       width: window.innerWidth,
       height: window.innerHeight,
       backgroundColor: 0xffffff,
@@ -22,8 +24,10 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       autoDensity: true,
     })
 
-    containerRef.current?.appendChild(app.view as HTMLCanvasElement)
+    // 2️⃣ Append the actual <canvas> element
+    containerRef.current?.appendChild(app.canvas)
 
+    // 3️⃣ Set up the zoomable/pannable viewport
     const viewport = new Viewport({
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
@@ -31,26 +35,29 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       worldHeight: 2000,
       events: app.renderer.events,
     })
-
     app.stage.addChild(viewport)
+    viewport.drag().pinch().wheel().decelerate()
 
+    // 4️⃣ Draw your tier × stage grid and artist cards
     const stageWidth = 300
     const tierHeight = 150
     const padding = 20
 
-    // Draw stages and tiers
     stages.forEach((stage, si) => {
       const x = si * (stageWidth + padding)
-      const label = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
-      label.position.set(x + stageWidth / 2 - label.width / 2, 10)
-      viewport.addChild(label)
+      // Stage label
+      const stageLabel = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
+      stageLabel.position.set(x + stageWidth / 2 - stageLabel.width / 2, 10)
+      viewport.addChild(stageLabel)
 
       tiers.forEach((tier, ti) => {
         const y = 50 + ti * (tierHeight + padding)
+        // Tier label
         const tierLabel = new PIXI.Text(tier.toUpperCase(), { fill: '#555', fontSize: 14 })
         tierLabel.position.set(x, y)
         viewport.addChild(tierLabel)
 
+        // Cell border
         const border = new PIXI.Graphics()
         border.lineStyle(2, 0xaaaaaa)
         border.beginFill(0xffffff)
@@ -58,9 +65,9 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
         border.endFill()
         viewport.addChild(border)
 
+        // Place artists
         const key = `${stage}-${tier}`
         const artists = placements[key] || []
-
         artists.forEach((artist, i) => {
           const col = i % 3
           const row = Math.floor(i / 3)
@@ -68,13 +75,15 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
           const ax = x + gap + col * (cw + gap)
           const ay = y + 30 + row * (ch + gap)
 
+          // Card background
           const card = new PIXI.Graphics()
           card.beginFill(0xeeeeee)
           card.drawRoundedRect(0, 0, cw, ch, 6)
           card.endFill()
-          card.x = ax; card.y = ay
+          card.position.set(ax, ay)
           viewport.addChild(card)
 
+          // Artist name
           const text = new PIXI.Text(artist.name, {
             fontSize: 12,
             fill: 0x000000,
@@ -82,15 +91,17 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
             wordWrapWidth: cw - 10,
             align: 'center',
           })
-          text.x = ax + (cw - text.width) / 2
-          text.y = ay + (ch - text.height) / 2
+          text.position.set(
+            ax + (cw - text.width) / 2,
+            ay + (ch - text.height) / 2
+          )
           viewport.addChild(text)
         })
       })
     })
 
+    // 5️⃣ Cleanup on unmount
     return () => {
-      // DROP baseTexture option — only children & texture are supported now
       app.destroy(true, { children: true, texture: true })
     }
   }, [tiers, stages, placements])
