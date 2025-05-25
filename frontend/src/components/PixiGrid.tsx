@@ -29,7 +29,7 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       screenHeight: window.innerHeight,
       worldWidth: 5000,
       worldHeight: 2000,
-      events: app.renderer.events, // ✅ This is the key fix for your TS error
+      events: app.renderer.events,
     })
 
     app.stage.addChild(viewport)
@@ -38,66 +38,60 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
     const tierHeight = 150
     const padding = 20
 
-    stages.forEach((stage, stageIndex) => {
-      const stageX = stageIndex * (stageWidth + padding)
+    // Draw stages and tiers
+    stages.forEach((stage, si) => {
+      const x = si * (stageWidth + padding)
+      const label = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
+      label.position.set(x + stageWidth / 2 - label.width / 2, 10)
+      viewport.addChild(label)
 
-      // Stage label
-      const stageLabel = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
-      stageLabel.position.set(stageX + stageWidth / 2 - stageLabel.width / 2, 10)
-      viewport.addChild(stageLabel)
-
-      tiers.forEach((tier, tierIndex) => {
-        const tierY = 50 + tierIndex * (tierHeight + padding)
-
-        // Tier label
+      tiers.forEach((tier, ti) => {
+        const y = 50 + ti * (tierHeight + padding)
         const tierLabel = new PIXI.Text(tier.toUpperCase(), { fill: '#555', fontSize: 14 })
-        tierLabel.position.set(stageX, tierY)
+        tierLabel.position.set(x, y)
         viewport.addChild(tierLabel)
 
-        // Border
         const border = new PIXI.Graphics()
-        border.lineStyle(2, 0xaaaaaa, 1)
+        border.lineStyle(2, 0xaaaaaa)
         border.beginFill(0xffffff)
-        border.drawRect(stageX, tierY + 20, stageWidth, tierHeight)
+        border.drawRect(x, y + 20, stageWidth, tierHeight)
         border.endFill()
         viewport.addChild(border)
 
-        // Artists
         const key = `${stage}-${tier}`
         const artists = placements[key] || []
+
         artists.forEach((artist, i) => {
           const col = i % 3
           const row = Math.floor(i / 3)
-          const cardWidth = 90
-          const cardHeight = 40
-          const spacing = 10
-          const artistX = stageX + spacing + col * (cardWidth + spacing)
-          const artistY = tierY + 30 + row * (cardHeight + spacing)
+          const cw = 90, ch = 40, gap = 10
+          const ax = x + gap + col * (cw + gap)
+          const ay = y + 30 + row * (ch + gap)
 
           const card = new PIXI.Graphics()
           card.beginFill(0xeeeeee)
-          card.drawRoundedRect(0, 0, cardWidth, cardHeight, 6)
+          card.drawRoundedRect(0, 0, cw, ch, 6)
           card.endFill()
-          card.x = artistX
-          card.y = artistY
+          card.x = ax; card.y = ay
           viewport.addChild(card)
 
           const text = new PIXI.Text(artist.name, {
             fontSize: 12,
             fill: 0x000000,
             wordWrap: true,
-            wordWrapWidth: cardWidth - 10,
+            wordWrapWidth: cw - 10,
             align: 'center',
           })
-          text.x = artistX + (cardWidth - text.width) / 2
-          text.y = artistY + (cardHeight - text.height) / 2
+          text.x = ax + (cw - text.width) / 2
+          text.y = ay + (ch - text.height) / 2
           viewport.addChild(text)
         })
       })
     })
 
     return () => {
-      app.destroy(true, { children: true, texture: true, baseTexture: true })
+      // DROP baseTexture option — only children & texture are supported now
+      app.destroy(true, { children: true, texture: true })
     }
   }, [tiers, stages, placements])
 
