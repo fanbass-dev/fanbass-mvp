@@ -1,3 +1,4 @@
+// frontend/src/components/PixiGrid.tsx
 import { useEffect, useRef } from 'react'
 import * as PIXI from 'pixi.js'
 import { Viewport } from 'pixi-viewport'
@@ -13,7 +14,6 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // 1) Create PIXI Application via constructor so renderer is set up
     const app = new PIXI.Application({
       width: window.innerWidth,
       height: window.innerHeight,
@@ -22,14 +22,14 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       autoDensity: true,
     })
 
-    // 2) ALWAYS grab the canvas from the renderer
-    const canvasEl = app.renderer.view
+    // — Append the actual <canvas> element — 
+    const canvasEl = app.renderer.view as unknown as HTMLCanvasElement
     canvasEl.style.display = 'block'
     canvasEl.style.width   = '100%'
     canvasEl.style.height  = '100%'
     containerRef.current?.appendChild(canvasEl)
 
-    // 3) Set up pan/zoom
+    // — Viewport setup —
     const viewport = new Viewport({
       screenWidth:  window.innerWidth,
       screenHeight: window.innerHeight,
@@ -40,23 +40,20 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
     app.stage.addChild(viewport)
     viewport.drag().pinch().wheel().decelerate()
 
-    // 4) Draw tiers × stages
+    // — Draw grid & artists —
     const stageW = 300, tierH = 150, pad = 20
     stages.forEach((stage, si) => {
       const x = si * (stageW + pad)
-      // Stage label
       const sLabel = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
       sLabel.position.set(x + stageW/2 - sLabel.width/2, 10)
       viewport.addChild(sLabel)
 
       tiers.forEach((tier, ti) => {
         const y = 50 + ti * (tierH + pad)
-        // Tier label
         const tLabel = new PIXI.Text(tier.toUpperCase(), { fill: '#555', fontSize: 14 })
         tLabel.position.set(x, y)
         viewport.addChild(tLabel)
 
-        // Border
         const border = new PIXI.Graphics()
         border.lineStyle(2, 0xaaaaaa)
         border.beginFill(0xffffff)
@@ -95,7 +92,7 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       })
     })
 
-    // 5) Clean up on unmount
+    // — Cleanup —
     return () => {
       app.destroy(true, { children: true, texture: true })
     }
