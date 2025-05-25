@@ -22,8 +22,8 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       autoDensity: true,
     })
 
-    // ——— APPEND THE REAL CANVAS ———
-    const canvas = app.renderer.view as HTMLCanvasElement
+    // ——— APPEND THE RENDERER CANVAS ———
+    const canvas = app.renderer.view as unknown as HTMLCanvasElement
     canvas.style.display = 'block'
     canvas.style.width = '100%'
     canvas.style.height = '100%'
