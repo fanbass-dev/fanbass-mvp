@@ -33,7 +33,6 @@ function App() {
   useEffect(() => {
     if (!user) return
 
-    // Fetch user-specific placements
     supabase
       .from('artist_placements')
       .select('stage, tier, artist:artist_id(id, name)')
@@ -41,17 +40,30 @@ function App() {
       .then(({ data, error }) => {
         if (error) {
           console.error('Failed to fetch placements:', error)
-        } else {
-          const grouped: Record<string, Artist[]> = {}
-          for (const row of data as Placement[]) {
-            const key = `${row.stage}-${row.tier}`
-            if (!grouped[key]) grouped[key] = []
-            grouped[key].push(row.artist)
-          }
-          setPlacements(grouped)
+          return
         }
+
+        const grouped: Record<string, Artist[]> = {}
+          ; (data || []).forEach((row: any) => {
+            const { stage, tier, artist } = row
+            const key = `${stage}-${tier}`
+
+            // Create the flattened Artist object
+            const a: Artist = {
+              id: artist.id,
+              name: artist.name,
+              stage,
+              tier,
+            }
+
+            if (!grouped[key]) grouped[key] = []
+            grouped[key].push(a)
+          })
+
+        setPlacements(grouped)
       })
   }, [user])
+
 
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
