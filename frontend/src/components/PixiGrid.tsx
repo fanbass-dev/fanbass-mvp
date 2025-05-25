@@ -15,9 +15,10 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
 
   useEffect(() => {
     console.log('🛠️ PixiGrid useEffect fired')
-    console.log('PIXI.Application constructor:', PIXI.Application)
 
-    const app = new PIXI.Application({
+    // workaround TS missing init()
+    const ApplicationAny = (PIXI.Application as any)
+    const app: PIXI.Application = ApplicationAny.init({
       width: window.innerWidth,
       height: window.innerHeight,
       backgroundColor: 0xffffff,
@@ -25,31 +26,19 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       autoDensity: true,
     })
 
-    console.log('Created PIXI.Application instance:', app)
-    console.log(' app.renderer exists?', (app as any).renderer)
-    console.log(' app.renderer.view exists?', (app as any).renderer?.view)
+    console.log('PIXI.Application instance:', app)
+    console.log(' renderer exists?', app.renderer)
+    console.log(' renderer.view exists?', (app.renderer as any)?.view)
 
-    // — Attempt to grab the canvas —
-    let canvasEl: HTMLCanvasElement | undefined
-    try {
-      canvasEl = (app.renderer.view as unknown) as HTMLCanvasElement
-      console.log(' canvasEl is:', canvasEl)
-    } catch (err) {
-      console.error('❌ Failed to cast app.renderer.view to canvas:', err)
-    }
+    // append the real <canvas>
+    const canvasEl = (app.renderer.view as unknown) as HTMLCanvasElement
+    canvasEl.style.display = 'block'
+    canvasEl.style.width   = '100%'
+    canvasEl.style.height  = '100%'
+    containerRef.current?.appendChild(canvasEl)
+    console.log('✅ Appended canvas')
 
-    console.log(' containerRef.current is:', containerRef.current)
-    if (canvasEl && containerRef.current) {
-      canvasEl.style.display = 'block'
-      canvasEl.style.width   = '100%'
-      canvasEl.style.height  = '100%'
-      containerRef.current.appendChild(canvasEl)
-      console.log('✅ Appended canvas to container')
-    } else {
-      console.warn('⚠️ Skipping append—canvasEl or containerRef is missing')
-    }
-
-    // Rest of our drawing logic…
+    // set up pan/zoom
     const viewport = new Viewport({
       screenWidth:  window.innerWidth,
       screenHeight: window.innerHeight,
@@ -60,7 +49,57 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
     app.stage.addChild(viewport)
     viewport.drag().pinch().wheel().decelerate()
 
-    // (…draw stages/tiers/artists, same as before…)
+    // draw grid & artists
+    const stageW = 300, tierH = 150, pad = 20
+    stages.forEach((stage, si) => {
+      const x = si * (stageW + pad)
+      const sLabel = new PIXI.Text(stage, { fill: '#000', fontSize: 20 })
+      sLabel.position.set(x + stageW/2 - sLabel.width/2, 10)
+      viewport.addChild(sLabel)
+
+      tiers.forEach((tier, ti) => {
+        const y = 50 + ti * (tierH + pad)
+        const tLabel = new PIXI.Text(tier.toUpperCase(), { fill: '#555', fontSize: 14 })
+        tLabel.position.set(x, y)
+        viewport.addChild(tLabel)
+
+        const border = new PIXI.Graphics()
+        border.lineStyle(2, 0xaaaaaa)
+        border.beginFill(0xffffff)
+        border.drawRect(x, y + 20, stageW, tierH)
+        border.endFill()
+        viewport.addChild(border)
+
+        const key = `${stage}-${tier}`
+        const list = placements[key] || []
+        list.forEach((artist, i) => {
+          const col = i % 3, row = Math.floor(i/3)
+          const cw = 90, ch = 40, gap = 10
+          const ax = x + gap + col*(cw+gap)
+          const ay = y + 30 + row*(ch+gap)
+
+          const card = new PIXI.Graphics()
+          card.beginFill(0xeeeeee)
+          card.drawRoundedRect(0, 0, cw, ch, 6)
+          card.endFill()
+          card.position.set(ax, ay)
+          viewport.addChild(card)
+
+          const txt = new PIXI.Text(artist.name, {
+            fontSize: 12,
+            fill: 0x000000,
+            wordWrap: true,
+            wordWrapWidth: cw - 10,
+            align: 'center',
+          })
+          txt.position.set(
+            ax + (cw - txt.width) / 2,
+            ay + (ch - txt.height) / 2
+          )
+          viewport.addChild(txt)
+        })
+      })
+    })
 
     return () => {
       console.log('🧹 Destroying PIXI.Application')
