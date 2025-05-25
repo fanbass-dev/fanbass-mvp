@@ -1,6 +1,11 @@
 import { useEffect, useRef } from 'react'
-import * as PIXI from 'pixi.js'
-import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js'
+import {
+  Application,
+  Container,
+  Graphics,
+  Text,
+  TextStyle,
+} from 'pixi.js'
 
 type Artist = {
   id: string
@@ -13,7 +18,7 @@ type Props = {
 
 const ArtistCanvas = ({ artists }: Props) => {
   const canvasRef = useRef<HTMLDivElement>(null)
-  const appRef = useRef<PIXI.Application | null>(null)
+  const appRef = useRef<Application | null>(null)
 
   useEffect(() => {
     if (!canvasRef.current) return
@@ -24,8 +29,8 @@ const ArtistCanvas = ({ artists }: Props) => {
       antialias: true,
     })
 
-    canvasRef.current.appendChild(app.view as HTMLCanvasElement)
     appRef.current = app
+    canvasRef.current.appendChild(app.view)
 
     const padding = 20
     const nodeHeight = 60
@@ -38,14 +43,12 @@ const ArtistCanvas = ({ artists }: Props) => {
       node.x = padding
       node.y = y
 
-      // background box
       const box = new Graphics()
       box.beginFill(0x1e1e1e)
       box.lineStyle(2, 0xffffff, 0.2)
       box.drawRoundedRect(0, 0, nodeWidth, nodeHeight, 10)
       box.endFill()
 
-      // text
       const text = new Text(artist.name, new TextStyle({
         fill: '#ffffff',
         fontSize: 20,
