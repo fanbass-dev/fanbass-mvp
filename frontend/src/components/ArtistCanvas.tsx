@@ -13,7 +13,7 @@ type Props = {
 
 const ArtistCanvas = ({ artists }: Props) => {
   const canvasRef = useRef<HTMLDivElement>(null)
-  const appRef = useRef<PIXI.Application>()
+  const appRef = useRef<PIXI.Application | null>(null)
 
   useEffect(() => {
     if (!canvasRef.current) return
