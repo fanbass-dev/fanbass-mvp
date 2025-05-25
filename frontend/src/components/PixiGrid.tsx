@@ -14,9 +14,8 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
   const containerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    // 1️⃣ Create & initialize the PIXI application
-    const app = new PIXI.Application()
-    app.init({
+    // ✨ Use the constructor so app.view is defined
+    const app = new PIXI.Application({
       width: window.innerWidth,
       height: window.innerHeight,
       backgroundColor: 0xffffff,
@@ -24,10 +23,10 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       autoDensity: true,
     })
 
-    // 2️⃣ Append the actual <canvas> element
-    containerRef.current?.appendChild(app.canvas)
+    // Append the <canvas> element
+    containerRef.current?.appendChild(app.view)
 
-    // 3️⃣ Set up the zoomable/pannable viewport
+    // Set up panning/zooming
     const viewport = new Viewport({
       screenWidth: window.innerWidth,
       screenHeight: window.innerHeight,
@@ -38,7 +37,7 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
     app.stage.addChild(viewport)
     viewport.drag().pinch().wheel().decelerate()
 
-    // 4️⃣ Draw your tier × stage grid and artist cards
+    // Layout constants
     const stageWidth = 300
     const tierHeight = 150
     const padding = 20
@@ -75,7 +74,6 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
           const ax = x + gap + col * (cw + gap)
           const ay = y + 30 + row * (ch + gap)
 
-          // Card background
           const card = new PIXI.Graphics()
           card.beginFill(0xeeeeee)
           card.drawRoundedRect(0, 0, cw, ch, 6)
@@ -83,7 +81,6 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
           card.position.set(ax, ay)
           viewport.addChild(card)
 
-          // Artist name
           const text = new PIXI.Text(artist.name, {
             fontSize: 12,
             fill: 0x000000,
@@ -100,7 +97,7 @@ export function PixiGrid({ tiers, stages, placements }: PixiGridProps) {
       })
     })
 
-    // 5️⃣ Cleanup on unmount
+    // Cleanup
     return () => {
       app.destroy(true, { children: true, texture: true })
     }
