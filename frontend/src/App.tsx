@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react'
 import { useAuth } from './hooks/useAuth'
-import { supabase } from './supabaseClient'
 import ArtistCanvas from './components/ArtistCanvas'
 import { SearchBar } from './components/SearchBar'
 import type { Artist, Tier } from './types'
+import { useArtistSearch } from './hooks/useArtistSearch'
 
 const tiers: Tier[] = ['headliner', 'support', 'opener']
 const stages = ['Dreamy', 'Heavy', 'Groovy']
@@ -11,33 +11,8 @@ const stages = ['Dreamy', 'Heavy', 'Groovy']
 function App() {
   const { user, signIn, signOut } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
-  const [searchResults, setSearchResults] = useState<Artist[]>([])
-  const [searching, setSearching] = useState(false)
+  const { searchResults, searching } = useArtistSearch(searchTerm)
   const [queue, setQueue] = useState<Artist[]>([])
-
-  // Temporary: Will be refactored next step into useArtistSearch
-  useEffect(() => {
-    if (!searchTerm.trim()) {
-      setSearchResults([])
-      return
-    }
-
-    setSearching(true)
-
-    supabase
-      .from('artists')
-      .select('id, name')
-      .ilike('name', `%${searchTerm}%`)
-      .then(({ data, error }) => {
-        setSearching(false)
-        if (error) {
-          console.error('Search failed:', error)
-          return
-        }
-        setSearchResults(data || [])
-      })
-  }, [searchTerm])
-
 
   const handleAddToQueue = (artist: Artist) => {
     setQueue((prev) => [...prev, artist])
