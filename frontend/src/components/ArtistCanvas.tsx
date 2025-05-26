@@ -74,7 +74,7 @@ const ArtistCanvas = ({ artists }: Props) => {
         position: 'relative',        // ← NEW
         zIndex: 0                    // ← ensure it's not over the sidebar
       }}
-    
+      ></div>
   )
 }
 
