@@ -6,7 +6,7 @@ export function LoginScreen({ onLogin }: Props) {
   return (
     <div style={{
       height: '100vh',
-      backgroundColor: 'black',
+      backgroundColor: '#03050e',
       color: 'white',
       display: 'flex',
       flexDirection: 'column',
