@@ -30,9 +30,22 @@ const ArtistCanvas = ({ artists }: Props) => {
       const padding = 20
       const nodeHeight = 60
       const nodeWidth = 300
+      const labelStyle = new TextStyle({
+        fill: '#ffffff',
+        fontSize: 24,
+        fontWeight: 'bold',
+        fontFamily: 'sans-serif',
+      })
 
+      // Label the Queue section
+      const label = new Text('Queue', labelStyle)
+      label.x = padding
+      label.y = padding
+      app.stage.addChild(label)
+
+      // Render artists in Queue section
       artists.forEach((artist, index) => {
-        const y = padding + index * (nodeHeight + padding)
+        const y = padding * 2 + label.height + index * (nodeHeight + padding)
 
         const node = new Container()
         node.x = padding
@@ -71,7 +84,8 @@ const ArtistCanvas = ({ artists }: Props) => {
       style={{
         width: '100%',
         height: '100%',
-        zIndex: 0 // No `position: absolute`
+        position: 'relative',
+        zIndex: 0,
       }}
     />
   )
