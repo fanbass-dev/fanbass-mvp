@@ -4,6 +4,7 @@ import { useArtistSearch } from './hooks/useArtistSearch'
 import type { Artist } from './types'
 import { Header } from './components/Header'
 import { MainLayout } from './components/MainLayout'
+import { LoginScreen } from './components/LoginScreen'
 
 function App() {
   const { user, signIn, signOut } = useAuth()
@@ -15,7 +16,7 @@ function App() {
     setQueue((prev) => [...prev, artist])
   }
 
-  if (!user) return <button onClick={signIn}>Log in with Google</button>
+if (!user) return <LoginScreen onLogin={signIn} />
 
   return (
     <div style={{ fontFamily: 'sans-serif', height: '100vh', display: 'flex', flexDirection: 'column' }}>
