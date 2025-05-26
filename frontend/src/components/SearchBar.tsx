@@ -27,7 +27,7 @@ export function SearchBar({
       <input
         type="text"
         placeholder="Search artists"
-        style={{ padding: '0.5rem', marginBottom: '1rem', display: 'block', width: '80%' }}
+        style={{ padding: '0.5rem', marginBottom: '1rem', display: 'block', width: '90%' }}
         value={searchTerm}
         onChange={(e) => onChange(e.target.value)}
       />
