@@ -1,20 +1,18 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './supabaseClient'
 import ArtistCanvas from './components/ArtistCanvas'
+import { SearchBar } from './components/SearchBar'
 import type { Artist, Tier } from './types'
 
 const tiers: Tier[] = ['headliner', 'support', 'opener']
 const stages = ['Dreamy', 'Heavy', 'Groovy']
 
-type Placement = {
-  stage: string
-  tier: Tier
-  artist: Artist
-}
-
 function App() {
   const [user, setUser] = useState<any>(null)
-  const [placements, setPlacements] = useState<Record<string, Artist[]>>({})
+  const [searchTerm, setSearchTerm] = useState('')
+  const [searchResults, setSearchResults] = useState<Artist[]>([])
+  const [searching, setSearching] = useState(false)
+  const [queue, setQueue] = useState<Artist[]>([])
 
   useEffect(() => {
     // Get current session
@@ -30,40 +28,28 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
+  // Search Supabase for artists
   useEffect(() => {
-    if (!user) return
+    if (!searchTerm.trim()) {
+      setSearchResults([])
+      return
+    }
+
+    setSearching(true)
 
     supabase
-      .from('artist_placements')
-      .select('stage, tier, artist:artist_id(id, name)')
-      .eq('user_id', user.id)
+      .from('artists')
+      .select('id, name')
+      .ilike('name', `%${searchTerm}%`)
       .then(({ data, error }) => {
+        setSearching(false)
         if (error) {
-          console.error('Failed to fetch placements:', error)
+          console.error('Search failed:', error)
           return
         }
-
-        const grouped: Record<string, Artist[]> = {}
-          ; (data || []).forEach((row: any) => {
-            const { stage, tier, artist } = row
-            const key = `${stage}-${tier}`
-
-            // Create the flattened Artist object
-            const a: Artist = {
-              id: artist.id,
-              name: artist.name,
-              stage,
-              tier,
-            }
-
-            if (!grouped[key]) grouped[key] = []
-            grouped[key].push(a)
-          })
-
-        setPlacements(grouped)
+        setSearchResults(data || [])
       })
-  }, [user])
-
+  }, [searchTerm])
 
   const signInWithGoogle = async () => {
     await supabase.auth.signInWithOAuth({
@@ -78,18 +64,10 @@ function App() {
     await supabase.auth.signOut()
     setUser(null)
   }
-  
-const flattenedArtists = Object.values(placements).flat()
 
-// TEMP: Add a mock artist if placements are empty
-if (flattenedArtists.length === 0) {
-  flattenedArtists.push({
-    id: 'test-1',
-    name: 'Test Artist',
-    stage: 'Dreamy',
-    tier: 'headliner',
-  })
-}
+  const handleAddToQueue = (artist: Artist) => {
+    setQueue((prev) => [...prev, artist])
+  }
 
   return (
     <div style={{ fontFamily: 'sans-serif', height: '100vh', overflow: 'hidden' }}>
@@ -99,7 +77,21 @@ if (flattenedArtists.length === 0) {
             Logged in as: <strong>{user.email}</strong>
             <button style={{ marginLeft: '1rem' }} onClick={signOut}>Log out</button>
           </div>
-          <ArtistCanvas artists={flattenedArtists} />
+          <div style={{ display: 'flex', height: 'calc(100vh - 40px)' }}>
+            <div style={{ width: '300px', padding: '1rem', overflowY: 'auto', background: '#fafafa' }}>
+              <SearchBar
+                searchTerm={searchTerm}
+                searchResults={searchResults}
+                searching={searching}
+                onChange={setSearchTerm}
+                onAdd={handleAddToQueue}
+                queue={queue}
+              />
+            </div>
+            <div style={{ flex: 1 }}>
+              <ArtistCanvas artists={queue} />
+            </div>
+          </div>
         </>
       ) : (
         <button onClick={signInWithGoogle}>Log in with Google</button>

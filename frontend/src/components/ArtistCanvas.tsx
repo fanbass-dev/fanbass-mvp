@@ -1,10 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js'
-
-type Artist = {
-  id: string
-  name: string
-}
+import type { Artist } from '../types'
 
 type Props = {
   artists: Artist[]
