@@ -70,12 +70,25 @@ function App() {
     <div style={{ fontFamily: 'sans-serif', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {user ? (
         <>
-          <div style={{ padding: '0.5rem', background: '#f0f0f0' }}>
+          <div style={{
+            padding: '0.5rem',
+            background: '#f0f0f0',
+            zIndex: 2,
+            position: 'relative'
+          }}>
             Logged in as: <strong>{user.email}</strong>
             <button style={{ marginLeft: '1rem' }} onClick={signOut}>Log out</button>
           </div>
+
           <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-            <div style={{ width: '300px', padding: '1rem', overflowY: 'auto', background: '#fafafa', position: 'relative', zIndex: 1}}>
+            <div style={{
+              width: '300px',
+              padding: '1rem',
+              overflowY: 'auto',
+              background: '#fafafa',
+              position: 'relative',
+              zIndex: 2
+            }}>
               <SearchBar
                 searchTerm={searchTerm}
                 searchResults={searchResults}
@@ -85,7 +98,8 @@ function App() {
                 queue={queue}
               />
             </div>
-            <div style={{ flex: 1 }}>
+
+            <div style={{ flex: 1, overflow: 'hidden', position: 'relative', zIndex: 0 }}>
               <ArtistCanvas artists={queue} />
             </div>
           </div>
