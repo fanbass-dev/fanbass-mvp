@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
+import { useAuth } from './hooks/useAuth'
 import { supabase } from './supabaseClient'
 import ArtistCanvas from './components/ArtistCanvas'
 import { SearchBar } from './components/SearchBar'
@@ -8,25 +9,14 @@ const tiers: Tier[] = ['headliner', 'support', 'opener']
 const stages = ['Dreamy', 'Heavy', 'Groovy']
 
 function App() {
-  const [user, setUser] = useState<any>(null)
+  const { user, signIn, signOut } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const [searchResults, setSearchResults] = useState<Artist[]>([])
   const [searching, setSearching] = useState(false)
   const [queue, setQueue] = useState<Artist[]>([])
 
-  useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
-      setUser(data?.session?.user ?? null)
-    })
-
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setUser(session?.user ?? null)
-    })
-
-    return () => subscription.unsubscribe()
-  }, [])
-
-  useEffect(() => {
+  // Temporary: Will be refactored next step into useArtistSearch
+  useState(() => {
     if (!searchTerm.trim()) {
       setSearchResults([])
       return
@@ -47,20 +37,6 @@ function App() {
         setSearchResults(data || [])
       })
   }, [searchTerm])
-
-  const signInWithGoogle = async () => {
-    await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: {
-        redirectTo: window.location.origin,
-      },
-    })
-  }
-
-  const signOut = async () => {
-    await supabase.auth.signOut()
-    setUser(null)
-  }
 
   const handleAddToQueue = (artist: Artist) => {
     setQueue((prev) => [...prev, artist])
@@ -105,7 +81,7 @@ function App() {
           </div>
         </>
       ) : (
-        <button onClick={signInWithGoogle}>Log in with Google</button>
+        <button onClick={signIn}>Log in with Google</button>
       )}
     </div>
   )
