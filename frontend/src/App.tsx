@@ -75,7 +75,7 @@ function App() {
             <button style={{ marginLeft: '1rem' }} onClick={signOut}>Log out</button>
           </div>
           <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-            <div style={{ width: '300px', padding: '1rem', overflowY: 'auto', background: '#fafafa' }}>
+            <div style={{ width: '300px', padding: '1rem', overflowY: 'auto', background: '#fafafa', zIndex: 1}}>
               <SearchBar
                 searchTerm={searchTerm}
                 searchResults={searchResults}
