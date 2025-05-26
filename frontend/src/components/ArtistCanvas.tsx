@@ -59,7 +59,7 @@ const ArtistCanvas = ({ artists }: Props) => {
 
         const text = new Text(artist.name, new TextStyle({
           fill: '#ffffff',
-          fontSize: 20,
+          fontSize: 12,
           fontFamily: 'sans-serif',
         }))
         text.x = 20
