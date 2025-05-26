@@ -68,12 +68,14 @@ const ArtistCanvas = ({ artists }: Props) => {
   return (
     <div
       ref={canvasRef}
-      style={{
-        width: '100%',
-        height: '100%',
-        position: 'relative',        // ← NEW
-        zIndex: 0                    // ← ensure it's not over the sidebar
-      }}
+        style={{
+          width: '100%',
+          height: '100%',
+          position: 'absolute', // ensures it doesn't block sidebar
+          top: 0,
+          left: 0,
+          zIndex: 0
+        }}
       ></div>
   )
 }
