@@ -1,5 +1,10 @@
-// ArtistCanvas.tsx
-const ArtistCanvas = () => {
+import type { Artist } from '../types'
+
+type Props = {
+  artists: Artist[]
+}
+
+const ArtistCanvas = (_props: Props) => {
   return (
     <div
       style={{
