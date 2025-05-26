@@ -65,7 +65,7 @@ const ArtistCanvas = ({ artists }: Props) => {
     }
   }, [artists])
 
-  return <div ref={canvasRef} style={{ width: '100%', height: '100vh' }} />
+  return <div ref={canvasRef} style={{ width: '100%', height: '100%' }} />
 }
 
 export default ArtistCanvas
