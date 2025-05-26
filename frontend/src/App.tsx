@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { supabase } from './supabaseClient'
 import ArtistCanvas from './components/ArtistCanvas'
@@ -16,7 +16,7 @@ function App() {
   const [queue, setQueue] = useState<Artist[]>([])
 
   // Temporary: Will be refactored next step into useArtistSearch
-  useState(() => {
+  useEffect(() => {
     if (!searchTerm.trim()) {
       setSearchResults([])
       return
@@ -37,6 +37,7 @@ function App() {
         setSearchResults(data || [])
       })
   }, [searchTerm])
+
 
   const handleAddToQueue = (artist: Artist) => {
     setQueue((prev) => [...prev, artist])
