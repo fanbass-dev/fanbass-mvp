@@ -15,12 +15,10 @@ function App() {
   const [queue, setQueue] = useState<Artist[]>([])
 
   useEffect(() => {
-    // Get current session
     supabase.auth.getSession().then(({ data }) => {
       setUser(data?.session?.user ?? null)
     })
 
-    // Subscribe to auth changes
     const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
     })
@@ -28,7 +26,6 @@ function App() {
     return () => subscription.unsubscribe()
   }, [])
 
-  // Search Supabase for artists
   useEffect(() => {
     if (!searchTerm.trim()) {
       setSearchResults([])
@@ -70,14 +67,14 @@ function App() {
   }
 
   return (
-    <div style={{ fontFamily: 'sans-serif', height: '100vh', overflow: 'hidden' }}>
+    <div style={{ fontFamily: 'sans-serif', height: '100vh', display: 'flex', flexDirection: 'column' }}>
       {user ? (
         <>
           <div style={{ padding: '0.5rem', background: '#f0f0f0' }}>
             Logged in as: <strong>{user.email}</strong>
             <button style={{ marginLeft: '1rem' }} onClick={signOut}>Log out</button>
           </div>
-          <div style={{ display: 'flex', height: 'calc(100vh - 40px)' }}>
+          <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
             <div style={{ width: '300px', padding: '1rem', overflowY: 'auto', background: '#fafafa' }}>
               <SearchBar
                 searchTerm={searchTerm}
