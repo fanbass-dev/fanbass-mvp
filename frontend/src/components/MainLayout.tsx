@@ -1,5 +1,6 @@
 import ArtistCanvas from './ArtistCanvas'
 import { SearchBar } from './SearchBar'
+import { ArtistRankingForm } from './ArtistRankingForm' // ✅ Add this
 import type { Artist } from '../types'
 
 type Props = {
@@ -9,6 +10,7 @@ type Props = {
   onSearchChange: (term: string) => void
   onAddToQueue: (artist: Artist) => void
   queue: Artist[]
+  useFormUI: boolean
 }
 
 export function MainLayout({
@@ -18,6 +20,7 @@ export function MainLayout({
   onSearchChange,
   onAddToQueue,
   queue,
+  useFormUI, // ✅ You forgot to destructure this earlier
 }: Props) {
   return (
     <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
@@ -38,8 +41,12 @@ export function MainLayout({
           queue={queue}
         />
       </div>
-      <div style={{ flex: 1, overflow: 'hidden', position: 'relative', zIndex: 0 }}>
-        <ArtistCanvas artists={queue} />
+      <div style={{ flex: 1, overflow: 'auto', position: 'relative', zIndex: 0, padding: '1rem' }}>
+        {useFormUI ? (
+          <ArtistRankingForm artists={queue} />
+        ) : (
+          <ArtistCanvas artists={queue} />
+        )}
       </div>
     </div>
   )

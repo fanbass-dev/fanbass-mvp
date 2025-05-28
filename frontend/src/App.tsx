@@ -5,22 +5,31 @@ import type { Artist } from './types'
 import { Header } from './components/Header'
 import { MainLayout } from './components/MainLayout'
 import { LoginScreen } from './components/LoginScreen'
+import { ArtistRankingForm } from './components/ArtistRankingForm'
 
 function App() {
   const { user, signIn, signOut } = useAuth()
   const [searchTerm, setSearchTerm] = useState('')
   const { searchResults, searching } = useArtistSearch(searchTerm)
   const [queue, setQueue] = useState<Artist[]>([])
+  const [useFormUI, setUseFormUI] = useState(true)
+
 
   const handleAddToQueue = (artist: Artist) => {
     setQueue((prev) => [...prev, artist])
   }
 
-if (!user) return <LoginScreen onLogin={signIn} />
+  if (!user) return <LoginScreen onLogin={signIn} />
 
   return (
     <div style={{ fontFamily: 'sans-serif', height: '100vh', display: 'flex', flexDirection: 'column' }}>
-      <Header userEmail={user.email} onSignOut={signOut} />
+      <Header
+        userEmail={user.email}
+        onSignOut={signOut}
+        useFormUI={useFormUI}
+        onToggleView={() => setUseFormUI((prev) => !prev)}
+      />
+      
       <MainLayout
         searchTerm={searchTerm}
         searchResults={searchResults}
@@ -28,6 +37,7 @@ if (!user) return <LoginScreen onLogin={signIn} />
         onSearchChange={setSearchTerm}
         onAddToQueue={handleAddToQueue}
         queue={queue}
+        useFormUI={useFormUI}
       />
     </div>
   )
