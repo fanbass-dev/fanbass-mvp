@@ -17,8 +17,11 @@ export function SearchBar({
   onAdd,
   queue,
 }: Props) {
+  const isInQueue = (artistId: string) =>
+    queue.some((a) => a.id === artistId)
+
   const filteredResults = searchResults.filter(
-    (artist) => !queue.some((q) => q.id === artist.id)
+    (artist) => !isInQueue(artist.id)
   )
 
   return (
@@ -27,7 +30,12 @@ export function SearchBar({
       <input
         type="text"
         placeholder="Search artists"
-        style={{ padding: '0.5rem', marginBottom: '1rem', display: 'block', width: '90%' }}
+        style={{
+          padding: '0.5rem',
+          marginBottom: '1rem',
+          display: 'block',
+          width: '90%',
+        }}
         value={searchTerm}
         onChange={(e) => onChange(e.target.value)}
       />

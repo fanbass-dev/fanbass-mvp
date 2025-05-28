@@ -1,52 +1,83 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../supabaseClient'
+import { getCurrentUser } from '../services/authService'
 import { Artist, Tier } from '../types'
 
 export function useArtistRankings() {
   const [user, setUser] = useState<any>(null)
-  const [artists, setArtists] = useState<Artist[]>([])
+  const [myArtists, setMyArtists] = useState<Artist[]>([])
   const [rankings, setRankings] = useState<Record<string, Tier>>({})
 
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data?.user ?? null))
+    const fetchData = async () => {
+      const currentUser = await getCurrentUser()
+      if (!currentUser) return
+      setUser(currentUser)
 
-    supabase
-      .from('artists')
-      .select('*')
-      .then(({ data, error }) => {
-        if (error) {
-          console.error('Error fetching artists:', error)
-        } else if (data) {
-          setArtists(data)
-        }
+      const { data: placements, error: placementError } = await supabase
+        .from('artist_placements')
+        .select('artist_id, tier')
+        .eq('user_id', currentUser.id)
+
+      if (placementError) {
+        console.error('Error fetching artist placements:', placementError)
+        return
+      }
+
+      const artistIds = placements.map((p) => p.artist_id)
+      const { data: artistData, error: artistError } = await supabase
+        .from('artists')
+        .select('*')
+        .in('id', artistIds)
+
+      if (artistError) {
+        console.error('Error fetching artists:', artistError)
+        return
+      }
+
+      const initialRankings: Record<string, Tier> = {}
+      placements.forEach((p) => {
+        initialRankings[p.artist_id] = p.tier
       })
+
+      setMyArtists(artistData || [])
+      setRankings(initialRankings)
+    }
+
+    fetchData()
   }, [])
 
-  const updateTier = (artistId: string, tier: Tier) => {
+  const updateTier = async (artistId: string, tier: Tier) => {
+    if (!user) return
     setRankings((prev) => ({ ...prev, [artistId]: tier }))
+
+    const payload = {
+      user_id: user.id,
+      artist_id: artistId,
+      tier,
+    }
+
+    await supabase
+      .from('artist_placements')
+      .upsert(payload, { onConflict: 'user_id,artist_id' })
+
+    await supabase
+      .from('artist_placement_history')
+      .insert(payload)
   }
 
-  const submit = async () => {
-    if (!user) throw new Error('User not logged in')
-
-    const payload = Object.entries(rankings).map(([artist_id, tier]) => ({
-      user_id: user.id,
-      artist_id,
-      tier,
-    }))
-
-    const { error } = await supabase.from('artist_rankings').upsert(payload, {
-    onConflict: 'user_id,artist_id',
+  const addArtistToQueue = (artist: Artist) => {
+    setMyArtists((prev) => {
+      if (prev.find((a) => a.id === artist.id)) return prev
+      return [...prev, artist]
     })
-
-    if (error) throw error
   }
 
   return {
     user,
-    artists,
+    myArtists,
     rankings,
     updateTier,
-    submit,
+    addArtistToQueue,
   }
 }

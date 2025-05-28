@@ -1,3 +1,3 @@
 {
-  "postStartCommand": "sleep 5 && echo VITE_API_BASE_URL=$(gp url 8000) > frontend/.env"
+  "postStartCommand": "sleep 5 && echo REACT_APP_API_BASE_URL=$(gp url 8000) > frontend/.env"
 }

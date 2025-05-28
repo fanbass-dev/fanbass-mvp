@@ -1,7 +1,7 @@
 import ArtistCanvas from './ArtistCanvas'
 import { SearchBar } from './SearchBar'
-import { ArtistRankingForm } from './ArtistRankingForm' // ✅ Add this
-import type { Artist } from '../types'
+import { ArtistRankingForm } from './ArtistRankingForm'
+import type { Artist, Tier } from '../types'
 
 type Props = {
   searchTerm: string
@@ -11,6 +11,8 @@ type Props = {
   onAddToQueue: (artist: Artist) => void
   queue: Artist[]
   useFormUI: boolean
+  rankings: Record<string, Tier>
+  updateTier: (id: string, tier: Tier) => void
 }
 
 export function MainLayout({
@@ -20,18 +22,22 @@ export function MainLayout({
   onSearchChange,
   onAddToQueue,
   queue,
-  useFormUI, // ✅ You forgot to destructure this earlier
+  useFormUI,
+  rankings,
+  updateTier,
 }: Props) {
   return (
     <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-      <div style={{
-        width: '300px',
-        padding: '1rem',
-        overflowY: 'auto',
-        background: '#fafafa',
-        position: 'relative',
-        zIndex: 2
-      }}>
+      <div
+        style={{
+          width: '300px',
+          padding: '1rem',
+          overflowY: 'auto',
+          background: '#fafafa',
+          position: 'relative',
+          zIndex: 2,
+        }}
+      >
         <SearchBar
           searchTerm={searchTerm}
           searchResults={searchResults}
@@ -41,9 +47,21 @@ export function MainLayout({
           queue={queue}
         />
       </div>
-      <div style={{ flex: 1, overflow: 'auto', position: 'relative', zIndex: 0, padding: '1rem' }}>
+      <div
+        style={{
+          flex: 1,
+          overflow: 'auto',
+          position: 'relative',
+          zIndex: 0,
+          padding: '1rem',
+        }}
+      >
         {useFormUI ? (
-          <ArtistRankingForm artists={queue} />
+          <ArtistRankingForm
+            queue={queue}
+            rankings={rankings}
+            updateTier={updateTier}
+          />
         ) : (
           <ArtistCanvas artists={queue} />
         )}
