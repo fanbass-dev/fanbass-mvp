@@ -1,3 +1,4 @@
+import './MainLayout.css'
 import ArtistCanvas from './ArtistCanvas'
 import { SearchBar } from './SearchBar'
 import { ArtistRankingForm } from './ArtistRankingForm'
@@ -27,17 +28,8 @@ export function MainLayout({
   updateTier,
 }: Props) {
   return (
-    <div style={{ display: 'flex', flex: 1, minHeight: 0 }}>
-      <div
-        style={{
-          width: '300px',
-          padding: '1rem',
-          overflowY: 'auto',
-          background: '#fafafa',
-          position: 'relative',
-          zIndex: 2,
-        }}
-      >
+    <div className="layout">
+      <div className="sidebar">
         <SearchBar
           searchTerm={searchTerm}
           searchResults={searchResults}
@@ -47,15 +39,7 @@ export function MainLayout({
           queue={queue}
         />
       </div>
-      <div
-        style={{
-          flex: 1,
-          overflow: 'auto',
-          position: 'relative',
-          zIndex: 0,
-          padding: '1rem',
-        }}
-      >
+      <div className="mainContent">
         {useFormUI ? (
           <ArtistRankingForm
             queue={queue}

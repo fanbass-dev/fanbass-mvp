@@ -1,0 +1,23 @@
+.searchContainer {
+  position: relative;
+  width: 100%;
+}
+
+.searchInput {
+  padding: 0.5rem;
+  margin-bottom: 1rem;
+  width: 90%;
+  display: block;
+}
+
+.searchResultItem {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 0.5rem;
+  padding: 0.25rem 0;
+}
+
+.searchResultItem button {
+  margin-left: 1rem;
+}

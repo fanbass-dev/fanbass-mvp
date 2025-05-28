@@ -1,0 +1,43 @@
+.layout {
+  display: flex;
+  flex-direction: row;
+  min-height: 0;
+  flex: 1;
+  /* desktop scrolls mainContent only */
+}
+
+.sidebar {
+  width: 300px;
+  padding: 1rem;
+  overflow-y: auto;
+  background: #fafafa;
+  position: relative;
+  z-index: 10;
+  flex-shrink: 0;
+}
+
+.mainContent {
+  flex: 1;
+  overflow: auto;       /* ← restore here */
+  position: relative;
+  padding: 1rem;
+}
+
+@media (max-width: 768px) {
+  .layout {
+    flex-direction: column;
+    overflow: hidden;   /* ← don't scroll whole layout on mobile */
+  }
+
+  .sidebar {
+    width: 100%;
+    position: static;
+    padding: 0.5rem;
+    z-index: 10;
+  }
+
+  .mainContent {
+    overflow: auto;
+    padding: 0.5rem;
+  }
+}
