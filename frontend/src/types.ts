@@ -3,7 +3,18 @@ export type Artist = {
   name: string
 }
 
-export type Tier = 'headliner' | 'support' | 'opener'
+export type Tier =
+  | 'must_see'
+  | 'worth_the_effort'
+  | 'nice_to_catch'
+  | 'depends_on_context'
+
+export const TIER_LABELS: Record<Tier, string> = {
+  must_see: 'Must See',
+  worth_the_effort: 'Worth the Effort',
+  nice_to_catch: 'Cool If I Catch It',
+  depends_on_context: 'Would Go with the Right Vibe',
+}
 
 export type PlacedArtist = Artist & {
   stage: string
