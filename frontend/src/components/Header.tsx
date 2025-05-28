@@ -7,7 +7,6 @@ export function Header({ userEmail, onSignOut }: Props) {
   return (
     <div style={{
       padding: '0.5rem',
-      background: '#f0f0f0',
       zIndex: 2,
       position: 'relative'
     }}>
