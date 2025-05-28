@@ -66,12 +66,36 @@ export function useArtistRankings() {
       .insert(payload)
   }
 
-  const addArtistToQueue = (artist: Artist) => {
+  const addArtistToQueue = async (artist: Artist) => {
+    if (!user) return
+
+    // Step 1: Upsert the placement as 'unranked'
+    const payload = {
+      user_id: user.id,
+      artist_id: artist.id,
+      tier: 'unranked' as Tier,
+    }
+
+    await supabase
+      .from('artist_placements')
+      .upsert(payload, { onConflict: 'user_id,artist_id' })
+
+    await supabase
+      .from('artist_placement_history')
+      .insert(payload)
+
+    // Step 2: Update local state if not already present
     setMyArtists((prev) => {
       if (prev.find((a) => a.id === artist.id)) return prev
       return [...prev, artist]
     })
+
+    setRankings((prev) => ({
+      ...prev,
+      [artist.id]: 'unranked',
+    }))
   }
+
 
   return {
     user,

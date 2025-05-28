@@ -21,10 +21,6 @@ function App() {
     addArtistToQueue,
   } = useArtistRankings()
 
-  const handleAddToQueue = (artist: Artist) => {
-    addArtistToQueue(artist)
-  }
-
   if (!user) return <LoginScreen onLogin={signIn} />
 
   return (
@@ -40,11 +36,11 @@ function App() {
         searchResults={searchResults}
         searching={searching}
         onSearchChange={setSearchTerm}
-        onAddToQueue={handleAddToQueue}
+        onAddToQueue={addArtistToQueue}
         queue={myArtists}
         useFormUI={useFormUI}
-        rankings={rankings}            // ✅ Added
-        updateTier={updateTier}        // ✅ Added
+        rankings={rankings}
+        updateTier={updateTier}
       />
     </div>
   )

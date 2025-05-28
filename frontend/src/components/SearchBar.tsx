@@ -52,7 +52,14 @@ export function SearchBar({
             }}
           >
             <span>{artist.name}</span>
-            <button onClick={() => onAdd(artist)}>+ Add</button>
+            <button
+              onClick={() => {
+                console.log('Adding artist:', artist)
+                onAdd(artist)
+              }}
+            >
+              + Add
+            </button>
           </div>
         ))
       )}
