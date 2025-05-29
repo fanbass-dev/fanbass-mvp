@@ -37,7 +37,11 @@ export function SearchBar({
   useLayoutEffect(() => {
     if (!inputRef.current) return
 
-    if (filteredResults.length > 0) {
+    const shouldOpenDropdown =
+      filteredResults.length > 0 ||
+      (searchTerm.trim().length > 0 && !searching)
+
+    if (shouldOpenDropdown) {
       const rect = inputRef.current.getBoundingClientRect()
       setPosition({
         top: rect.bottom + window.scrollY,
@@ -49,7 +53,8 @@ export function SearchBar({
       if (position !== null) setPosition(null)
       setIsOpen(false)
     }
-  }, [searchResults.length])
+  }, [searchResults.length, searchTerm, searching])
+
 
   // Close on click outside
   useEffect(() => {
@@ -113,9 +118,31 @@ export function SearchBar({
                 <button onClick={() => onAdd(artist)}>+ Add</button>
               </div>
             ))}
+
+            {searchTerm.trim().length > 0 &&
+              filteredResults.length === 0 &&
+              !searching && (
+                <div className="searchResultItem">
+                  <span>No match found.</span>
+                  <a
+                    href={`/artist/new?name=${encodeURIComponent(searchTerm.trim().toUpperCase())}`}
+                    style={{
+                      display: 'block',
+                      marginTop: '0.5rem',
+                      color: '#007bff',
+                      textDecoration: 'underline',
+                      cursor: 'pointer',
+                    }}
+                    onClick={() => setIsOpen(false)}
+                  >
+                    + Create new artist: {searchTerm.trim().toUpperCase()}
+                  </a>
+                </div>
+              )}
           </div>,
           document.getElementById('dropdown-root')!
         )}
+
     </div>
   )
 }
