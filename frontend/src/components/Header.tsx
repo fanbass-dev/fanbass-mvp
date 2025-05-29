@@ -1,4 +1,4 @@
-import { useNavigate } from 'react-router-dom' // ✅ Imports go first
+import { useNavigate } from 'react-router-dom'
 
 type Props = {
   userEmail: string
@@ -9,6 +9,18 @@ type Props = {
 
 export function Header({ userEmail, onSignOut, useFormUI, onToggleView }: Props) {
   const navigate = useNavigate()
+
+  const sharedButtonStyle = {
+    marginLeft: '1rem',
+    padding: '6px 12px',
+    fontSize: '0.9rem',
+    border: '1px solid #000',
+    borderRadius: '4px',
+    cursor: 'pointer',
+    display: 'inline-block',
+    textDecoration: 'none',
+    lineHeight: 1.2,
+  } as const
 
   return (
     <div
@@ -23,40 +35,47 @@ export function Header({ userEmail, onSignOut, useFormUI, onToggleView }: Props)
     >
       <div>
         Logged in as: <strong>{userEmail}</strong>
-        <button style={{ marginLeft: '1rem' }} onClick={onSignOut}>
+        <button style={{ ...sharedButtonStyle }} onClick={onSignOut}>
           Log out
         </button>
       </div>
 
       <div>
-        <button
-          onClick={onToggleView}
-          style={{
-            marginLeft: '1rem',
-            padding: '4px 10px',
-            background: 'transparent',
-            border: '1px solid #000',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
-        >
-          Switch to {useFormUI ? 'Canvas' : 'Form'} View
-        </button>
+        {false && (
+          <button
+            onClick={onToggleView}
+            style={{
+              ...sharedButtonStyle,
+              background: 'transparent',
+            }}
+          >
+            Switch to {useFormUI ? 'Canvas' : 'Form'} View
+          </button>
+        )}
 
         <button
           onClick={() => navigate('/feature-voting')}
           style={{
-            marginLeft: '1rem',
-            padding: '4px 10px',
+            ...sharedButtonStyle,
             background: '#03050e',
             color: '#fff',
-            border: '1px solid #000',
-            borderRadius: '4px',
-            cursor: 'pointer',
           }}
         >
           Feature Voting
         </button>
+
+        <a
+          href="https://discord.gg/HuXbDVVBjb"
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            ...sharedButtonStyle,
+            background: '#5865F2',
+            color: '#fff',
+          }}
+        >
+          Join Discord
+        </a>
       </div>
     </div>
   )
