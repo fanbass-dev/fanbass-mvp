@@ -1,3 +1,5 @@
+import { useNavigate } from 'react-router-dom' // ✅ Imports go first
+
 type Props = {
   userEmail: string
   onSignOut: () => void
@@ -5,10 +7,8 @@ type Props = {
   onToggleView: () => void
 }
 
-import { useNavigate } from 'react-router-dom' // Add this line at the top
-
 export function Header({ userEmail, onSignOut, useFormUI, onToggleView }: Props) {
-  const navigate = useNavigate() // Add this line inside the component
+  const navigate = useNavigate()
 
   return (
     <div
