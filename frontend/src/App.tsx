@@ -8,6 +8,8 @@ import { Header } from './components/Header'
 import { MainLayout } from './components/MainLayout'
 import { LoginScreen } from './components/LoginScreen'
 import { ArtistPage } from './components/ArtistPage' // this file is coming next
+import FeatureVotingPage from './components/FeatureVotingPage'
+
 
 function App() {
   const { user, signIn, signOut } = useAuth()
@@ -52,7 +54,9 @@ function App() {
             }
           />
           <Route path="/artist/:id" element={<ArtistPage currentUser={user} />} />
+          <Route path="/feature-voting" element={<FeatureVotingPage />} /> {/* ✅ This line */}
         </Routes>
+
       </div>
     </BrowserRouter>
   )

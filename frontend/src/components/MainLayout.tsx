@@ -4,6 +4,7 @@ import { SearchBar } from './SearchBar'
 import { ArtistRankingForm } from './ArtistRankingForm'
 import type { Artist, Tier } from '../types'
 
+
 type Props = {
   searchTerm: string
   searchResults: Artist[]
