@@ -7,7 +7,7 @@ type Props = {
   onToggleView: () => void
 }
 
-export function Header({ userEmail, onSignOut, useFormUI, onToggleView }: Props) {
+export function Header({ userEmail, onSignOut }: Props) {
   const navigate = useNavigate()
 
   const sharedButtonStyle = {
@@ -45,6 +45,13 @@ export function Header({ userEmail, onSignOut, useFormUI, onToggleView }: Props)
           }}
         >
           Home
+        </button>
+
+        <button
+          onClick={() => navigate('/events')}
+          style={{ ...sharedButtonStyle }}
+        >
+          Events
         </button>
 
         <button
