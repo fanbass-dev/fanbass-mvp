@@ -1,9 +1,10 @@
-// src/routes/AppRoutes.tsx
-
 import { Routes, Route } from 'react-router-dom'
 import { MainLayout } from '../components/MainLayout'
 import { ArtistPage } from '../components/ArtistPage'
 import FeatureVotingPage from '../components/FeatureVotingPage'
+import { EventForm } from '../components/EventForm'
+import { EventPage } from '../components/EventPage'
+import { EventListPage } from '../components/EventListPage'
 import type { Artist, Tier } from '../types'
 
 type Props = {
@@ -51,6 +52,9 @@ export function AppRoutes({
       />
       <Route path="/artist/:id" element={<ArtistPage currentUser={currentUser} />} />
       <Route path="/feature-voting" element={<FeatureVotingPage />} />
+      <Route path="/event/:id" element={<EventPage />} />
+      <Route path="/event/new" element={<EventForm />} /> {/* ✅ Added new route */}
+      <Route path="/events" element={<EventListPage />} />
     </Routes>
   )
 }

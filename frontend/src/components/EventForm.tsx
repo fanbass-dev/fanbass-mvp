@@ -24,6 +24,13 @@ export function EventForm() {
     }
   }
 
+  const slugify = (name: string, date: string) =>
+    `${name}-${date}`
+      .toLowerCase()
+      .replace(/\s+/g, '-')
+      .replace(/[^a-z0-9\-]/g, '')
+      .slice(0, 64)
+
   const handleSubmit = async () => {
     setSubmitting(true)
     setSuccess(false)
@@ -31,14 +38,18 @@ export function EventForm() {
     const user = (await supabase.auth.getUser()).data.user
     if (!user) return alert('You must be logged in')
 
+    const slug = slugify(name, date)
+
     const { data: event, error: eventError } = await supabase
       .from('events')
-      .insert([{ name, date, location, num_tiers: numTiers, created_by: user.id }])
+      .insert([{ name, date, location, num_tiers: numTiers, created_by: user.id, slug }])
       .select()
       .single()
 
     if (eventError || !event) {
-      alert('Error creating event: ' + eventError?.message)
+      alert(eventError?.code === '23505'
+        ? 'An event with this name and date already exists. Try renaming it.'
+        : 'Error creating event: ' + (eventError?.message || 'Unknown error'))
       setSubmitting(false)
       return
     }
