@@ -33,25 +33,19 @@ export function Header({ userEmail, onSignOut, useFormUI, onToggleView }: Props)
         justifyContent: 'space-between',
       }}
     >
+      {/* Left: Navigation */}
       <div>
-        Logged in as: <strong>{userEmail}</strong>
-        <button style={{ ...sharedButtonStyle }} onClick={onSignOut}>
-          Log out
+        <button
+          onClick={() => navigate('/')}
+          style={{
+            ...sharedButtonStyle,
+            background: '#eee',
+            color: '#000',
+            marginLeft: 0,
+          }}
+        >
+          Home
         </button>
-      </div>
-
-      <div>
-        {false && (
-          <button
-            onClick={onToggleView}
-            style={{
-              ...sharedButtonStyle,
-              background: 'transparent',
-            }}
-          >
-            Switch to {useFormUI ? 'Canvas' : 'Form'} View
-          </button>
-        )}
 
         <button
           onClick={() => navigate('/feature-voting')}
@@ -76,6 +70,14 @@ export function Header({ userEmail, onSignOut, useFormUI, onToggleView }: Props)
         >
           Join Discord
         </a>
+      </div>
+
+      {/* Right: Account */}
+      <div>
+        <strong>{userEmail}</strong>
+        <button style={{ ...sharedButtonStyle }} onClick={onSignOut}>
+          Log out
+        </button>
       </div>
     </div>
   )
