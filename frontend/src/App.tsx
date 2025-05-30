@@ -1,15 +1,14 @@
-import { BrowserRouter, Routes, Route } from 'react-router-dom'
+// src/App.tsx
+
+import { BrowserRouter } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { useArtistSearch } from './hooks/useArtistSearch'
 import { useArtistRankings } from './hooks/useArtistRankings'
 import type { Artist } from './types'
 import { Header } from './components/Header'
-import { MainLayout } from './components/MainLayout'
 import { LoginScreen } from './components/LoginScreen'
-import { ArtistPage } from './components/ArtistPage' // this file is coming next
-import FeatureVotingPage from './components/FeatureVotingPage'
-
+import { AppRoutes } from './routes/AppRoutes'
 
 function App() {
   const { user, signIn, signOut } = useAuth()
@@ -36,27 +35,18 @@ function App() {
           useFormUI={useFormUI}
           onToggleView={() => setUseFormUI((prev) => !prev)}
         />
-        <Routes>
-          <Route
-            path="/"
-            element={
-              <MainLayout
-                searchTerm={searchTerm}
-                searchResults={searchResults}
-                searching={searching}
-                onSearchChange={setSearchTerm}
-                onAddToQueue={addArtistToQueue}
-                queue={myArtists}
-                useFormUI={useFormUI}
-                rankings={rankings}
-                updateTier={updateTier}
-              />
-            }
-          />
-          <Route path="/artist/:id" element={<ArtistPage currentUser={user} />} />
-          <Route path="/feature-voting" element={<FeatureVotingPage />} /> {/* ✅ This line */}
-        </Routes>
-
+        <AppRoutes
+          searchTerm={searchTerm}
+          searchResults={searchResults}
+          searching={searching}
+          onSearchChange={setSearchTerm}
+          onAddToQueue={addArtistToQueue}
+          queue={myArtists}
+          useFormUI={useFormUI}
+          rankings={rankings}
+          updateTier={updateTier}
+          currentUser={user}
+        />
       </div>
     </BrowserRouter>
   )
