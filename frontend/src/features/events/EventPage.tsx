@@ -77,28 +77,36 @@ export function EventPage() {
       .eq('artist_id', artistId)
   }
 
+  if (!event) return null
+
   return (
     <div style={{ padding: '1rem', maxWidth: '600px' }}>
-      {event && (
-        <>
-          <EventForm event={event} onUpdate={handleUpdateEventField} />
+      <h2 style={{ marginBottom: '1rem' }}>Event Details</h2>
+      <EventForm event={event} onUpdate={handleUpdateEventField} />
 
-          <SearchBar
-            searchTerm={searchTerm}
-            searchResults={searchResults}
-            searching={searching}
-            onChange={setSearchTerm}
-            onAdd={handleAddArtist}
-            queue={lineup.map((l) => l.artist)}
-          />
+      <div style={{ marginTop: '2rem' }}>
+        <SearchBar
+          searchTerm={searchTerm}
+          searchResults={searchResults}
+          searching={searching}
+          onChange={setSearchTerm}
+          onAdd={handleAddArtist}
+          queue={lineup.map((l) => l.artist)}
+        />
+      </div>
 
+      <div style={{ marginTop: '2rem' }}>
+        <h2 style={{ marginBottom: '0.5rem' }}>Lineup</h2>
+        {lineup.length === 0 ? (
+          <p style={{ margin: 0 }}>No artists added yet. Use search to add them.</p>
+        ) : (
           <LineupSection
             event={event}
             lineup={lineup}
             onTierChange={handleTierChange}
           />
-        </>
-      )}
+        )}
+      </div>
     </div>
   )
 }
