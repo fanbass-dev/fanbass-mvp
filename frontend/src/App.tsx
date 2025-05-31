@@ -3,9 +3,8 @@
 import { BrowserRouter } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
-import { useArtistSearch } from './hooks/useArtistSearch'
-import { useArtistRankings } from './hooks/useArtistRankings'
-import type { Artist } from './types'
+import { useArtistSearch } from './features/artists/useArtistSearch'
+import { useArtistRankings } from './features/artists/useArtistRankings'
 import { Header } from './components/Header'
 import { LoginScreen } from './components/LoginScreen'
 import { AppRoutes } from './routes/AppRoutes'
@@ -17,7 +16,6 @@ function App() {
   const [useFormUI, setUseFormUI] = useState(true)
 
   const {
-    user: rankingsUser,
     myArtists,
     rankings,
     updateTier,

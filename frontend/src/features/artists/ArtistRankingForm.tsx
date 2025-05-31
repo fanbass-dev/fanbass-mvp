@@ -1,5 +1,5 @@
-import type { Artist, Tier } from '../types'
-import { TIER_LABELS } from '../types'
+import type { Artist } from '../../types/types'
+import { TIER_LABELS, type Tier } from '../../constants/tiers'
 
 type Props = {
   queue: Artist[]

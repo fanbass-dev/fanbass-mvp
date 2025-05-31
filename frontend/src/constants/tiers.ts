@@ -1,8 +1,4 @@
-export type Artist = {
-  id: string
-  name: string
-}
-
+// src/constants/tiers.ts
 export type Tier =
   | 'must_see'
   | 'worth_the_effort'
@@ -16,9 +12,4 @@ export const TIER_LABELS: Record<Tier, string> = {
   nice_to_catch: 'Cool If I Catch It',
   depends_on_context: 'Would Go with the Right Vibe',
   unranked: 'Unranked',
-}
-
-export type PlacedArtist = Artist & {
-  stage: string
-  tier: Tier
 }

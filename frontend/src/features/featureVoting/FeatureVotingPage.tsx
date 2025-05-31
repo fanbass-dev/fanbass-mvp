@@ -1,4 +1,4 @@
-import { FeatureVoting } from '../components/FeatureVoting'
+import { FeatureVoting } from './FeatureVoting'
 
 export default function FeatureVotingPage() {
   return (

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../supabaseClient'
-import { getCurrentUser } from '../services/authService'
-import { Artist, Tier } from '../types'
+import { supabase } from '../../supabaseClient'
+import { getCurrentUser } from '../../services/authService'
+import { Artist } from '../../types/types'
+import type { Tier } from '../../constants/tiers'
 
 export function useArtistRankings() {
   const [user, setUser] = useState<any>(null)

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
-import { supabase } from '../supabaseClient'
-import type { Artist } from '../types'
+import { supabase } from '../../supabaseClient'
+import type { Artist } from '../../types/types'
 
 export function useArtistSearch(searchTerm: string) {
   const [searchResults, setSearchResults] = useState<Artist[]>([])

@@ -1,5 +1,6 @@
 import { supabase } from '../supabaseClient'
-import { Artist, Tier } from '../types'
+import { Artist } from '../types/types'
+import type { Tier } from '../constants/tiers'
 
 export async function fetchArtists(): Promise<Artist[]> {
   const { data, error } = await supabase.from('artists').select('*')

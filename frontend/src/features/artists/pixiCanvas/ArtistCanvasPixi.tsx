@@ -1,6 +1,6 @@
 import { useEffect, useRef } from 'react'
 import { Application, Container, Graphics, Text, TextStyle } from 'pixi.js'
-import type { Artist } from '../types'
+import type { Artist } from '../../../types/types'
 
 // Extend Container with a dragging flag
 interface DraggableNode extends Container {

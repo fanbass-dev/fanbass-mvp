@@ -1,7 +1,7 @@
-import { useRef, useLayoutEffect, useState, useEffect } from 'react'
+import { useRef, useLayoutEffect, useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
 import './SearchBar.css'
-import type { Artist } from '../types'
+import type { Artist } from '../types/types'
 
 type Props = {
   searchTerm: string
@@ -20,18 +20,28 @@ export function SearchBar({
   onAdd,
   queue,
 }: Props) {
-  const isInQueue = (artistId: string) =>
-    queue.some((a) => a.id === artistId)
-
-  const filteredResults = searchResults.filter(
-    (artist) => !isInQueue(artist.id)
-  )
-
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
 
+  const [inputValue, setInputValue] = useState(searchTerm)
   const [position, setPosition] = useState<{ top: number; left: number; width: number } | null>(null)
   const [isOpen, setIsOpen] = useState(false)
+
+  const filteredResults = useMemo(
+    () => searchResults.filter((artist) => !queue.some((a) => a.id === artist.id)),
+    [searchResults, queue]
+  )
+
+  // Debounce search input
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (inputValue !== searchTerm) {
+        onChange(inputValue)
+      }
+    }, 300)
+
+    return () => clearTimeout(timeout)
+  }, [inputValue, onChange, searchTerm])
 
   // Reposition dropdown
   useLayoutEffect(() => {
@@ -39,7 +49,7 @@ export function SearchBar({
 
     const shouldOpenDropdown =
       filteredResults.length > 0 ||
-      (searchTerm.trim().length > 0 && !searching)
+      (inputValue.trim().length > 0 && !searching)
 
     if (shouldOpenDropdown) {
       const rect = inputRef.current.getBoundingClientRect()
@@ -50,11 +60,10 @@ export function SearchBar({
       })
       setIsOpen(true)
     } else {
-      if (position !== null) setPosition(null)
+      setPosition(null)
       setIsOpen(false)
     }
-  }, [searchResults.length, searchTerm, searching])
-
+  }, [filteredResults.length, inputValue, searching]) // ✅ removed `position` from deps
 
   // Close on click outside
   useEffect(() => {
@@ -80,8 +89,8 @@ export function SearchBar({
         type="text"
         placeholder="Search artists"
         className="searchInput"
-        value={searchTerm}
-        onChange={(e) => onChange(e.target.value)}
+        value={inputValue}
+        onChange={(e) => setInputValue(e.target.value)}
         onFocus={() => {
           if (filteredResults.length > 0) {
             setIsOpen(true)
@@ -92,7 +101,6 @@ export function SearchBar({
       <div style={{ minHeight: '1.5rem' }}>
         {searching && <p>Searching...</p>}
       </div>
-
 
       {position && isOpen &&
         createPortal(
@@ -119,13 +127,13 @@ export function SearchBar({
               </div>
             ))}
 
-            {searchTerm.trim().length > 0 &&
+            {inputValue.trim().length > 0 &&
               filteredResults.length === 0 &&
               !searching && (
                 <div className="searchResultItem">
                   <span>No match found.</span>
                   <a
-                    href={`/artist/new?name=${encodeURIComponent(searchTerm.trim().toUpperCase())}`}
+                    href={`/artist/new?name=${encodeURIComponent(inputValue.trim().toUpperCase())}`}
                     style={{
                       display: 'block',
                       marginTop: '0.5rem',
@@ -135,14 +143,13 @@ export function SearchBar({
                     }}
                     onClick={() => setIsOpen(false)}
                   >
-                    + Create new artist: {searchTerm.trim().toUpperCase()}
+                    + Create new artist: {inputValue.trim().toUpperCase()}
                   </a>
                 </div>
               )}
           </div>,
           document.getElementById('dropdown-root')!
         )}
-
     </div>
   )
 }

@@ -1,9 +1,9 @@
+import type { Tier } from '../constants/tiers'
+import { ArtistRankingForm } from '../features/artists/ArtistRankingForm'
+import ArtistCanvas from '../features/artists/pixiCanvas/ArtistCanvas'
+import type { Artist } from '../types/types'
 import './MainLayout.css'
-import ArtistCanvas from './ArtistCanvas'
 import { SearchBar } from './SearchBar'
-import { ArtistRankingForm } from './ArtistRankingForm'
-import type { Artist, Tier } from '../types'
-
 
 type Props = {
   searchTerm: string

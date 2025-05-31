@@ -1,11 +1,11 @@
 import { Routes, Route } from 'react-router-dom'
 import { MainLayout } from '../components/MainLayout'
-import { ArtistPage } from '../components/ArtistPage'
-import FeatureVotingPage from '../components/FeatureVotingPage'
-import { EventForm } from '../components/EventForm'
-import { EventPage } from '../components/EventPage'
-import { EventListPage } from '../components/EventListPage'
-import type { Artist, Tier } from '../types'
+import { ArtistPage } from '../features/artists/ArtistPage'
+import FeatureVotingPage from '../features/featureVoting/FeatureVotingPage'
+import { EventPage } from '../features/events/EventPage'
+import { EventListPage } from '../features/events/EventListPage'
+import type { Artist } from '../types/types'
+import type { Tier } from '../constants/tiers'
 
 type Props = {
     searchTerm: string
@@ -53,7 +53,6 @@ export function AppRoutes({
             <Route path="/artist/:id" element={<ArtistPage currentUser={currentUser} />} />
             <Route path="/feature-voting" element={<FeatureVotingPage />} />
             <Route path="/event/:eventKey" element={<EventPage />} />
-            <Route path="/event/new" element={<EventForm />} /> {/* ✅ Added new route */}
             <Route path="/events" element={<EventListPage />} />
         </Routes>
     )
