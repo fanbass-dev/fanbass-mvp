@@ -86,12 +86,14 @@ export function EventPage() {
   if (!event) return null
 
   return (
-    <div className="max-w-screen-sm mx-auto px-4 py-6 text-white">
-      <h2 className="text-xl font-semibold mb-4">Event Details</h2>
+    <div className="max-w-3xl w-full mx-auto px-4 md:px-8 py-6 text-white">
+      <div>
+        <h2 className="text-xl font-semibold mb-4">Event Details</h2>
+        <EventForm event={event} onUpdate={handleUpdateEventField} />
+      </div>
+      <div className="border-t border-gray-700 my-8" />
 
-      <EventForm event={event} onUpdate={handleUpdateEventField} />
-
-      <div className="mt-8">
+      <div>
         <SearchBar
           searchTerm={searchTerm}
           searchResults={searchResults}
@@ -102,12 +104,12 @@ export function EventPage() {
         />
       </div>
 
-      <div className="mt-8 space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="space-y-6">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
           <h2 className="text-lg font-semibold">Lineup</h2>
           <button
             onClick={() => setUseMyView((v) => !v)}
-            className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-3 py-1.5 rounded"
+            className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded"
           >
             {useMyView ? 'Show Event View' : 'Show My Rankings'}
           </button>
