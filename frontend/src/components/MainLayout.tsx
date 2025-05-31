@@ -1,4 +1,3 @@
-import type { Tier } from '../constants/tiers'
 import { ArtistRankingForm } from '../features/artists/ArtistRankingForm'
 import ArtistCanvas from '../features/artists/pixiCanvas/ArtistCanvas'
 import type { Artist } from '../types/types'
