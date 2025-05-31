@@ -4,6 +4,8 @@ import { getCurrentUser } from '../../services/authService'
 import { Artist } from '../../types/types'
 import type { Tier } from '../../constants/tiers'
 
+// ...imports unchanged
+
 export function useArtistRankings() {
   const [user, setUser] = useState<any>(null)
   const [myArtists, setMyArtists] = useState<Artist[]>([])
@@ -70,7 +72,6 @@ export function useArtistRankings() {
   const addArtistToQueue = async (artist: Artist) => {
     if (!user) return
 
-    // Step 1: Upsert the placement as 'unranked'
     const payload = {
       user_id: user.id,
       artist_id: artist.id,
@@ -85,7 +86,6 @@ export function useArtistRankings() {
       .from('artist_placement_history')
       .insert(payload)
 
-    // Step 2: Update local state if not already present
     setMyArtists((prev) => {
       if (prev.find((a) => a.id === artist.id)) return prev
       return [...prev, artist]
@@ -97,6 +97,21 @@ export function useArtistRankings() {
     }))
   }
 
+  const removeArtistFromQueue = async (artistId: string) => {
+    if (!user) return
+
+    await supabase
+      .from('artist_placements')
+      .delete()
+      .eq('user_id', user.id)
+      .eq('artist_id', artistId)
+
+    setMyArtists((prev) => prev.filter((a) => a.id !== artistId))
+    setRankings((prev) => {
+      const { [artistId]: _, ...rest } = prev
+      return rest
+    })
+  }
 
   return {
     user,
@@ -104,5 +119,6 @@ export function useArtistRankings() {
     rankings,
     updateTier,
     addArtistToQueue,
+    removeArtistFromQueue,
   }
 }

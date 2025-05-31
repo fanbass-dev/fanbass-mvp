@@ -15,6 +15,7 @@ type Props = {
   useFormUI: boolean
   rankings: Record<string, Tier>
   updateTier: (id: string, tier: Tier) => void
+  removeArtist: (id: string) => void
 }
 
 export function MainLayout({
@@ -27,6 +28,7 @@ export function MainLayout({
   useFormUI,
   rankings,
   updateTier,
+  removeArtist,
 }: Props) {
   return (
     <div className="layout">
@@ -46,6 +48,7 @@ export function MainLayout({
             queue={queue}
             rankings={rankings}
             updateTier={updateTier}
+            removeArtist={removeArtist}
           />
         ) : (
           <ArtistCanvas artists={queue} />

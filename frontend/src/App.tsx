@@ -1,5 +1,3 @@
-// src/App.tsx
-
 import { BrowserRouter } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
@@ -20,6 +18,7 @@ function App() {
     rankings,
     updateTier,
     addArtistToQueue,
+    removeArtistFromQueue,
   } = useArtistRankings()
 
   if (!user) return <LoginScreen onLogin={signIn} />
@@ -44,6 +43,7 @@ function App() {
           rankings={rankings}
           updateTier={updateTier}
           currentUser={user}
+          removeArtist={removeArtistFromQueue}
         />
       </div>
     </BrowserRouter>
