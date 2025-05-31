@@ -7,6 +7,8 @@ import { useEvent } from './useEvent'
 import { slugify } from './eventUtils'
 import { EventForm } from './EventForm'
 import { LineupSection } from './LineupSection'
+import { ArtistRankingForm } from '../artists/ArtistRankingForm'
+import { useEventRankings } from './useEventRankings'
 import type { Event } from '../../types/types'
 import type { Artist } from '../../types/types'
 
@@ -14,10 +16,14 @@ export function EventPage() {
   const { eventKey } = useParams()
   const [initialName, setInitialName] = useState('')
   const [initialDate, setInitialDate] = useState('')
+  const [useMyView, setUseMyView] = useState(false)
 
   const { event, setEvent, lineup, setLineup } = useEvent(eventKey)
   const [searchTerm, setSearchTerm] = useState('')
   const { searchResults, searching } = useArtistSearch(searchTerm)
+
+  const artistIds = lineup.map((l) => l.artist.id)
+  const { rankings, updateTier } = useEventRankings(artistIds)
 
   useEffect(() => {
     if (event) {
@@ -96,9 +102,21 @@ export function EventPage() {
       </div>
 
       <div style={{ marginTop: '2rem' }}>
-        <h2 style={{ marginBottom: '0.5rem' }}>Lineup</h2>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+          <h2 style={{ margin: 0 }}>Lineup</h2>
+          <button onClick={() => setUseMyView((v) => !v)} style={{ padding: '4px 10px' }}>
+            {useMyView ? 'Show Event View' : 'Show My Rankings'}
+          </button>
+        </div>
+
         {lineup.length === 0 ? (
           <p style={{ margin: 0 }}>No artists added yet. Use search to add them.</p>
+        ) : useMyView ? (
+          <ArtistRankingForm
+            queue={lineup.map((l) => l.artist)}
+            rankings={rankings}
+            updateTier={updateTier}
+          />
         ) : (
           <LineupSection
             event={event}
