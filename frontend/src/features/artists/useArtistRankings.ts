@@ -1,26 +1,22 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabaseClient'
-import { getCurrentUser } from '../../services/authService'
 import { Artist } from '../../types/types'
 import type { Tier } from '../../constants/tiers'
-
-// ...imports unchanged
+import { useUserContext } from '../../context/UserContext'
 
 export function useArtistRankings() {
-  const [user, setUser] = useState<any>(null)
+  const { user } = useUserContext()
   const [myArtists, setMyArtists] = useState<Artist[]>([])
   const [rankings, setRankings] = useState<Record<string, Tier>>({})
 
   useEffect(() => {
     const fetchData = async () => {
-      const currentUser = await getCurrentUser()
-      if (!currentUser) return
-      setUser(currentUser)
+      if (!user) return
 
       const { data: placements, error: placementError } = await supabase
         .from('artist_placements')
         .select('artist_id, tier')
-        .eq('user_id', currentUser.id)
+        .eq('user_id', user.id)
 
       if (placementError) {
         console.error('Error fetching artist placements:', placementError)
@@ -48,7 +44,7 @@ export function useArtistRankings() {
     }
 
     fetchData()
-  }, [])
+  }, [user])
 
   const updateTier = async (artistId: string, tier: Tier) => {
     if (!user) return

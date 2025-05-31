@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useUserContext } from '../context/UserContext'
 
 type Props = {
   userEmail: string
@@ -9,6 +10,7 @@ type Props = {
 
 export function Header({ userEmail, onSignOut }: Props) {
   const navigate = useNavigate()
+  const { isAdmin } = useUserContext()
 
   const sharedButtonStyle = {
     marginLeft: '1rem',
@@ -65,6 +67,19 @@ export function Header({ userEmail, onSignOut }: Props) {
           Feature Voting
         </button>
 
+        {isAdmin && (
+          <button
+            onClick={() => navigate('/admin/artist-rankings')}
+            style={{
+              ...sharedButtonStyle,
+              background: '#111',
+              color: '#fff',
+            }}
+          >
+            Admin Rankings
+          </button>
+        )}
+
         <a
           href="https://discord.gg/HuXbDVVBjb"
           target="_blank"
@@ -80,9 +95,24 @@ export function Header({ userEmail, onSignOut }: Props) {
       </div>
 
       {/* Right: Account */}
-      <div>
+      <div style={{ display: 'flex', alignItems: 'center' }}>
         <strong>{userEmail}</strong>
-        <button style={{ ...sharedButtonStyle }} onClick={onSignOut}>
+        {isAdmin && (
+          <span
+            style={{
+              marginLeft: '0.5rem',
+              padding: '2px 6px',
+              backgroundColor: '#333',
+              color: '#fff',
+              fontSize: '0.75rem',
+              borderRadius: '12px',
+              lineHeight: 1,
+            }}
+          >
+            Admin
+          </span>
+        )}
+        <button style={{ ...sharedButtonStyle, marginLeft: '1rem' }} onClick={onSignOut}>
           Log out
         </button>
       </div>
