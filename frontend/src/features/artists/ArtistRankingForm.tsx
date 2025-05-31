@@ -80,15 +80,28 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                     key={artist.id}
                     style={{
                       display: 'flex',
-                      flexWrap: 'wrap',
+                      flexDirection: 'row',
+                      flexWrap: 'nowrap',
                       alignItems: 'center',
                       justifyContent: 'space-between',
-                      rowGap: '8px',
-                      columnGap: '12px',
+                      gap: '12px',
                       marginBottom: '12px',
+                      flexGrow: 1,
+                      overflowX: 'auto',
                     }}
                   >
-                    <div style={{ flex: '1 1 160px', fontSize: '0.95rem' }}>{artist.name}</div>
+                    <div
+                      style={{
+                        minWidth: 0,
+                        overflow: 'hidden',
+                        textOverflow: 'ellipsis',
+                        whiteSpace: 'nowrap',
+                        fontSize: '0.95rem',
+                        flexBasis: '50%',
+                      }}
+                    >
+                      {artist.name}
+                    </div>
 
                     <div
                       style={{
