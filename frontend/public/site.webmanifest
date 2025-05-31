@@ -1,6 +1,6 @@
 {
-  "name": "MyWebSite",
-  "short_name": "MySite",
+  "name": "FanBass",
+  "short_name": "FanBass | A Feedback Resonator for Music Culture",
   "icons": [
     {
       "src": "/web-app-manifest-192x192.png",
