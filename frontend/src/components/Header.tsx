@@ -2,7 +2,9 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUserContext } from '../context/UserContext'
 import { Menu, X } from 'lucide-react'
-import { FaDiscord } from 'react-icons/fa'
+import { FaDiscord as RawFaDiscord } from 'react-icons/fa'
+
+const FaDiscord = RawFaDiscord as unknown as React.FC<React.SVGProps<SVGSVGElement>>
 
 type Props = {
   userEmail: string
@@ -79,7 +81,6 @@ export function Header({ userEmail, onSignOut }: Props) {
             <FaDiscord className="w-4 h-4" />
             <span>Discord</span>
           </a>
-
         </nav>
 
         <div className="flex items-center gap-2">
@@ -144,7 +145,6 @@ export function Header({ userEmail, onSignOut }: Props) {
           <FaDiscord className="w-4 h-4" />
           <span>Discord</span>
         </a>
-
       </nav>
     </header>
   )
