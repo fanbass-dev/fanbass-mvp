@@ -6,8 +6,6 @@ export function LoginScreen({ onLogin }: Props) {
   return (
     <div style={{
       height: '100vh',
-      backgroundColor: '#03050e',
-      color: 'white',
       display: 'flex',
       flexDirection: 'column',
       alignItems: 'center',
@@ -30,8 +28,6 @@ export function LoginScreen({ onLogin }: Props) {
         style={{
           padding: '0.75rem 1.5rem',
           fontSize: '1rem',
-          backgroundColor: 'white',
-          color: 'black',
           border: 'none',
           borderRadius: '4px',
           cursor: 'pointer',

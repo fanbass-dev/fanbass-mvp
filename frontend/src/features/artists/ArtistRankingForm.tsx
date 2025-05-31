@@ -66,7 +66,6 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                       padding: '4px 8px',
                       border: '1px solid #ccc',
                       borderRadius: '4px',
-                      background: 'white',
                       cursor: 'pointer',
                     }}
                   >
@@ -106,7 +105,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                         value={rankings[artist.id] || 'unranked'}
                         onChange={(e) => updateTier(artist.id, e.target.value as Tier)}
                         style={{
-                          width: '180px', // fixed width for label length
+                          width: '160px', // fixed width for label length
                           fontSize: '0.95rem',
                           padding: '4px 6px',
                         }}

@@ -12,57 +12,27 @@ export function Header({ userEmail, onSignOut }: Props) {
   const navigate = useNavigate()
   const { isAdmin } = useUserContext()
 
-  const sharedButtonStyle = {
-    marginLeft: '1rem',
-    padding: '6px 12px',
-    fontSize: '0.9rem',
-    border: '1px solid #000',
-    borderRadius: '4px',
-    cursor: 'pointer',
-    display: 'inline-block',
-    textDecoration: 'none',
-    lineHeight: 1.2,
-  } as const
-
   return (
-    <div
-      style={{
-        padding: '0.5rem',
-        zIndex: 2,
-        position: 'relative',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
-    >
-      {/* Left: Navigation */}
-      <div>
+    <div className="w-full px-4 py-3 z-20 relative flex flex-col gap-4 md:flex-row md:items-center md:justify-between bg-[#03050e] text-white border-b border-gray-800 shadow-sm">
+      {/* Navigation Buttons */}
+      <div className="flex flex-wrap gap-2">
         <button
           onClick={() => navigate('/')}
-          style={{
-            ...sharedButtonStyle,
-            background: '#eee',
-            color: '#000',
-            marginLeft: 0,
-          }}
+          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition"
         >
           Home
         </button>
 
         <button
           onClick={() => navigate('/events')}
-          style={{ ...sharedButtonStyle }}
+          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition"
         >
           Events
         </button>
 
         <button
           onClick={() => navigate('/feature-voting')}
-          style={{
-            ...sharedButtonStyle,
-            background: '#03050e',
-            color: '#fff',
-          }}
+          className="bg-indigo-700 text-white hover:bg-indigo-600 px-4 py-2 rounded transition"
         >
           Feature Voting
         </button>
@@ -70,11 +40,7 @@ export function Header({ userEmail, onSignOut }: Props) {
         {isAdmin && (
           <button
             onClick={() => navigate('/admin/artist-rankings')}
-            style={{
-              ...sharedButtonStyle,
-              background: '#111',
-              color: '#fff',
-            }}
+            className="bg-black text-white hover:bg-gray-900 px-4 py-2 rounded transition"
           >
             Admin Rankings
           </button>
@@ -84,35 +50,26 @@ export function Header({ userEmail, onSignOut }: Props) {
           href="https://discord.gg/HuXbDVVBjb"
           target="_blank"
           rel="noopener noreferrer"
-          style={{
-            ...sharedButtonStyle,
-            background: '#5865F2',
-            color: '#fff',
-          }}
+          className="bg-[#5865F2] text-white hover:bg-[#4752c4] px-4 py-2 rounded transition"
         >
           Join Discord
         </a>
       </div>
 
-      {/* Right: Account */}
-      <div style={{ display: 'flex', alignItems: 'center' }}>
-        <strong>{userEmail}</strong>
-        {isAdmin && (
-          <span
-            style={{
-              marginLeft: '0.5rem',
-              padding: '2px 6px',
-              backgroundColor: '#333',
-              color: '#fff',
-              fontSize: '0.75rem',
-              borderRadius: '12px',
-              lineHeight: 1,
-            }}
-          >
-            Admin
-          </span>
-        )}
-        <button style={{ ...sharedButtonStyle, marginLeft: '1rem' }} onClick={onSignOut}>
+      {/* Account Info */}
+      <div className="flex flex-wrap items-center justify-between md:justify-end gap-2">
+        <div className="flex items-center gap-2 flex-wrap">
+          <strong className="text-sm">{userEmail}</strong>
+          {isAdmin && (
+            <span className="px-2 py-1 text-xs rounded-full bg-gray-700 text-white uppercase tracking-wide font-medium">
+              Admin
+            </span>
+          )}
+        </div>
+        <button
+          onClick={onSignOut}
+          className="bg-gray-700 text-white hover:bg-gray-600 px-4 py-2 rounded transition"
+        >
           Log out
         </button>
       </div>

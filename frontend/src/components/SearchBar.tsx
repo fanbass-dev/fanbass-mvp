@@ -77,7 +77,6 @@ export function SearchBar({
 
   return (
     <div className="searchContainer">
-      <h2>Search Artists</h2>
       <input
         ref={inputRef}
         type="text"
@@ -129,7 +128,7 @@ export function SearchBar({
                     }}
                     onClick={() => setIsOpen(false)}
                   >
-                    + Create new artist: {inputValue.trim().toUpperCase()}
+                    Create: {inputValue.trim().toUpperCase()}
                   </a>
                 </div>
               )}

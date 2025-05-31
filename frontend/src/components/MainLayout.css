@@ -10,7 +10,6 @@
   width: 300px;
   padding: 1rem;
   overflow-y: auto;
-  background: #fafafa;
   position: relative;
   z-index: 10;
   flex-shrink: 0;

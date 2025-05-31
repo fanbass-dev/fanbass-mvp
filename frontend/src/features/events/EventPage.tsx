@@ -86,11 +86,12 @@ export function EventPage() {
   if (!event) return null
 
   return (
-    <div style={{ padding: '1rem', maxWidth: '600px' }}>
-      <h2 style={{ marginBottom: '1rem' }}>Event Details</h2>
+    <div className="max-w-screen-sm mx-auto px-4 py-6 text-white">
+      <h2 className="text-xl font-semibold mb-4">Event Details</h2>
+
       <EventForm event={event} onUpdate={handleUpdateEventField} />
 
-      <div style={{ marginTop: '2rem' }}>
+      <div className="mt-8">
         <SearchBar
           searchTerm={searchTerm}
           searchResults={searchResults}
@@ -101,16 +102,19 @@ export function EventPage() {
         />
       </div>
 
-      <div style={{ marginTop: '2rem' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-          <h2 style={{ margin: 0 }}>Lineup</h2>
-          <button onClick={() => setUseMyView((v) => !v)} style={{ padding: '4px 10px' }}>
+      <div className="mt-8 space-y-4">
+        <div className="flex items-center justify-between">
+          <h2 className="text-lg font-semibold">Lineup</h2>
+          <button
+            onClick={() => setUseMyView((v) => !v)}
+            className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-3 py-1.5 rounded"
+          >
             {useMyView ? 'Show Event View' : 'Show My Rankings'}
           </button>
         </div>
 
         {lineup.length === 0 ? (
-          <p style={{ margin: 0 }}>No artists added yet. Use search to add them.</p>
+          <p className="text-subtle text-sm">No artists added yet. Use search to add them.</p>
         ) : useMyView ? (
           <ArtistRankingForm
             queue={lineup.map((l) => l.artist)}
