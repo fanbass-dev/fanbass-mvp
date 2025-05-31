@@ -9,9 +9,9 @@ export type Tier =
 
 export const TIER_LABELS: Record<Tier, string> = {
   must_see: 'Must see',
-  worth_the_effort: 'Worth the effort',
-  nice_to_catch: 'Cool if I catch It',
-  depends_on_context: 'Only going if the homies go',
+  worth_the_effort: 'Worth an effort',
+  nice_to_catch: 'Cool if convenient',
+  depends_on_context: 'It depends',
   not_for_me: 'Not for me',
   unranked: 'Unranked',
 }

@@ -10,13 +10,6 @@ type Props = {
 }
 
 export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }: Props) {
-  const grouped: Record<Tier, Artist[]> = {} as Record<Tier, Artist[]>
-  queue.forEach((artist) => {
-    const tier = rankings[artist.id] || 'unranked'
-    if (!grouped[tier]) grouped[tier] = []
-    grouped[tier].push(artist)
-  })
-
   const [notForMeExpanded, setNotForMeExpanded] = useState(false)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
 
@@ -38,6 +31,13 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [menuOpenId])
+
+  const grouped: Record<Tier, Artist[]> = {} as Record<Tier, Artist[]>
+  queue.forEach((artist) => {
+    const tier = rankings[artist.id] || 'unranked'
+    if (!grouped[tier]) grouped[tier] = []
+    grouped[tier].push(artist)
+  })
 
   return (
     <div>
@@ -79,14 +79,37 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                 artists.map((artist) => (
                   <div
                     key={artist.id}
-                    style={{ display: 'flex', alignItems: 'center', marginBottom: '12px' }}
+                    style={{
+                      display: 'flex',
+                      flexWrap: 'wrap',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      rowGap: '8px',
+                      columnGap: '12px',
+                      marginBottom: '12px',
+                    }}
                   >
-                    <div style={{ flex: 1 }}>{artist.name}</div>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', width: '300px', position: 'relative' }}>
+                    <div style={{ flex: '1 1 160px', fontSize: '0.95rem' }}>{artist.name}</div>
+
+                    <div
+                      style={{
+                        display: 'flex',
+                        flex: '2 1 240px',
+                        alignItems: 'center',
+                        justifyContent: 'flex-end',
+                        gap: '8px',
+                        minWidth: 0,
+                        position: 'relative',
+                      }}
+                    >
                       <select
                         value={rankings[artist.id] || 'unranked'}
                         onChange={(e) => updateTier(artist.id, e.target.value as Tier)}
-                        style={{ flex: 1 }}
+                        style={{
+                          width: '180px', // fixed width for label length
+                          fontSize: '0.95rem',
+                          padding: '4px 6px',
+                        }}
                       >
                         {(Object.keys(TIER_LABELS) as Tier[]).map((t) => (
                           <option key={t} value={t}>
@@ -128,6 +151,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                                 borderRadius: '4px',
                                 padding: '4px 8px',
                                 zIndex: 10,
+                                whiteSpace: 'nowrap',
                               }}
                             >
                               <button
