@@ -32,24 +32,20 @@ export function SearchBar({
     [searchResults, queue]
   )
 
-  // Debounce search input
   useEffect(() => {
     const timeout = setTimeout(() => {
       if (inputValue !== searchTerm) {
         onChange(inputValue)
       }
     }, 300)
-
     return () => clearTimeout(timeout)
   }, [inputValue, onChange, searchTerm])
 
-  // Reposition dropdown
   useLayoutEffect(() => {
     if (!inputRef.current) return
 
     const shouldOpenDropdown =
-      filteredResults.length > 0 ||
-      (inputValue.trim().length > 0 && !searching)
+      filteredResults.length > 0 || (inputValue.trim().length > 0 && !searching)
 
     if (shouldOpenDropdown) {
       const rect = inputRef.current.getBoundingClientRect()
@@ -63,9 +59,8 @@ export function SearchBar({
       setPosition(null)
       setIsOpen(false)
     }
-  }, [filteredResults.length, inputValue, searching]) // ✅ removed `position` from deps
+  }, [filteredResults.length, inputValue, searching])
 
-  // Close on click outside
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       if (
@@ -76,7 +71,6 @@ export function SearchBar({
         setIsOpen(false)
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside)
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
@@ -106,18 +100,11 @@ export function SearchBar({
         createPortal(
           <div
             ref={dropdownRef}
+            className="dropdownMenu"
             style={{
-              position: 'absolute',
               top: position.top,
               left: position.left,
               width: position.width,
-              background: 'white',
-              border: '1px solid #ccc',
-              maxHeight: '300px',
-              overflowY: 'auto',
-              boxShadow: '0 4px 8px rgba(0, 0, 0, 0.1)',
-              padding: '0.5rem',
-              zIndex: 1000,
             }}
           >
             {filteredResults.map((artist) => (
@@ -126,7 +113,6 @@ export function SearchBar({
                 <button onClick={() => onAdd(artist)}>+ Add</button>
               </div>
             ))}
-
             {inputValue.trim().length > 0 &&
               filteredResults.length === 0 &&
               !searching && (
