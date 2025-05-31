@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Artist } from '../../types/types'
 import { TIER_LABELS, type Tier } from '../../constants/tiers'
+import { Trash } from 'lucide-react'
 
 type Props = {
   queue: Artist[]
@@ -40,7 +41,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
   })
 
   return (
-    <div>
+    <div className="relative z-10">
       <h2>My Artists</h2>
       {Object.keys(grouped).length === 0 ? (
         <p>No artists added yet. Use search to add.</p>
@@ -53,21 +54,15 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
           if (isNotForMe && artists.length === 0) return null
 
           return (
-            <div key={tier} style={{ marginBottom: '2rem' }}>
-              <h3 style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <div key={tier} className="mb-8">
+              <h3 className="flex justify-between items-center">
                 <span>
                   {TIER_LABELS[tier]} ({artists.length})
                 </span>
                 {isNotForMe && (
                   <button
                     onClick={() => setNotForMeExpanded(!notForMeExpanded)}
-                    style={{
-                      fontSize: '0.9rem',
-                      padding: '4px 8px',
-                      border: '1px solid #ccc',
-                      borderRadius: '4px',
-                      cursor: 'pointer',
-                    }}
+                    className="text-sm border border-gray-500 px-2 py-1 rounded"
                   >
                     {notForMeExpanded ? 'Hide' : 'Show'}
                   </button>
@@ -78,50 +73,15 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                 artists.map((artist) => (
                   <div
                     key={artist.id}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      flexWrap: 'nowrap',
-                      alignItems: 'center',
-                      justifyContent: 'space-between',
-                      gap: '12px',
-                      marginBottom: '12px',
-                      flexGrow: 1,
-                      overflowX: 'auto',
-                    }}
+                    className="flex items-center justify-between gap-3 mb-3 relative overflow-visible"
                   >
-                    <div
-                      style={{
-                        minWidth: 0,
-                        overflow: 'hidden',
-                        textOverflow: 'ellipsis',
-                        whiteSpace: 'nowrap',
-                        fontSize: '0.95rem',
-                        flexBasis: '50%',
-                      }}
-                    >
-                      {artist.name}
-                    </div>
+                    <div className="text-sm truncate basis-1/2">{artist.name}</div>
 
-                    <div
-                      style={{
-                        display: 'flex',
-                        flex: '2 1 240px',
-                        alignItems: 'center',
-                        justifyContent: 'flex-end',
-                        gap: '8px',
-                        minWidth: 0,
-                        position: 'relative',
-                      }}
-                    >
+                    <div className="flex items-center gap-2 relative z-10">
                       <select
                         value={rankings[artist.id] || 'unranked'}
                         onChange={(e) => updateTier(artist.id, e.target.value as Tier)}
-                        style={{
-                          width: '160px', // fixed width for label length
-                          fontSize: '0.95rem',
-                          padding: '4px 6px',
-                        }}
+                        className="w-40 text-sm px-2 py-1 z-0"
                       >
                         {(Object.keys(TIER_LABELS) as Tier[]).map((t) => (
                           <option key={t} value={t}>
@@ -129,10 +89,9 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                           </option>
                         ))}
                       </select>
-
                       {removeArtist && (
                         <div
-                          style={{ position: 'relative' }}
+                          className="relative z-20"
                           ref={(el) => {
                             menuRefs.current[artist.id] = el
                           }}
@@ -141,45 +100,21 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                             onClick={() =>
                               setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
                             }
-                            style={{
-                              background: 'transparent',
-                              border: 'none',
-                              fontSize: '1.2rem',
-                              cursor: 'pointer',
-                              padding: '0 6px',
-                              lineHeight: 1,
-                            }}
+                            className="text-white text-xl px-1"
                           >
                             ⋯
                           </button>
                           {menuOpenId === artist.id && (
-                            <div
-                              style={{
-                                position: 'absolute',
-                                bottom: '100%',
-                                right: 0,
-                                background: 'white',
-                                border: '1px solid #ccc',
-                                borderRadius: '4px',
-                                padding: '4px 8px',
-                                zIndex: 10,
-                                whiteSpace: 'nowrap',
-                              }}
-                            >
+                            <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[9999]">
                               <button
                                 onClick={() => {
                                   removeArtist(artist.id)
                                   setMenuOpenId(null)
                                 }}
-                                style={{
-                                  background: 'none',
-                                  border: 'none',
-                                  color: 'red',
-                                  cursor: 'pointer',
-                                  padding: '4px 0',
-                                }}
+                                className="flex items-center justify-center text-red-600 hover:text-red-700 p-1"
+                                aria-label="Remove artist"
                               >
-                                Remove
+                                <Trash className="w-4 h-4" />
                               </button>
                             </div>
                           )}
