@@ -30,7 +30,7 @@ export function Header({ userEmail, onSignOut }: Props) {
         </button>
         <button
           onClick={onSignOut}
-          className="bg-gray-700 text-white hover:bg-gray-600 px-4 py-2 rounded transition text-sm"
+          className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition text-base"
         >
           Log out
         </button>
@@ -41,14 +41,14 @@ export function Header({ userEmail, onSignOut }: Props) {
         <nav className="flex flex-wrap items-center gap-2">
           <button
             onClick={() => navigate('/')}
-            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition"
+            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base"
           >
             Artists
           </button>
 
           <button
             onClick={() => navigate('/events')}
-            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition"
+            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base"
           >
             Events
           </button>
@@ -58,7 +58,7 @@ export function Header({ userEmail, onSignOut }: Props) {
 
           <button
             onClick={() => navigate('/feature-voting')}
-            className="bg-gray-600 text-white hover:bg-gray-500 px-4 py-2 rounded transition"
+            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base"
           >
             Feature Voting
           </button>
@@ -66,7 +66,7 @@ export function Header({ userEmail, onSignOut }: Props) {
           {isAdmin && (
             <button
               onClick={() => navigate('/admin/artist-rankings')}
-              className="bg-black text-white hover:bg-gray-900 px-4 py-2 rounded transition"
+              className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base"
             >
               Admin Rankings
             </button>
@@ -76,7 +76,7 @@ export function Header({ userEmail, onSignOut }: Props) {
             href="https://discord.gg/HuXbDVVBjb"
             target="_blank"
             rel="noopener noreferrer"
-            className="bg-brand text-white hover:bg-[#7289da] px-4 py-2 rounded transition flex items-center gap-2 text-sm"
+            className="bg-brand text-white hover:bg-[#7289da] px-4 py-2 rounded transition flex items-center gap-2 text-sm justify-center"
           >
             <FaDiscord className="w-4 h-4" />
             <span>Discord</span>
@@ -94,7 +94,7 @@ export function Header({ userEmail, onSignOut }: Props) {
           )}
           <button
             onClick={onSignOut}
-            className="bg-gray-700 text-white hover:bg-gray-600 px-4 py-2 rounded transition"
+            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition text-base"
           >
             Log out
           </button>
@@ -105,14 +105,14 @@ export function Header({ userEmail, onSignOut }: Props) {
       <nav className={`flex flex-col gap-2 mt-4 ${menuOpen ? 'block' : 'hidden'} md:hidden`}>
         <button
           onClick={() => navigate('/')}
-          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition"
+          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
         >
           Artists
         </button>
 
         <button
           onClick={() => navigate('/events')}
-          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition"
+          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
         >
           Events
         </button>
@@ -122,7 +122,7 @@ export function Header({ userEmail, onSignOut }: Props) {
 
         <button
           onClick={() => navigate('/feature-voting')}
-          className="bg-gray-600 text-white hover:bg-gray-500 px-4 py-2 rounded transition"
+          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
         >
           Feature Voting
         </button>
@@ -130,7 +130,7 @@ export function Header({ userEmail, onSignOut }: Props) {
         {isAdmin && (
           <button
             onClick={() => navigate('/admin/artist-rankings')}
-            className="bg-black text-white hover:bg-gray-900 px-4 py-2 rounded transition"
+            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
           >
             Admin Rankings
           </button>
@@ -140,7 +140,7 @@ export function Header({ userEmail, onSignOut }: Props) {
           href="https://discord.gg/HuXbDVVBjb"
           target="_blank"
           rel="noopener noreferrer"
-          className="bg-brand text-white hover:bg-[#7289da] px-4 py-2 rounded transition flex items-center gap-2 text-sm"
+          className="bg-brand text-white hover:bg-[#7289da] px-4 py-2 rounded transition flex items-center gap-2 text-sm justify-center"
         >
           <FaDiscord className="w-4 h-4" />
           <span>Discord</span>
