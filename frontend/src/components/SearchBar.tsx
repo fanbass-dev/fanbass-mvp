@@ -1,6 +1,7 @@
 // src/components/SearchBar.tsx
 import { useRef, useLayoutEffect, useState, useEffect, useMemo } from 'react'
 import { createPortal } from 'react-dom'
+import clsx from 'clsx'
 import './SearchBar.css'
 import type { Artist } from '../types/types'
 
@@ -100,7 +101,7 @@ export function SearchBar({
 
   return (
     <div className="searchContainer">
-      <div style={{ display: 'flex', alignItems: 'center', marginBottom: '0.5rem' }}>
+      <div style={{ marginBottom: '0.5rem' }}>
         <input
           ref={inputRef}
           type="text"
@@ -114,18 +115,28 @@ export function SearchBar({
             }
           }}
         />
-        <label style={{ marginLeft: '1rem', fontSize: '0.85rem' }}>
-          <input
-            type="checkbox"
-            checked={b2bMode}
-            onChange={(e) => {
-              setB2bMode(e.target.checked)
-              setB2bQueue([])
-            }}
-            style={{ marginRight: '0.25rem' }}
+      </div>
+
+      {/* B2B Toggle */}
+      <div className="mb-3 flex items-center gap-3">
+        <div
+          className={clsx(
+            'w-11 h-6 rounded-full relative cursor-pointer transition-colors',
+            b2bMode ? 'bg-blue-600' : 'bg-gray-600'
+          )}
+          onClick={() => {
+            setB2bMode((prev) => !prev)
+            setB2bQueue([])
+          }}
+        >
+          <div
+            className={clsx(
+              'absolute top-1 left-1 w-4 h-4 bg-white rounded-full transition-transform duration-200 transform',
+              b2bMode && 'translate-x-5'
+            )}
           />
-          B2B mode
-        </label>
+        </div>
+        <span className="text-sm text-white">B2B</span>
       </div>
 
       {/* B2B Cart Display */}

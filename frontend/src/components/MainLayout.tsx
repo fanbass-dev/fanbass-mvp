@@ -34,7 +34,7 @@ export function MainLayout({
   const handleAddArtistOrB2B = async (artistOrArtists: Artist | Artist[]) => {
     if (Array.isArray(artistOrArtists)) {
       const sortedIds = artistOrArtists.map((a) => a.id).sort()
-      const name = artistOrArtists.map((a) => a.name).join(' B2B')
+      const name = artistOrArtists.map((a) => a.name).join(' B2B ')
 
       const { data: user } = await supabase.auth.getUser()
       const userId = user?.user?.id
