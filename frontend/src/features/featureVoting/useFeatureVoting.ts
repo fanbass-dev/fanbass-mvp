@@ -26,15 +26,6 @@ export function useFeatureVoting() {
     }
   }, [sortFeatures])
 
-  const initialize = useCallback(async () => {
-    const { data: { session } } = await supabase.auth.getSession()
-    const currentUser = session?.user
-    if (!currentUser) return
-
-    setUser(currentUser)
-    await fetchFeatures(currentUser.id)
-  }, [fetchFeatures])
-
   const handleVote = useCallback(async (featureId: string) => {
     if (!user) return
 
@@ -75,8 +66,25 @@ export function useFeatureVoting() {
   }, [user, fetchFeatures])
 
   useEffect(() => {
-    initialize()
-  }, [initialize])
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session?.user) {
+        setUser(session.user)
+        fetchFeatures(session.user.id)
+      }
+    })
+
+    // Try loading session immediately as well
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session?.user) {
+        setUser(session.user)
+        fetchFeatures(session.user.id)
+      }
+    })
+
+    return () => {
+      listener?.subscription.unsubscribe()
+    }
+  }, [fetchFeatures])
 
   useEffect(() => {
     if (user) fetchFeatures(user.id)
