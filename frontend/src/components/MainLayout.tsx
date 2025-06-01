@@ -40,7 +40,6 @@ export function MainLayout({
       const userId = user?.user?.id
       if (!userId) return
 
-      // Check for existing B2B set with same artist_ids
       const { data: existingB2Bs, error: fetchError } = await supabase
         .from('b2b_sets')
         .select('id, name, artist_ids')
@@ -90,13 +89,8 @@ export function MainLayout({
         original_ids: sortedIds,
       }
 
-      // Remove individuals to avoid duplication
       sortedIds.forEach(removeArtistFromQueue)
-
-      // Add to UI immediately
       addArtistToQueue(pseudoArtist)
-
-      // Persist ranking to trigger re-load on future visits
       await updateTier(pseudoArtist.id, 'unranked')
     } else {
       addArtistToQueue(artistOrArtists)
@@ -108,18 +102,17 @@ export function MainLayout({
   }
 
   return (
-    <div className="layout">
-      <div className="sidebar">
-        <SearchBar
-          searchTerm={searchTerm}
-          searchResults={searchResults}
-          searching={searching}
-          onChange={onSearchChange}
-          onAdd={handleAddArtistOrB2B}
-          queue={myArtists}
-        />
-      </div>
-      <div className="mainContent">
+    <div className="max-w-3xl w-full mx-auto px-4 md:px-8 py-6 text-white">
+      <SearchBar
+        searchTerm={searchTerm}
+        searchResults={searchResults}
+        searching={searching}
+        onChange={onSearchChange}
+        onAdd={handleAddArtistOrB2B}
+        queue={myArtists}
+      />
+
+      <div className="mt-6">
         {useFormUI ? (
           <ArtistRankingForm
             queue={myArtists}

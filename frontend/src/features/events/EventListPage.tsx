@@ -50,27 +50,24 @@ export function EventListPage() {
   }
 
   return (
-    <div style={{ padding: '1rem' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-        <h2>All Events</h2>
+    <div className="max-w-3xl w-full mx-auto px-4 md:px-8 py-6 text-white">
+      <div className="flex items-center justify-between mb-4">
+        <h2 className="text-xl font-semibold">All Events</h2>
         <button
           onClick={handleCreateNewEvent}
-          style={{
-            padding: '6px 12px',
-            fontSize: '0.9rem',
-            border: '1px solid #000',
-            borderRadius: '4px',
-            cursor: 'pointer',
-          }}
+          className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded text-sm"
         >
           + New Event
         </button>
       </div>
 
-      <ul>
+      <ul className="space-y-2">
         {events.map((event) => (
           <li key={event.id}>
-            <Link to={`/event/${event.slug || event.id}`}>
+            <Link
+              to={`/event/${event.slug || event.id}`}
+              className="text-blue-400 hover:underline"
+            >
               {event.name} {new Date(event.date).getFullYear()}
             </Link>
           </li>
