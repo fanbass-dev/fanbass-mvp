@@ -13,8 +13,8 @@ export function useFeatureVoting() {
     return sortBy === 'top'
       ? [...data].sort((a, b) => b.vote_count - a.vote_count)
       : [...data].sort((a, b) =>
-        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-      )
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+        )
   }, [sortBy])
 
   const fetchFeatures = useCallback(async () => {
@@ -30,7 +30,6 @@ export function useFeatureVoting() {
       setFeatures(sortFeatures(data))
     }
   }, [sortFeatures])
-
 
   const handleVote = useCallback(async (featureId: string) => {
     if (!user) return
@@ -67,7 +66,7 @@ export function useFeatureVoting() {
     if (error) {
       console.error(error)
     } else {
-      await fetchFeatures(user.id)
+      await fetchFeatures()
     }
   }, [user, fetchFeatures])
 
@@ -75,26 +74,23 @@ export function useFeatureVoting() {
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         setUser(session.user)
-        fetchFeatures(session.user.id)
       }
     })
 
-    // Try loading session immediately as well
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
-        fetchFeatures(session.user.id)
       }
     })
 
     return () => {
       listener?.subscription.unsubscribe()
     }
-  }, [fetchFeatures])
+  }, [])
 
   useEffect(() => {
-    if (user) fetchFeatures(user.id)
-  }, [sortBy, user, fetchFeatures])
+    fetchFeatures()
+  }, [sortBy, fetchFeatures])
 
   return {
     user,
