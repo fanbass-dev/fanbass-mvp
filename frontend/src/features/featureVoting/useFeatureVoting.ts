@@ -17,16 +17,12 @@ export function useFeatureVoting() {
         )
   }, [sortBy])
 
-  const fetchFeatures = useCallback(async () => {
-    const { data, error } = await supabase
-      .from('features')
-      .select('*')
-      .order('created_at', { ascending: false })
+  const fetchFeatures = useCallback(async (uid: string) => {
+    const { data, error } = await supabase.rpc('get_feature_votes', { uid })
 
     if (error) {
-      console.error('Plain fetch failed:', error)
+      console.error('RPC fetch failed:', error)
     } else {
-      console.log('Plain fetch succeeded:', data)
       setFeatures(sortFeatures(data))
     }
   }, [sortFeatures])
@@ -66,7 +62,7 @@ export function useFeatureVoting() {
     if (error) {
       console.error(error)
     } else {
-      await fetchFeatures()
+      await fetchFeatures(user.id)
     }
   }, [user, fetchFeatures])
 
@@ -74,23 +70,25 @@ export function useFeatureVoting() {
     const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       if (session?.user) {
         setUser(session.user)
+        fetchFeatures(session.user.id)
       }
     })
 
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUser(session.user)
+        fetchFeatures(session.user.id)
       }
     })
 
     return () => {
       listener?.subscription.unsubscribe()
     }
-  }, [])
+  }, [fetchFeatures])
 
   useEffect(() => {
-    fetchFeatures()
-  }, [sortBy, fetchFeatures])
+    if (user) fetchFeatures(user.id)
+  }, [sortBy, user, fetchFeatures])
 
   return {
     user,
