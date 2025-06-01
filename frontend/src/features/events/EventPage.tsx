@@ -1,3 +1,4 @@
+// EventPage.tsx
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
@@ -9,8 +10,7 @@ import { EventForm } from './EventForm'
 import { LineupSection } from './LineupSection'
 import { ArtistRankingForm } from '../artists/ArtistRankingForm'
 import { useEventRankings } from './useEventRankings'
-import type { Event } from '../../types/types'
-import type { Artist } from '../../types/types'
+import type { Event, Artist } from '../../types/types'
 
 export function EventPage() {
   const { eventKey } = useParams()
@@ -22,7 +22,7 @@ export function EventPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const { searchResults, searching } = useArtistSearch(searchTerm)
 
-  const artistIds = lineup.map((l) => l.artist.id)
+  const artistIds = lineup.flatMap((l) => l.artists.map((a) => a.id))
   const { rankings, updateTier } = useEventRankings(artistIds)
 
   useEffect(() => {
@@ -45,7 +45,9 @@ export function EventPage() {
         .update({ slug: newSlug })
         .eq('id', event.id)
 
-      if (!error) {
+      if (error) {
+        console.error('Failed to update slug:', error)
+      } else {
         setEvent((prev) => (prev ? { ...prev, slug: newSlug } : prev))
       }
     }
@@ -59,28 +61,52 @@ export function EventPage() {
     await supabase.from('events').update({ [field]: value }).eq('id', event.id)
   }
 
-  const handleAddArtist = async (artist: Artist) => {
-    if (!event) return
-    if (lineup.some((entry) => entry.artist.id === artist.id)) return
-
-    const entry = { event_id: event.id, artist_id: artist.id, tier: 1 }
-    await supabase.from('event_lineups').insert([entry])
-    setLineup((prev) => [...prev, { tier: 1, artist }])
-  }
-
   const handleTierChange = async (artistId: string, tier: number) => {
     if (!event) return
+
     setLineup((prev) =>
       prev.map((entry) =>
-        entry.artist.id === artistId ? { ...entry, tier } : entry
+        entry.artists.some((a) => a.id === artistId) ? { ...entry, tier } : entry
       )
     )
 
-    await supabase
-      .from('event_lineups')
-      .update({ tier })
+    const { data: setData } = await supabase
+      .from('event_sets_view')
+      .select('set_id')
       .eq('event_id', event.id)
       .eq('artist_id', artistId)
+      .maybeSingle()
+
+    if (setData?.set_id) {
+      await supabase
+        .from('event_sets')
+        .update({ tier })
+        .eq('id', setData.set_id)
+    }
+  }
+
+  const handleSetNoteChange = async (artistId: string, note: string) => {
+    if (!event) return
+
+    setLineup((prev) =>
+      prev.map((entry) =>
+        entry.artists.some((a) => a.id === artistId) ? { ...entry, set_note: note } : entry
+      )
+    )
+
+    const { data: setData } = await supabase
+      .from('event_sets_view')
+      .select('set_id')
+      .eq('event_id', event.id)
+      .eq('artist_id', artistId)
+      .maybeSingle()
+
+    if (setData?.set_id) {
+      await supabase
+        .from('event_sets')
+        .update({ set_note: note })
+        .eq('id', setData.set_id)
+    }
   }
 
   if (!event) return null
@@ -93,16 +119,90 @@ export function EventPage() {
       </div>
       <div className="border-t border-gray-700 my-8" />
 
-      <div>
-        <SearchBar
-          searchTerm={searchTerm}
-          searchResults={searchResults}
-          searching={searching}
-          onChange={setSearchTerm}
-          onAdd={handleAddArtist}
-          queue={lineup.map((l) => l.artist)}
-        />
-      </div>
+      <SearchBar
+        searchTerm={searchTerm}
+        searchResults={searchResults}
+        searching={searching}
+        onChange={setSearchTerm}
+        onAdd={(artistOrArtists) => {
+          const addOne = async (artist: Artist) => {
+            if (!event) return
+
+            if (lineup.some((entry) => entry.artists.some((a) => a.id === artist.id))) return
+
+            const { data: setData, error: setError } = await supabase
+              .from('event_sets')
+              .insert([{ event_id: event.id, tier: 1, display_name: null, set_note: '' }])
+              .select()
+              .single()
+
+            if (setError || !setData) {
+              console.error('Failed to insert event_set:', setError)
+              return
+            }
+
+            const { error: joinError } = await supabase
+              .from('event_set_artists')
+              .insert([{ set_id: setData.id, artist_id: artist.id }])
+
+            if (joinError) {
+              console.error('Failed to insert into event_set_artists:', joinError)
+              return
+            }
+
+            setLineup((prev) => [
+              ...prev,
+              {
+                tier: 1,
+                artists: [artist],
+                set_note: '',
+                display_name: '',
+              },
+            ])
+          }
+
+          if (Array.isArray(artistOrArtists)) {
+            (async () => {
+              if (!event) return
+
+              const { data: setData, error: setError } = await supabase
+                .from('event_sets')
+                .insert([{ event_id: event.id, tier: 1, display_name: null, set_note: '' }])
+                .select()
+                .single()
+
+              if (setError || !setData) {
+                console.error('Failed to insert B2B event_set:', setError)
+                return
+              }
+
+              const joins = artistOrArtists.map((artist) => ({
+                set_id: setData.id,
+                artist_id: artist.id,
+              }))
+
+              const { error: joinError } = await supabase.from('event_set_artists').insert(joins)
+              if (joinError) {
+                console.error('Failed to insert B2B artists:', joinError)
+                return
+              }
+
+              setLineup((prev) => [
+                ...prev,
+                {
+                  tier: 1,
+                  artists: artistOrArtists,
+                  set_note: '',
+                  display_name: '',
+                },
+              ])
+            })()
+          } else {
+            addOne(artistOrArtists)
+          }
+        }}
+        queue={lineup.flatMap((l) => l.artists)}
+      />
 
       <div className="space-y-6">
         <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
@@ -119,7 +219,7 @@ export function EventPage() {
           <p className="text-subtle text-sm">No artists added yet. Use search to add them.</p>
         ) : useMyView ? (
           <ArtistRankingForm
-            queue={lineup.map((l) => l.artist)}
+            queue={lineup.flatMap((l) => l.artists)}
             rankings={rankings}
             updateTier={updateTier}
           />
@@ -128,6 +228,7 @@ export function EventPage() {
             event={event}
             lineup={lineup}
             onTierChange={handleTierChange}
+            onSetNoteChange={handleSetNoteChange}
           />
         )}
       </div>

@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../../supabaseClient'
-import type { Event, LineupEntry } from '../../types/types'
+import type { Event, LineupEntry, Artist } from '../../types/types'
 
 export function useEvent(eventKey: string | undefined) {
   const [event, setEvent] = useState<Event | null>(null)
@@ -20,17 +20,40 @@ export function useEvent(eventKey: string | undefined) {
         .single()
 
       if (!eventData) return
-
       setEvent(eventData)
 
-      const { data: lineupData } = await supabase
-        .from('event_lineups')
-        .select('tier, artist:artist_id(id, name)')
+      const { data: viewData, error } = await supabase
+        .from('event_sets_view')
+        .select('tier, set_note, display_name, set_id, artist_id, artist_name')
         .eq('event_id', eventData.id)
 
-      const safeLineup: LineupEntry[] = (lineupData ?? []).map((entry: any) => ({
+      if (error) {
+        console.error('Failed to load event_sets_view:', error)
+        return
+      }
+
+      const grouped = new Map<string, { tier: number; set_note: string | null; display_name: string | null; artists: Artist[] }>()
+
+      for (const row of viewData ?? []) {
+        const existing = grouped.get(row.set_id)
+        const artist: Artist = { id: row.artist_id, name: row.artist_name }
+        if (existing) {
+          existing.artists.push(artist)
+        } else {
+          grouped.set(row.set_id, {
+            tier: row.tier,
+            set_note: row.set_note,
+            display_name: row.display_name,
+            artists: [artist],
+          })
+        }
+      }
+
+      const safeLineup: LineupEntry[] = Array.from(grouped.values()).map((entry) => ({
         tier: entry.tier,
-        artist: Array.isArray(entry.artist) ? entry.artist[0] : entry.artist,
+        artists: entry.artists,
+        set_note: entry.set_note ?? undefined,
+        display_name: entry.display_name ?? undefined,
       }))
 
       setLineup(safeLineup)
