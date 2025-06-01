@@ -21,25 +21,27 @@ export function LineupSection({ event, lineup, onTierChange, onSetNoteChange }: 
             const nameToShow =
               entry.display_name || entry.artists.map((a) => a.name).join(' B2B ')
             const primaryId = entry.artists[0]?.id || `set-${index}`
+            const uniqueKey = `${entry.artists.map((a) => a.id).join('-')}-${index}`
 
             return (
               <div
-                key={primaryId}
+                key={uniqueKey}
                 className="flex flex-col md:flex-row md:items-center justify-between gap-2 py-2"
               >
-                <div className="flex flex-col">
+                <div className="flex flex-row items-center gap-2">
                   <span className="font-medium">{nameToShow}</span>
-                  <input
-                    type="text"
-                    className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm mt-1"
-                    placeholder="Set note (optional)"
-                    value={entry.set_note ?? ''}
-                    onChange={(e) =>
-                      onSetNoteChange(primaryId, e.target.value)
-                    }
-                  />
+                  {entry.set_note && (
+                    <input
+                      type="text"
+                      className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm"
+                      value={entry.set_note}
+                      size={Math.max(entry.set_note.length, 1)}
+                      onChange={(e) =>
+                        onSetNoteChange(primaryId, e.target.value)
+                      }
+                    />
+                  )}
                 </div>
-
                 <select
                   value={entry.tier}
                   onChange={(e) =>

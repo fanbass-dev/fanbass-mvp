@@ -20,7 +20,7 @@ export function Header({ userEmail, onSignOut }: Props) {
 
   return (
     <header className="w-full px-4 py-3 z-20 relative bg-surface text-white border-b border-gray-800 shadow-sm">
-      {/* Top Row: mobile menu + flex row for desktop nav + account */}
+      {/* Top Row: mobile menu toggle */}
       <div className="flex items-center justify-between md:hidden">
         <button
           onClick={() => setMenuOpen(!menuOpen)}
@@ -28,50 +28,24 @@ export function Header({ userEmail, onSignOut }: Props) {
         >
           {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
         </button>
-        <button
-          onClick={onSignOut}
-          className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition text-base"
-        >
-          Log out
-        </button>
+        <div className="text-sm">
+          <strong>{userEmail}</strong>
+        </div>
       </div>
 
-      {/* Desktop View: Nav + Account in a row */}
+      {/* Desktop View: Nav + Account */}
       <div className="hidden md:flex justify-between items-center gap-4 mt-0">
         <nav className="flex flex-wrap items-center gap-2">
-          <button
-            onClick={() => navigate('/')}
-            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base"
-          >
-            Artists
-          </button>
-
-          <button
-            onClick={() => navigate('/events')}
-            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base"
-          >
-            Events
-          </button>
-
-          {/* Divider */}
+          <button onClick={() => navigate('/')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base">Artists</button>
+          <button onClick={() => navigate('/events')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base">Events</button>
           <div className="w-px h-6 bg-gray-700 mx-1" />
-
-          <button
-            onClick={() => navigate('/feature-voting')}
-            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base"
-          >
-            Feature Voting
-          </button>
-
+          <button onClick={() => navigate('/feature-voting')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base">Feature Voting</button>
           {isAdmin && (
-            <button
-              onClick={() => navigate('/admin/artist-rankings')}
-              className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base"
-            >
-              Admin Rankings
-            </button>
+            <>
+              <button onClick={() => navigate('/admin/artist-rankings')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base">Admin Rankings</button>
+              <button onClick={() => navigate('/admin/lineup-uploader')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base">Lineup Uploader</button>
+            </>
           )}
-
           <a
             href="https://discord.gg/HuXbDVVBjb"
             target="_blank"
@@ -103,39 +77,16 @@ export function Header({ userEmail, onSignOut }: Props) {
 
       {/* Mobile Nav Dropdown */}
       <nav className={`flex flex-col gap-2 mt-4 ${menuOpen ? 'block' : 'hidden'} md:hidden`}>
-        <button
-          onClick={() => navigate('/')}
-          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
-        >
-          Artists
-        </button>
-
-        <button
-          onClick={() => navigate('/events')}
-          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
-        >
-          Events
-        </button>
-
-        {/* Divider */}
+        <button onClick={() => navigate('/')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Artists</button>
+        <button onClick={() => navigate('/events')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Events</button>
         <div className="w-full h-px bg-gray-700 my-1" />
-
-        <button
-          onClick={() => navigate('/feature-voting')}
-          className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
-        >
-          Feature Voting
-        </button>
-
+        <button onClick={() => navigate('/feature-voting')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Feature Voting</button>
         {isAdmin && (
-          <button
-            onClick={() => navigate('/admin/artist-rankings')}
-            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
-          >
-            Admin Rankings
-          </button>
+          <>
+            <button onClick={() => navigate('/admin/artist-rankings')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Admin Rankings</button>
+            <button onClick={() => navigate('/admin/lineup-uploader')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Lineup Uploader</button>
+          </>
         )}
-
         <a
           href="https://discord.gg/HuXbDVVBjb"
           target="_blank"
@@ -145,6 +96,12 @@ export function Header({ userEmail, onSignOut }: Props) {
           <FaDiscord className="w-4 h-4" />
           <span>Discord</span>
         </a>
+        <button
+          onClick={onSignOut}
+          className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition text-base text-center"
+        >
+          Log out
+        </button>
       </nav>
     </header>
   )

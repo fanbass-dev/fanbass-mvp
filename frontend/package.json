@@ -14,6 +14,7 @@
     "@types/react-dom": "^19.1.5",
     "clsx": "^2.1.1",
     "lucide-react": "^0.511.0",
+    "papaparse": "^5.5.3",
     "pixi-viewport": "^6.0.3",
     "pixi.js": "^8.9.2",
     "react": "^19.1.0",
@@ -51,6 +52,7 @@
     ]
   },
   "devDependencies": {
+    "@types/papaparse": "^5.3.16",
     "@types/uuid": "^10.0.0",
     "autoprefixer": "^10.4.21",
     "postcss": "^8.5.4",

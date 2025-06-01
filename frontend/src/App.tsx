@@ -1,4 +1,4 @@
-import { BrowserRouter } from 'react-router-dom'
+import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { useArtistSearch } from './features/artists/useArtistSearch'
@@ -6,6 +6,7 @@ import { Header } from './components/Header'
 import { LoginScreen } from './components/LoginScreen'
 import { AppRoutes } from './routes/AppRoutes'
 import { UserProvider } from './context/UserContext'
+import { LineupUploader } from './features/admin/LineupUploader'
 
 function App() {
   const { user, signIn, signOut } = useAuth()
@@ -25,15 +26,25 @@ function App() {
             useFormUI={useFormUI}
             onToggleView={() => setUseFormUI((prev) => !prev)}
           />
-          <AppRoutes
-            searchTerm={searchTerm}
-            searchResults={searchResults}
-            searching={searching}
-            onSearchChange={setSearchTerm}
-            onAddToQueue={() => { }} // you can remove this too if it's unused
-            useFormUI={useFormUI}
-            currentUser={user}
-          />
+          <Routes>
+            {/* Main App Route Tree */}
+            <Route
+              path="/*"
+              element={
+                <AppRoutes
+                  searchTerm={searchTerm}
+                  searchResults={searchResults}
+                  searching={searching}
+                  onSearchChange={setSearchTerm}
+                  onAddToQueue={() => { }}
+                  useFormUI={useFormUI}
+                  currentUser={user}
+                />
+              }
+            />
+            {/* Admin Lineup Uploader */}
+            <Route path="/admin/lineup-uploader" element={<LineupUploader />} />
+          </Routes>
         </div>
       </UserProvider>
     </BrowserRouter>
