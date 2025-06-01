@@ -13,18 +13,24 @@ export function useFeatureVoting() {
     return sortBy === 'top'
       ? [...data].sort((a, b) => b.vote_count - a.vote_count)
       : [...data].sort((a, b) =>
-          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
-        )
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
   }, [sortBy])
 
-  const fetchFeatures = useCallback(async (uid: string) => {
-    const { data, error } = await supabase.rpc('get_feature_votes', { uid })
+  const fetchFeatures = useCallback(async () => {
+    const { data, error } = await supabase
+      .from('features')
+      .select('*')
+      .order('created_at', { ascending: false })
+
     if (error) {
-      console.error(error)
+      console.error('Plain fetch failed:', error)
     } else {
+      console.log('Plain fetch succeeded:', data)
       setFeatures(sortFeatures(data))
     }
   }, [sortFeatures])
+
 
   const handleVote = useCallback(async (featureId: string) => {
     if (!user) return
