@@ -1,4 +1,7 @@
+import { useEffect, useRef, useState } from 'react'
 import type { Event, LineupEntry } from '../../types/types'
+import { deleteLineupEntry } from './useEvent'
+import { Trash } from 'lucide-react'
 
 type Props = {
   event: Event
@@ -8,6 +11,26 @@ type Props = {
 }
 
 export function LineupSection({ event, lineup, onTierChange, onSetNoteChange }: Props) {
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const menuRefs = useRef<Record<string, HTMLDivElement | null>>({})
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (
+        menuOpenId &&
+        menuRefs.current[menuOpenId] &&
+        !menuRefs.current[menuOpenId]!.contains(event.target as Node)
+      ) {
+        setMenuOpenId(null)
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside)
+    }
+  }, [menuOpenId])
+
   const grouped = Array.from({ length: event.num_tiers }, (_, i) =>
     lineup.filter((l) => l.tier === i + 1)
   )
@@ -21,12 +44,12 @@ export function LineupSection({ event, lineup, onTierChange, onSetNoteChange }: 
             const nameToShow =
               entry.display_name || entry.artists.map((a) => a.name).join(' B2B ')
             const primaryId = entry.artists[0]?.id || `set-${index}`
-            const uniqueKey = `${entry.artists.map((a) => a.id).join('-')}-${index}`
+            const uniqueKey = entry.set_id
 
             return (
               <div
                 key={uniqueKey}
-                className="flex flex-col md:flex-row md:items-center justify-between gap-2 py-2"
+                className="flex flex-col md:flex-row md:items-center justify-between gap-2 py-2 relative"
               >
                 <div className="flex flex-row items-center gap-2">
                   <span className="font-medium">{nameToShow}</span>
@@ -42,19 +65,57 @@ export function LineupSection({ event, lineup, onTierChange, onSetNoteChange }: 
                     />
                   )}
                 </div>
-                <select
-                  value={entry.tier}
-                  onChange={(e) =>
-                    onTierChange(primaryId, Number(e.target.value))
-                  }
-                  className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm"
-                >
-                  {Array.from({ length: event.num_tiers }, (_, j) => (
-                    <option key={j + 1} value={j + 1}>
-                      Tier {j + 1}
-                    </option>
-                  ))}
-                </select>
+
+                <div className="flex items-center gap-2">
+                  <select
+                    value={entry.tier}
+                    onChange={(e) =>
+                      onTierChange(primaryId, Number(e.target.value))
+                    }
+                    className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm"
+                  >
+                    {Array.from({ length: event.num_tiers }, (_, j) => (
+                      <option key={j + 1} value={j + 1}>
+                        Tier {j + 1}
+                      </option>
+                    ))}
+                  </select>
+
+                  <div
+                    className="relative z-20"
+                    ref={(el) => {
+                      menuRefs.current[uniqueKey] = el
+                    }}
+                  >
+                    <button
+                      onClick={() =>
+                        setMenuOpenId((prev) => (prev === uniqueKey ? null : uniqueKey))
+                      }
+                      className="text-white text-xl px-1"
+                    >
+                      ⋯
+                    </button>
+                    {menuOpenId === uniqueKey && (
+                      <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[9999]">
+                        <button
+                          onClick={async () => {
+                            const confirmed = window.confirm(`Remove "${nameToShow}" from lineup?`)
+                            if (!confirmed) return
+
+                            const success = await deleteLineupEntry(event.id, entry.set_id)
+                            if (success) {
+                              window.location.reload()
+                            }
+                          }}
+                          className="flex items-center justify-center text-red-600 hover:text-red-700 p-1"
+                          aria-label="Remove set"
+                        >
+                          <Trash className="w-4 h-4" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
               </div>
             )
           })}

@@ -57,7 +57,7 @@ export function Header({ userEmail, onSignOut }: Props) {
           </a>
         </nav>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 shrink-0 [&>*]:whitespace-nowrap [&>*]:leading-none">
           <div className="text-sm">
             <strong>{userEmail}</strong>
           </div>
@@ -68,7 +68,7 @@ export function Header({ userEmail, onSignOut }: Props) {
           )}
           <button
             onClick={onSignOut}
-            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition text-base"
+            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded transition text-base h-10"
           >
             Log out
           </button>

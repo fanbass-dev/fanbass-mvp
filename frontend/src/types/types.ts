@@ -20,6 +20,7 @@ export type Event = {
 }
 
 export type LineupEntry = {
+  set_id: string
   tier: number
   artists: Artist[]
   set_note?: string

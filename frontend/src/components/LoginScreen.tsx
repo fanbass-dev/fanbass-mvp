@@ -1,3 +1,5 @@
+import './LoginScreen.css'
+
 type Props = {
   onLogin: () => void
 }
@@ -13,26 +15,22 @@ export function LoginScreen({ onLogin }: Props) {
       fontFamily: 'sans-serif',
       textAlign: 'center',
       padding: '2rem',
+      backgroundColor: '#03050c',
+      color: 'white',
     }}>
       <img
         src="/logo.png"
         alt="FanBass Logo"
         style={{ width: '150px', marginBottom: '1rem' }}
       />
-      <h1 style={{ fontSize: '2.5rem', margin: 0 }}>FanBass</h1>
+      <div className="shiny-text-wrapper">
+        <h1 className="metallic-text">FanBass</h1>
+        <span className="shiny-text-glow" />
+      </div>
       <p style={{ fontSize: '1.2rem', marginTop: '0.5rem', marginBottom: '2rem' }}>
         A Feedback Resonator for Music Culture
       </p>
-      <button
-        onClick={onLogin}
-        style={{
-          padding: '0.75rem 1.5rem',
-          fontSize: '1rem',
-          border: 'none',
-          borderRadius: '4px',
-          cursor: 'pointer',
-        }}
-      >
+      <button className="login-button" onClick={onLogin}>
         Log in with Google
       </button>
     </div>

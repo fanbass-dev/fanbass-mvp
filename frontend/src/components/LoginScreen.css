@@ -1,0 +1,86 @@
+.metallic-text {
+  position: relative;
+  display: inline-block;
+  font-size: 2.5rem;
+  font-weight: 800;
+  background: linear-gradient(90deg, #aaa, #ddd, #aaa); /* brightened steel */
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+
+  text-shadow:
+    0 1px 1px rgba(0, 0, 0, 0.4),
+    0 2px 1px rgba(0, 0, 0, 0.2);
+
+  overflow: hidden;
+}
+
+
+
+.metallic-text::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -100%;
+  width: 200%;
+  height: 100%;
+  mix-blend-mode: screen;
+  animation: metallicSheen 3s linear infinite;
+  pointer-events: none;
+}
+
+/* @keyframes metallicSheen {
+  0% {
+    left: -100%;
+  }
+  100% {
+    left: 100%;
+  }
+} */
+
+/* ---------- Shiny login button ---------- */
+.login-button {
+  background: linear-gradient(135deg, #0b2497, #1e40af);
+  color: white;
+  padding: 0.75rem 2rem;
+  font-size: 1.125rem;
+  border: none;
+  border-radius: 0.5rem;
+  cursor: pointer;
+  box-shadow: 0 0 12px rgba(11, 36, 151, 0.6);
+  position: relative;
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.login-button::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: -60%;
+  width: 50%;
+  height: 100%;
+  background: linear-gradient(
+    120deg,
+    rgba(255, 255, 255, 0.1) 0%,
+    rgba(255, 255, 255, 0.3) 50%,
+    rgba(255, 255, 255, 0.1) 100%
+  );
+  transform: skewX(-20deg);
+  animation: shine 2.5s infinite;
+  pointer-events: none;
+}
+
+.login-button:hover {
+  transform: scale(1.03);
+  box-shadow: 0 0 18px rgba(11, 36, 151, 0.9);
+}
+
+@keyframes shine {
+  0% {
+    left: -60%;
+  }
+  100% {
+    left: 130%;
+  }
+}

@@ -1,6 +1,6 @@
-// EventPage.tsx
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
+import { v4 as uuidv4 } from 'uuid'
 import { supabase } from '../../supabaseClient'
 import { useArtistSearch } from '../artists/useArtistSearch'
 import { SearchBar } from '../../components/SearchBar'
@@ -153,6 +153,7 @@ export function EventPage() {
             setLineup((prev) => [
               ...prev,
               {
+                set_id: setData.id,
                 tier: 1,
                 artists: [artist],
                 set_note: '',
@@ -181,7 +182,10 @@ export function EventPage() {
                 artist_id: artist.id,
               }))
 
-              const { error: joinError } = await supabase.from('event_set_artists').insert(joins)
+              const { error: joinError } = await supabase
+                .from('event_set_artists')
+                .insert(joins)
+
               if (joinError) {
                 console.error('Failed to insert B2B artists:', joinError)
                 return
@@ -190,6 +194,7 @@ export function EventPage() {
               setLineup((prev) => [
                 ...prev,
                 {
+                  set_id: setData.id,
                   tier: 1,
                   artists: artistOrArtists,
                   set_note: '',
