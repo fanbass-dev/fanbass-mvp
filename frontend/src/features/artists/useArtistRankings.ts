@@ -61,11 +61,37 @@ export function useArtistRankings() {
     fetchData()
   }, [])
 
-  const addArtistToQueue = (artist: Artist) => {
+  const addArtistToQueue = async (artist: Artist) => {
     setMyArtists((prev) => {
       if (prev.some((a) => a.id === artist.id)) return prev
       return [...prev, artist]
     })
+
+    const isB2B = artist.id.startsWith('b2b-')
+    const key = isB2B ? 'b2b_set_id' : 'artist_id'
+    const value = isB2B ? artist.id.replace('b2b-', '') : artist.id
+
+    const { error } = await supabase
+      .from('artist_placements')
+      .upsert(
+        {
+          user_id: user.id,
+          [key]: value,
+          tier: 'unranked',
+        },
+        {
+          onConflict: `user_id,${key}`,
+        }
+      )
+
+    if (error) {
+      console.error('Failed to persist unranked placement:', error)
+    } else {
+      setRankings((prev) => ({
+        ...prev,
+        [artist.id]: 'unranked',
+      }))
+    }
   }
 
   const removeArtistFromQueue = async (id: string) => {
