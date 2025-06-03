@@ -72,37 +72,61 @@ export function useEvent(eventKey: string | undefined) {
 }
 
 export async function deleteLineupEntry(eventId: string, setId: string) {
-  const { error: deleteLineupError } = await supabase
-    .from('event_lineups')
+  const isB2B = setId.startsWith('b2b-')
+  const rawSetId = setId.replace('b2b-', '') // remove prefix if B2B
+
+  console.log('[deleteLineupEntry]', { eventId, rawSetId })
+
+  // 1. Delete from event_sets by primary key
+  const { error: deleteSetError } = await supabase
+    .from('event_sets')
+    .delete()
+    .eq('id', rawSetId)
+    .eq('event_id', eventId)
+
+  if (deleteSetError) {
+    console.error('Failed to delete from event_sets:', deleteSetError)
+    return false
+  }
+
+  // 2. Delete from event_set_artists (cleanup join table)
+  const { error: deleteArtistsError } = await supabase
+    .from('event_set_artists')
     .delete()
     .eq('event_id', eventId)
-    .eq('b2b_set_id', setId)
+    .eq('set_id', rawSetId)
 
-  if (deleteLineupError) {
-    console.error('Failed to delete event_lineup entry:', deleteLineupError)
+  if (deleteArtistsError) {
+    console.error('Failed to delete from event_set_artists:', deleteArtistsError)
     return false
   }
 
-  const { count, error: countError } = await supabase
-    .from('event_lineups')
-    .select('*', { count: 'exact', head: true })
-    .eq('b2b_set_id', setId)
+  // 3. Optionally delete orphaned b2b_set
+  if (isB2B) {
+    const { count, error: countError } = await supabase
+      .from('event_sets')
+      .select('*', { count: 'exact', head: true })
+      .eq('b2b_set_id', rawSetId)
 
-  if (countError) {
-    console.error('Failed to check b2b_set usage:', countError)
-    return false
-  }
+    if (countError) {
+      console.error('Failed to check b2b_set usage:', countError)
+      return false
+    }
 
-  if (count === 0) {
-    const { error: deleteSetError } = await supabase
-      .from('b2b_sets')
-      .delete()
-      .eq('id', setId)
+    if (count === 0) {
+      const { error: deleteB2BError } = await supabase
+        .from('b2b_sets')
+        .delete()
+        .eq('id', rawSetId)
 
-    if (deleteSetError) {
-      console.error('Failed to delete orphaned b2b_set:', deleteSetError)
+      if (deleteB2BError) {
+        console.error('Failed to delete orphaned b2b_set:', deleteB2BError)
+        return false
+      }
     }
   }
 
   return true
 }
+
+

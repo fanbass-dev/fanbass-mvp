@@ -6,11 +6,12 @@ import { Trash } from 'lucide-react'
 type Props = {
   event: Event
   lineup: LineupEntry[]
+  setLineup: React.Dispatch<React.SetStateAction<LineupEntry[]>>
   onTierChange: (artistId: string, tier: number) => void
   onSetNoteChange: (artistId: string, note: string) => void
 }
 
-export function LineupSection({ event, lineup, onTierChange, onSetNoteChange }: Props) {
+export function LineupSection({ event, lineup, setLineup, onTierChange, onSetNoteChange }: Props) {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -99,12 +100,9 @@ export function LineupSection({ event, lineup, onTierChange, onSetNoteChange }: 
                       <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[9999]">
                         <button
                           onClick={async () => {
-                            const confirmed = window.confirm(`Remove "${nameToShow}" from lineup?`)
-                            if (!confirmed) return
-
                             const success = await deleteLineupEntry(event.id, entry.set_id)
                             if (success) {
-                              window.location.reload()
+                              setLineup((prev) => prev.filter((l) => l.set_id !== entry.set_id))
                             }
                           }}
                           className="flex items-center justify-center text-red-600 hover:text-red-700 p-1"

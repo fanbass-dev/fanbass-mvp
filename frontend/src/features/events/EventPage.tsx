@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { useParams } from 'react-router-dom'
-import { v4 as uuidv4 } from 'uuid'
 import { supabase } from '../../supabaseClient'
 import { useArtistSearch } from '../artists/useArtistSearch'
 import { SearchBar } from '../../components/SearchBar'
@@ -232,6 +231,7 @@ export function EventPage() {
           <LineupSection
             event={event}
             lineup={lineup}
+            setLineup={setLineup} // ✅ add this
             onTierChange={handleTierChange}
             onSetNoteChange={handleSetNoteChange}
           />
