@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
 import { useArtistSearch } from '../artists/useArtistSearch'
@@ -9,6 +9,11 @@ import { EventForm } from './EventForm'
 import { LineupSection } from './LineupSection'
 import { ArtistRankingForm } from '../artists/ArtistRankingForm'
 import { useEventRankings } from './useEventRankings'
+import {
+  normalizeLineupForRanking,
+  areLineupsEqual,
+  type B2BSet,
+} from '../../utils/normalizeLineupForRanking'
 import type { Event, Artist } from '../../types/types'
 
 export function EventPage() {
@@ -21,8 +26,10 @@ export function EventPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const { searchResults, searching } = useArtistSearch(searchTerm)
 
-  const artistIds = lineup.flatMap((l) => l.artists.map((a) => a.id))
+  const artistIds = useMemo(() => lineup.flatMap((l) => l.artists.map((a) => a.id)), [lineup])
   const { rankings, updateTier } = useEventRankings(artistIds)
+
+  const [b2bSets, setB2bSets] = useState<B2BSet[]>([])
 
   useEffect(() => {
     if (event) {
@@ -54,6 +61,26 @@ export function EventPage() {
     updateSlug()
   }, [event, initialName, initialDate, setEvent])
 
+  useEffect(() => {
+    const loadB2Bs = async () => {
+      const { data, error } = await supabase
+        .from('b2b_sets')
+        .select('id, name, artist_ids')
+
+      if (error) {
+        console.error('Failed to load b2b_sets:', error)
+      } else {
+        setB2bSets(data || [])
+      }
+    }
+
+    loadB2Bs()
+  }, [])
+
+  const normalizedQueue = useMemo(() => {
+    return normalizeLineupForRanking(lineup, b2bSets)
+  }, [lineup, b2bSets])
+
   const handleUpdateEventField = async (field: keyof Event, value: string | number) => {
     if (!event) return
     setEvent({ ...event, [field]: value })
@@ -63,11 +90,13 @@ export function EventPage() {
   const handleTierChange = async (artistId: string, tier: number) => {
     if (!event) return
 
-    setLineup((prev) =>
-      prev.map((entry) =>
-        entry.artists.some((a) => a.id === artistId) ? { ...entry, tier } : entry
-      )
+    const updated = lineup.map((entry) =>
+      entry.artists.some((a) => a.id === artistId) ? { ...entry, tier } : entry
     )
+
+    if (!areLineupsEqual(updated, lineup)) {
+      setLineup(updated)
+    }
 
     const { data: setData } = await supabase
       .from('event_sets_view')
@@ -87,11 +116,13 @@ export function EventPage() {
   const handleSetNoteChange = async (artistId: string, note: string) => {
     if (!event) return
 
-    setLineup((prev) =>
-      prev.map((entry) =>
-        entry.artists.some((a) => a.id === artistId) ? { ...entry, set_note: note } : entry
-      )
+    const updated = lineup.map((entry) =>
+      entry.artists.some((a) => a.id === artistId) ? { ...entry, set_note: note } : entry
     )
+
+    if (!areLineupsEqual(updated, lineup)) {
+      setLineup(updated)
+    }
 
     const { data: setData } = await supabase
       .from('event_sets_view')
@@ -116,6 +147,7 @@ export function EventPage() {
         <h2 className="text-xl font-semibold mb-4">Event Details</h2>
         <EventForm event={event} onUpdate={handleUpdateEventField} />
       </div>
+
       <div className="border-t border-gray-700 my-8" />
 
       <SearchBar
@@ -162,7 +194,7 @@ export function EventPage() {
           }
 
           if (Array.isArray(artistOrArtists)) {
-            (async () => {
+            ; (async () => {
               if (!event) return
 
               const { data: setData, error: setError } = await supabase
@@ -223,7 +255,7 @@ export function EventPage() {
           <p className="text-subtle text-sm">No artists added yet. Use search to add them.</p>
         ) : useMyView ? (
           <ArtistRankingForm
-            queue={lineup.flatMap((l) => l.artists)}
+            queue={normalizedQueue}
             rankings={rankings}
             updateTier={updateTier}
           />
@@ -231,7 +263,7 @@ export function EventPage() {
           <LineupSection
             event={event}
             lineup={lineup}
-            setLineup={setLineup} // ✅ add this
+            setLineup={setLineup}
             onTierChange={handleTierChange}
             onSetNoteChange={handleSetNoteChange}
           />

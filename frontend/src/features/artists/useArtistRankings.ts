@@ -125,6 +125,12 @@ export function useArtistRankings() {
   const updateTier = async (id: string, tier: Tier) => {
     if (!user) return
 
+    // Optimistically update ranking to prevent flicker
+    setRankings((prev) => ({
+      ...prev,
+      [id]: tier,
+    }))
+
     const isB2B = id.startsWith('b2b-')
     const key = isB2B ? 'b2b_set_id' : 'artist_id'
     const value = isB2B ? id.replace('b2b-', '') : id
@@ -144,13 +150,7 @@ export function useArtistRankings() {
 
     if (error) {
       console.error('Failed to update tier:', error)
-      return
     }
-
-    setRankings((prev) => ({
-      ...prev,
-      [id]: tier,
-    }))
   }
 
   return {
