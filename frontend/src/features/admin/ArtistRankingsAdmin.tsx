@@ -33,7 +33,6 @@ export default function ArtistRankingsAdmin() {
 
       for (const row of placements || []) {
         const { artist_id, tier } = row as { artist_id: string; tier: Tier }
-
         if (!artistMap[artist_id]) continue
 
         if (!grouped[artist_id]) {
@@ -81,46 +80,52 @@ export default function ArtistRankingsAdmin() {
   }
 
   return (
-    <div style={{ padding: '2rem' }}>
-      <h2>Artist Rankings Overview</h2>
-      <table>
-        <thead>
-          <tr>
-            <th
-              style={{ cursor: 'pointer' }}
-              onClick={() => handleSort('name')}
-            >
-              Artist {sortColumn === 'name' && (sortDirection === 'asc' ? '▲' : '▼')}
-            </th>
-            {Object.entries(TIER_LABELS).map(([tier, label]) => (
+    <div className="max-w-5xl mx-auto px-4 py-8 text-white">
+      <h2 className="text-xl font-semibold mb-6">Artist Rankings Overview</h2>
+      <div className="overflow-auto border border-gray-700 rounded-lg">
+        <table className="min-w-full text-sm table-auto">
+          <thead className="bg-gray-800 text-left text-xs uppercase border-b border-gray-600">
+            <tr>
               <th
-                key={tier}
-                style={{ cursor: 'pointer' }}
-                onClick={() => handleSort(tier)}
+                className="px-4 py-3 cursor-pointer"
+                onClick={() => handleSort('name')}
               >
-                {label} {sortColumn === tier && (sortDirection === 'asc' ? '▲' : '▼')}
+                Artist {sortColumn === 'name' && (sortDirection === 'asc' ? '▲' : '▼')}
               </th>
-            ))}
-            <th
-              style={{ cursor: 'pointer' }}
-              onClick={() => handleSort('total')}
-            >
-              Total {sortColumn === 'total' && (sortDirection === 'asc' ? '▲' : '▼')}
-            </th>
-          </tr>
-        </thead>
-        <tbody>
-          {sortedRows.map((artist) => (
-            <tr key={artist.id}>
-              <td>{artist.name}</td>
-              {Object.keys(TIER_LABELS).map((tier) => (
-                <td key={tier}>{artist[tier] ?? 0}</td>
+              {Object.entries(TIER_LABELS).map(([tier, label]) => (
+                <th
+                  key={tier}
+                  className="px-4 py-3 cursor-pointer text-center"
+                  onClick={() => handleSort(tier)}
+                >
+                  {label} {sortColumn === tier && (sortDirection === 'asc' ? '▲' : '▼')}
+                </th>
               ))}
-              <td>{artist.total ?? 0}</td>
+              <th
+                className="px-4 py-3 cursor-pointer text-center"
+                onClick={() => handleSort('total')}
+              >
+                Total {sortColumn === 'total' && (sortDirection === 'asc' ? '▲' : '▼')}
+              </th>
             </tr>
-          ))}
-        </tbody>
-      </table>
+          </thead>
+          <tbody className="divide-y divide-gray-700">
+            {sortedRows.map((artist) => (
+              <tr key={artist.id} className="hover:bg-gray-800 transition">
+                <td className="px-4 py-2 whitespace-nowrap">{artist.name}</td>
+                {Object.keys(TIER_LABELS).map((tier) => (
+                  <td key={tier} className="px-4 py-2 text-center">
+                    {artist[tier] ?? 0}
+                  </td>
+                ))}
+                <td className="px-4 py-2 text-center font-semibold">
+                  {artist.total ?? 0}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
     </div>
   )
 }
