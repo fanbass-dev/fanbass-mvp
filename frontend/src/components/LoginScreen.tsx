@@ -31,7 +31,7 @@ export function LoginScreen({ onLogin }: Props) {
         A Feedback Resonator for Music Culture
       </p>
       <button className="login-button" onClick={onLogin}>
-        Log in with Google
+        Google Login
       </button>
     </div>
   )

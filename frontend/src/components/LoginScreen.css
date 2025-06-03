@@ -3,40 +3,13 @@
   display: inline-block;
   font-size: 2.5rem;
   font-weight: 800;
-  background: linear-gradient(90deg, #aaa, #ddd, #aaa); /* brightened steel */
-  background-clip: text;
-  -webkit-background-clip: text;
-  color: transparent;
-
-  text-shadow:
-    0 1px 1px rgba(0, 0, 0, 0.4),
-    0 2px 1px rgba(0, 0, 0, 0.2);
-
+  text-transform: uppercase;
+  letter-spacing: 0.001em;
+  color:rgba(255, 255, 255, 0.9);
   overflow: hidden;
 }
 
 
-
-.metallic-text::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: -100%;
-  width: 200%;
-  height: 100%;
-  mix-blend-mode: screen;
-  animation: metallicSheen 3s linear infinite;
-  pointer-events: none;
-}
-
-/* @keyframes metallicSheen {
-  0% {
-    left: -100%;
-  }
-  100% {
-    left: 100%;
-  }
-} */
 
 /* ---------- Shiny login button ---------- */
 .login-button {
@@ -62,9 +35,11 @@
   height: 100%;
   background: linear-gradient(
     120deg,
-    rgba(255, 255, 255, 0.1) 0%,
-    rgba(255, 255, 255, 0.3) 50%,
-    rgba(255, 255, 255, 0.1) 100%
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.15) 40%,
+    rgba(255, 255, 255, 0.25) 50%,
+    rgba(255, 255, 255, 0.15) 60%,
+    rgba(255, 255, 255, 0) 100%
   );
   transform: skewX(-20deg);
   animation: shine 2.5s infinite;
