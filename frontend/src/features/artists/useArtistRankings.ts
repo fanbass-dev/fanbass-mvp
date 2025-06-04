@@ -10,6 +10,7 @@ export function useArtistRankings() {
   const [user, setUser] = useState<any>(null)
   const [myArtists, setMyArtists] = useState<Artist[]>([])
   const [rankings, setRankings] = useState<Record<string, Tier>>({})
+  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -82,7 +83,7 @@ export function useArtistRankings() {
     }
 
     fetchData()
-  }, [])
+  }, [refreshTrigger])
 
   const addArtistToQueue = async (artist: Artist) => {
     setMyArtists((prev) => {
@@ -129,12 +130,15 @@ export function useArtistRankings() {
       return
     }
 
-    setMyArtists((prev) => prev.filter((a) => a.id !== id))
-    setRankings((prev) => {
+    // Update rankings state directly
+    setRankings(prev => {
       const next = { ...prev }
       delete next[id]
       return next
     })
+
+    // Trigger a re-fetch of the artists
+    setRefreshTrigger(prev => prev + 1)
   }
 
   const updateTier = async (id: string, tier: Tier) => {

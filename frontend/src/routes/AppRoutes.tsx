@@ -6,6 +6,7 @@ import { EventPage } from '../features/events/EventPage'
 import { EventListPage } from '../features/events/EventListPage'
 import ArtistRankingsAdmin from '../features/admin/ArtistRankingsAdmin'
 import type { Artist } from '../types/types'
+import type { Tier } from '../constants/tiers'
 
 type Props = {
   searchTerm: string
@@ -16,6 +17,9 @@ type Props = {
   useFormUI: boolean
   currentUser: any
   myArtists: Artist[]
+  rankings: Record<string, Tier>
+  updateTier: (id: string, tier: Tier) => void
+  removeArtistFromQueue: (id: string) => void
 }
 
 export function AppRoutes({
@@ -27,6 +31,9 @@ export function AppRoutes({
   useFormUI,
   currentUser,
   myArtists,
+  rankings,
+  updateTier,
+  removeArtistFromQueue,
 }: Props) {
   return (
     <Routes>
@@ -41,6 +48,9 @@ export function AppRoutes({
             onAddToQueue={onAddToQueue}
             useFormUI={useFormUI}
             myArtists={myArtists}
+            rankings={rankings}
+            updateTier={updateTier}
+            removeArtist={removeArtistFromQueue}
           />
         }
       />

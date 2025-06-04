@@ -3,7 +3,7 @@ import ArtistCanvas from '../features/artists/pixiCanvas/ArtistCanvas'
 import type { Artist } from '../types/types'
 import './MainLayout.css'
 import { SearchBar } from './SearchBar'
-import { useArtistRankings } from '../features/artists/useArtistRankings'
+import type { Tier } from '../constants/tiers'
 
 type Props = {
   searchTerm: string
@@ -13,6 +13,9 @@ type Props = {
   onAddToQueue: (artist: Artist) => void
   useFormUI: boolean
   myArtists: Artist[]
+  rankings: Record<string, Tier>
+  updateTier: (id: string, tier: Tier) => void
+  removeArtist: (id: string) => void
 }
 
 export function MainLayout({
@@ -23,17 +26,10 @@ export function MainLayout({
   onAddToQueue,
   useFormUI,
   myArtists,
+  rankings,
+  updateTier,
+  removeArtist,
 }: Props) {
-  const {
-    rankings,
-    updateTier,
-    removeArtistFromQueue,
-  } = useArtistRankings()
-
-  const handleRemove = (id: string) => {
-    removeArtistFromQueue(id)
-  }
-
   return (
     <div className="max-w-3xl w-full mx-auto px-4 md:px-8 py-6 text-white">
       <SearchBar
@@ -57,7 +53,7 @@ export function MainLayout({
             queue={myArtists}
             rankings={rankings}
             updateTier={updateTier}
-            removeArtist={handleRemove}
+            removeArtist={removeArtist}
           />
         ) : (
           <ArtistCanvas artists={myArtists} />

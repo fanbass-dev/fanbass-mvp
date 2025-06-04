@@ -14,7 +14,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('')
   const { searchResults, searching } = useArtistSearch(searchTerm)
   const [useFormUI, setUseFormUI] = useState(true)
-  const { addArtistToQueue, myArtists } = useArtistRankings()
+  const { addArtistToQueue, myArtists, rankings, updateTier, removeArtistFromQueue } = useArtistRankings()
 
   if (!user) return <LoginScreen onLogin={signIn} />
 
@@ -42,6 +42,9 @@ function App() {
                   useFormUI={useFormUI}
                   currentUser={user}
                   myArtists={myArtists}
+                  rankings={rankings}
+                  updateTier={updateTier}
+                  removeArtistFromQueue={removeArtistFromQueue}
                 />
               }
             />
