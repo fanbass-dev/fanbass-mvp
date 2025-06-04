@@ -76,16 +76,13 @@ export function useEvent(eventKey: string | undefined) {
 }
 
 export async function deleteLineupEntry(eventId: string, setId: string) {
-  const isB2B = setId.startsWith('b2b-')
-  const rawSetId = setId.replace('b2b-', '') // remove prefix if B2B
-
-  console.log('[deleteLineupEntry]', { eventId, rawSetId })
+  console.log('[deleteLineupEntry]', { eventId, setId })
 
   // 1. Delete from event_sets by primary key
   const { error: deleteSetError } = await supabase
     .from('event_sets')
     .delete()
-    .eq('id', rawSetId)
+    .eq('id', setId)
     .eq('event_id', eventId)
 
   if (deleteSetError) {
@@ -98,36 +95,11 @@ export async function deleteLineupEntry(eventId: string, setId: string) {
     .from('event_set_artists')
     .delete()
     .eq('event_id', eventId)
-    .eq('set_id', rawSetId)
+    .eq('set_id', setId)
 
   if (deleteArtistsError) {
     console.error('Failed to delete from event_set_artists:', deleteArtistsError)
     return false
-  }
-
-  // 3. Optionally delete orphaned b2b_set
-  if (isB2B) {
-    const { count, error: countError } = await supabase
-      .from('event_sets')
-      .select('*', { count: 'exact', head: true })
-      .eq('b2b_set_id', rawSetId)
-
-    if (countError) {
-      console.error('Failed to check b2b_set usage:', countError)
-      return false
-    }
-
-    if (count === 0) {
-      const { error: deleteB2BError } = await supabase
-        .from('b2b_sets')
-        .delete()
-        .eq('id', rawSetId)
-
-      if (deleteB2BError) {
-        console.error('Failed to delete orphaned b2b_set:', deleteB2BError)
-        return false
-      }
-    }
   }
 
   return true
