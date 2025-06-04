@@ -2,6 +2,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom'
 import { useState } from 'react'
 import { useAuth } from './hooks/useAuth'
 import { useArtistSearch } from './features/artists/useArtistSearch'
+import { useArtistRankings } from './features/artists/useArtistRankings'
 import { Header } from './components/Header'
 import { LoginScreen } from './components/LoginScreen'
 import { AppRoutes } from './routes/AppRoutes'
@@ -13,6 +14,7 @@ function App() {
   const [searchTerm, setSearchTerm] = useState('')
   const { searchResults, searching } = useArtistSearch(searchTerm)
   const [useFormUI, setUseFormUI] = useState(true)
+  const { addArtistToQueue, myArtists } = useArtistRankings()
 
   if (!user) return <LoginScreen onLogin={signIn} />
 
@@ -36,9 +38,10 @@ function App() {
                   searchResults={searchResults}
                   searching={searching}
                   onSearchChange={setSearchTerm}
-                  onAddToQueue={() => { }}
+                  onAddToQueue={addArtistToQueue}
                   useFormUI={useFormUI}
                   currentUser={user}
+                  myArtists={myArtists}
                 />
               }
             />

@@ -16,7 +16,7 @@ export function useArtistSearch(searchTerm: string) {
 
     supabase
       .from('artists')
-      .select('id, name')
+      .select('id, name, type')
       .ilike('name', `%${searchTerm}%`)
       .then(({ data, error }) => {
         setSearching(false)

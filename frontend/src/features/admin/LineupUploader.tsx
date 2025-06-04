@@ -3,31 +3,30 @@
 import { useState, useEffect } from 'react'
 import Papa from 'papaparse'
 import { supabase } from '../../supabaseClient'
+import type { Event } from '../../types/types'
 
 type Row = {
     name: string
     tier: string
-    set_note?: string
+    set_note: string
     artistNames: string[]
 }
 
-type Event = {
-    id: string
-    name: string
-    date: string
-}
+type EventPreview = Pick<Event, 'id' | 'name' | 'date'>
 
 export function LineupUploader() {
     const [eventId, setEventId] = useState('')
-    const [events, setEvents] = useState<Event[]>([])
+    const [events, setEvents] = useState<EventPreview[]>([])
     const [rows, setRows] = useState<Row[]>([])
     const [csvError, setCsvError] = useState<string | null>(null)
     const [uploading, setUploading] = useState(false)
 
     useEffect(() => {
         const loadEvents = async () => {
-            const { data } = await supabase.from('events').select('id, name, date')
-            if (data) setEvents(data)
+            const { data } = await supabase
+                .from('events')
+                .select('id, name, date')
+            if (data) setEvents(data as EventPreview[])
         }
         loadEvents()
     }, [])
@@ -67,162 +66,178 @@ export function LineupUploader() {
         })
     }
 
-    const handleImport = async () => {
-        if (!eventId) {
-            alert('Please select an event.')
-            return
+    const createB2BArtist = async (artistNames: string[]) => {
+        const { data: existingArtists } = await supabase
+            .from('artists')
+            .select('id, name')
+            .in('name', artistNames)
+
+        if (!existingArtists || existingArtists.length !== artistNames.length) {
+            throw new Error('All artists must exist before creating B2B')
         }
 
-        for (const row of rows) {
-            try {
-                // 1. Lookup or create artists
-                const artistIds: string[] = []
-                for (const name of row.artistNames) {
-                    const { data: existing } = await supabase
+        const sortedIds = existingArtists.map(a => a.id).sort()
+        const name = artistNames.join(' B2B ')
+
+        // Check if B2B already exists
+        const { data: existingB2B } = await supabase
+            .from('artists')
+            .select('*')
+            .eq('type', 'b2b')
+            .eq('fingerprint', sortedIds.join(','))
+            .single()
+
+        if (existingB2B) {
+            return existingB2B
+        }
+
+        const { data: newB2B, error } = await supabase
+            .from('artists')
+            .insert({
+                name,
+                type: 'b2b',
+                member_ids: sortedIds,
+                fingerprint: sortedIds.join(',')
+            })
+            .select()
+            .single()
+
+        if (error) throw error
+        return newB2B
+    }
+
+    const handleUpload = async () => {
+        if (!eventId || rows.length === 0) return
+        setUploading(true)
+
+        try {
+            for (const row of rows) {
+                const artistNames = row.artistNames.map(name => name.trim().toUpperCase())
+                
+                let artist
+                if (artistNames.length > 1) {
+                    // This is a B2B set
+                    artist = await createB2BArtist(artistNames)
+                } else {
+                    // Single artist
+                    const { data } = await supabase
                         .from('artists')
-                        .select('id')
-                        .ilike('name', name)
-                        .maybeSingle()
-
-                    let artistId = existing?.id
-                    if (!artistId) {
-                        const { data: inserted, error } = await supabase
-                            .from('artists')
-                            .insert({ name })
-                            .select()
-                            .single()
-                        if (error) throw error
-                        artistId = inserted.id
+                        .select('*')
+                        .eq('name', artistNames[0])
+                        .single()
+                    
+                    if (!data) {
+                        throw new Error(`Artist not found: ${artistNames[0]}`)
                     }
-
-                    artistIds.push(artistId)
+                    artist = data
                 }
 
-                // 2. Sort artistIds to avoid mirrored sets
-                const sortedArtistIds = [...artistIds].sort()
-
-                // 3. Check if an identical set already exists
-                const { data: existingSetLinks } = await supabase
-                    .from('event_set_artists')
-                    .select('set_id, artist_id')
-                    .in('artist_id', sortedArtistIds)
-                    .eq('event_id', eventId)  // optional if event_id in join view
-                const setsById: Record<string, string[]> = {}
-
-                for (const link of existingSetLinks || []) {
-                    const setId = link.set_id
-                    if (!setsById[setId]) setsById[setId] = []
-                    setsById[setId].push(link.artist_id)
-                }
-
-                let duplicateSetId: string | null = null
-                for (const [setId, ids] of Object.entries(setsById)) {
-                    if (ids.sort().join(',') === sortedArtistIds.join(',')) {
-                        duplicateSetId = setId
-                        break
-                    }
-                }
-
-                if (duplicateSetId) {
-                    console.log(`⚠️ Skipping duplicate set: ${row.name}`)
-                    continue
-                }
-
-                // 4. Insert event_set row
+                // Create event set
                 const { data: setData, error: setError } = await supabase
                     .from('event_sets')
                     .insert({
                         event_id: eventId,
-                        tier: row.tier,
-                        set_note: row.set_note || null,
-                        display_name: row.artistNames.sort().join(' B2B '),
+                        tier: parseInt(row.tier) || 1,
+                        display_name: artist.type === 'b2b' ? artist.name : null,
+                        set_note: row.set_note
                     })
                     .select()
                     .single()
-                if (setError) throw setError
 
-                const event_set_id = setData.id
+                if (setError || !setData) {
+                    throw new Error(`Failed to create event set: ${setError?.message}`)
+                }
 
-                // 5. Link all artists to the set
-                const artistLinks = artistIds.map((artistId) => ({
-                    set_id: event_set_id,
-                    artist_id: artistId,
+                // Add artists to set
+                const artistIds = artist.type === 'b2b' && artist.member_ids 
+                    ? artist.member_ids 
+                    : [artist.id]
+
+                const joins = artistIds.map((id: string) => ({
+                    set_id: setData.id,
+                    artist_id: id,
+                    event_id: eventId
                 }))
 
-                const { error: linkError } = await supabase
+                const { error: joinError } = await supabase
                     .from('event_set_artists')
-                    .insert(artistLinks)
+                    .insert(joins)
 
-                if (linkError) throw linkError
-            } catch (err: any) {
-                console.error(`❌ Failed to import: ${row.name}`, err)
+                if (joinError) {
+                    throw new Error(`Failed to add artists to set: ${joinError.message}`)
+                }
             }
+
+            // Clear form after successful upload
+            setRows([])
+            setCsvError(null)
+        } catch (error) {
+            console.error('Upload error:', error)
+            setCsvError(error instanceof Error ? error.message : 'Upload failed')
+        } finally {
+            setUploading(false)
         }
-        alert('✅ Import complete!')
-    setUploading(false)
-}
+    }
 
-return (
-    <div className="p-4 max-w-3xl mx-auto">
-        <h2 className="text-xl font-semibold mb-4">Lineup Uploader</h2>
+    return (
+        <div className="p-4 max-w-3xl mx-auto">
+            <h2 className="text-xl font-semibold mb-4">Lineup Uploader</h2>
 
-        <div className="mb-4">
-            <label className="block mb-1 font-medium text-sm">Select Event</label>
-            <select
-                value={eventId}
-                onChange={(e) => setEventId(e.target.value)}
-                className="w-full p-2 rounded bg-black border border-gray-600 text-white"
-            >
-                <option value="">-- Select an event --</option>
-                {events.map((event) => {
-                    const year = new Date(event.date).getFullYear()
-                    return (
-                        <option key={event.id} value={event.id}>
-                            {event.name} ({year})
-                        </option>
-                    )
-                })}
-            </select>
-        </div>
-
-        <div className="mb-4">
-            <input type="file" accept=".csv" onChange={handleFileUpload} />
-            {csvError && <p className="text-red-500 text-sm mt-2">{csvError}</p>}
-        </div>
-
-        {rows.length > 0 && (
-            <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-2">Preview</h3>
-                <table className="w-full border-collapse text-sm">
-                    <thead>
-                        <tr>
-                            <th className="border-b border-gray-700 text-left p-1">Name</th>
-                            <th className="border-b border-gray-700 text-left p-1">Tier</th>
-                            <th className="border-b border-gray-700 text-left p-1">Note</th>
-                            <th className="border-b border-gray-700 text-left p-1">Artists</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {rows.map((row, i) => (
-                            <tr key={i} className="border-t border-gray-800">
-                                <td className="p-1">{row.name}</td>
-                                <td className="p-1">{row.tier}</td>
-                                <td className="p-1">{row.set_note}</td>
-                                <td className="p-1">{row.artistNames.join(', ')}</td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-
-                <button
-                    onClick={handleImport}
-                    className="mt-4 bg-green-600 hover:bg-green-500 text-white px-4 py-2 rounded text-sm"
-                    disabled={uploading}
+            <div className="mb-4">
+                <label className="block mb-1 font-medium text-sm">Select Event</label>
+                <select
+                    value={eventId}
+                    onChange={(e) => setEventId(e.target.value)}
+                    className="w-full p-2 rounded bg-black border border-gray-600 text-white"
                 >
-                    {uploading ? 'Importing...' : 'Import to Supabase'}
-                </button>
+                    <option value="">-- Select an event --</option>
+                    {events.map((event) => {
+                        const year = new Date(event.date).getFullYear()
+                        return (
+                            <option key={event.id} value={event.id}>
+                                {event.name} ({year})
+                            </option>
+                        )
+                    })}
+                </select>
             </div>
-        )}
-    </div>
-)
+
+            <div className="mb-4">
+                <input type="file" accept=".csv" onChange={handleFileUpload} />
+                {csvError && <p className="text-red-500 text-sm mt-2">{csvError}</p>}
+            </div>
+
+            {rows.length > 0 && (
+                <div className="mb-4">
+                    <h3 className="font-medium mb-2">Preview</h3>
+                    <table className="w-full text-sm">
+                        <thead>
+                            <tr>
+                                <th className="text-left">Artists</th>
+                                <th className="text-left">Tier</th>
+                                <th className="text-left">Note</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {rows.map((row, i) => (
+                                <tr key={i}>
+                                    <td>{row.name}</td>
+                                    <td>{row.tier}</td>
+                                    <td>{row.set_note}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            )}
+
+            <button
+                onClick={handleUpload}
+                disabled={uploading || !eventId || rows.length === 0}
+                className="bg-blue-600 text-white px-4 py-2 rounded disabled:opacity-50"
+            >
+                {uploading ? 'Uploading...' : 'Upload Lineup'}
+            </button>
+        </div>
+    )
 }

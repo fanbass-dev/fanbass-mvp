@@ -4,6 +4,7 @@ import { createPortal } from 'react-dom'
 import clsx from 'clsx'
 import './SearchBar.css'
 import type { Artist } from '../types/types'
+import { supabase } from '../supabaseClient'
 
 type Props = {
   searchTerm: string
@@ -31,9 +32,16 @@ export function SearchBar({
   const [b2bMode, setB2bMode] = useState(false)
   const [b2bQueue, setB2bQueue] = useState<Artist[]>([])
 
-  const filteredResults = useMemo(
-    () => searchResults.filter((artist) => !queue.some((a) => a.id === artist.id)),
-    [searchResults, queue]
+  // Filter out B2B artists in B2B mode and add status flags
+  const searchResultsWithStatus = useMemo(
+    () => searchResults
+      .filter(artist => !b2bMode || artist.type !== 'b2b')
+      .map((artist) => ({
+        ...artist,
+        isInQueue: queue.some((a) => a.id === artist.id),
+        isInB2bQueue: b2bQueue.some((a) => a.id === artist.id)
+      })),
+    [searchResults, queue, b2bQueue, b2bMode]
   )
 
   useEffect(() => {
@@ -48,8 +56,7 @@ export function SearchBar({
   useLayoutEffect(() => {
     if (!inputRef.current) return
 
-    const shouldOpenDropdown =
-      filteredResults.length > 0 || (inputValue.trim().length > 0 && !searching)
+    const shouldOpenDropdown = searchResultsWithStatus.length > 0 || (inputValue.trim().length > 0 && !searching)
 
     if (shouldOpenDropdown) {
       const rect = inputRef.current.getBoundingClientRect()
@@ -63,7 +70,7 @@ export function SearchBar({
       setPosition(null)
       setIsOpen(false)
     }
-  }, [filteredResults.length, inputValue, searching])
+  }, [searchResultsWithStatus.length, inputValue, searching])
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -87,12 +94,100 @@ export function SearchBar({
     }
   }
 
-  const handleCreateB2B = () => {
+  const handleCreateB2B = async () => {
     if (b2bQueue.length < 2) return
-    onAdd(b2bQueue)
-    setB2bQueue([])
-    setInputValue('')
-    setIsOpen(false)
+
+    const sortedIds = b2bQueue.map(a => a.id).sort()
+    // Ensure consistent case for the name to avoid unique constraint violations
+    const name = b2bQueue.map(a => a.name.toUpperCase()).join(' B2B ')
+    const fingerprint = sortedIds.join('_')
+
+    try {
+      // First try to find by member IDs instead of fingerprint
+      const { data: memberMatches } = await supabase
+        .from('artist_members')
+        .select('parent_artist_id')
+        .in('member_artist_id', sortedIds)
+
+      if (memberMatches?.length) {
+        // Get all parent IDs that have these members
+        const parentIds = Array.from(new Set(memberMatches.map(m => m.parent_artist_id)))
+        
+        // Check which parents have exactly these members
+        const { data: existingB2Bs } = await supabase
+          .from('artists')
+          .select('id, name, type, fingerprint')
+          .eq('type', 'b2b')
+          .in('id', parentIds)
+
+        if (existingB2Bs?.length) {
+          // Find the B2B that has exactly these members
+          for (const b2b of existingB2Bs) {
+            const { data: members } = await supabase
+              .from('artist_members')
+              .select('member_artist_id')
+              .eq('parent_artist_id', b2b.id)
+
+            const memberIds = members?.map(m => m.member_artist_id).sort() || []
+            if (JSON.stringify(memberIds) === JSON.stringify(sortedIds)) {
+              // Found exact match
+              onAdd({
+                ...b2b,
+                member_ids: memberIds
+              })
+              setB2bQueue([])
+              setInputValue('')
+              setIsOpen(false)
+              return
+            }
+          }
+        }
+      }
+
+      // No existing B2B found, create new one
+      const { data: newB2B, error: createError } = await supabase
+        .from('artists')
+        .insert({
+          name,
+          type: 'b2b',
+          fingerprint
+        })
+        .select()
+        .single()
+
+      if (createError) {
+        console.error('Failed to create B2B artist:', createError)
+        return
+      }
+
+      // Create member relationships
+      const { error: memberError } = await supabase
+        .from('artist_members')
+        .insert(
+          sortedIds.map(memberId => ({
+            parent_artist_id: newB2B.id,
+            member_artist_id: memberId
+          }))
+        )
+
+      if (memberError) {
+        console.error('Failed to create B2B member relationships:', memberError)
+        // Clean up the artist if member creation fails
+        await supabase.from('artists').delete().eq('id', newB2B.id)
+        return
+      }
+
+      onAdd({
+        ...newB2B,
+        member_ids: sortedIds
+      })
+      setB2bQueue([])
+      setInputValue('')
+      setIsOpen(false)
+
+    } catch (error) {
+      console.error('Error in B2B creation:', error)
+    }
   }
 
   const handleCancelB2B = () => {
@@ -110,7 +205,7 @@ export function SearchBar({
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}
           onFocus={() => {
-            if (filteredResults.length > 0) {
+            if (searchResultsWithStatus.length > 0) {
               setIsOpen(true)
             }
           }}
@@ -181,27 +276,38 @@ export function SearchBar({
               width: position.width,
             }}
           >
-            {filteredResults.map((artist) => {
-              const isQueued = b2bQueue.some((a) => a.id === artist.id)
+            {searchResultsWithStatus.map((result) => {
+              const { isInQueue, isInB2bQueue } = result
               return (
                 <div
-                  key={artist.id}
-                  className="searchResultItem"
-                  style={{ background: isQueued ? '#1f2937' : undefined }}
+                  key={result.id}
+                  className={clsx("searchResultItem", {
+                    "bg-gray-700": isInB2bQueue,
+                    "opacity-75": isInQueue && !b2bMode
+                  })}
                 >
-                  <span>{artist.name}</span>
+                  <span>{result.name}</span>
                   {b2bMode ? (
-                    <button onClick={() => toggleB2BArtist(artist)}>
-                      {isQueued ? '− Remove' : '+ Select'}
+                    <button 
+                      onClick={() => toggleB2BArtist(result)}
+                      className={clsx({
+                        "text-blue-400": isInB2bQueue
+                      })}
+                    >
+                      {isInB2bQueue ? '− Remove' : '+ Select'}
                     </button>
                   ) : (
-                    <button onClick={() => onAdd(artist)}>+ Add</button>
+                    isInQueue ? (
+                      <span className="text-gray-400 text-sm">Added</span>
+                    ) : (
+                      <button onClick={() => onAdd(result)}>+ Add</button>
+                    )
                   )}
                 </div>
               )
             })}
             {inputValue.trim().length > 0 &&
-              filteredResults.length === 0 &&
+              searchResultsWithStatus.length === 0 &&
               !searching && (
                 <div className="searchResultItem">
                   <span>No match found.</span>

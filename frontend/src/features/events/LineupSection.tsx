@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useMemo } from 'react'
 import type { Event, LineupEntry } from '../../types/types'
 import { deleteLineupEntry } from './useEvent'
 import { Trash } from 'lucide-react'
@@ -32,19 +32,35 @@ export function LineupSection({ event, lineup, setLineup, onTierChange, onSetNot
     }
   }, [menuOpenId])
 
-  const grouped = Array.from({ length: event.num_tiers }, (_, i) =>
-    lineup.filter((l) => l.tier === i + 1)
-  )
+  const grouped = useMemo(() => {
+    const groups: LineupEntry[][] = []
+    for (let i = 0; i < (event?.num_tiers || 3); i++) {
+      groups.push(lineup.filter((entry) => entry.tier === i + 1))
+    }
+    return groups
+  }, [lineup, event?.num_tiers])
+
+  const getDisplayName = (entry: LineupEntry) => {
+    if (entry.display_name) return entry.display_name
+    
+    // If any of the artists is a B2B, use its name
+    const b2bArtist = entry.artists.find(a => a.type === 'b2b')
+    if (b2bArtist) return b2bArtist.name
+    
+    // Otherwise join artist names with B2B if multiple
+    return entry.artists.length > 1
+      ? entry.artists.map(a => a.name).join(' B2B ')
+      : entry.artists[0].name
+  }
 
   return (
     <>
       {grouped.map((group, i) => (
         <div key={i} style={{ marginTop: '1rem' }}>
           <h3>Tier {i + 1}</h3>
-          {group.map((entry, index) => {
-            const nameToShow =
-              entry.display_name || entry.artists.map((a) => a.name).join(' B2B ')
-            const primaryId = entry.artists[0]?.id || `set-${index}`
+          {group.map((entry) => {
+            const nameToShow = getDisplayName(entry)
+            const primaryId = entry.artists[0]?.id || `set-${i}`
             const uniqueKey = entry.set_id
 
             return (

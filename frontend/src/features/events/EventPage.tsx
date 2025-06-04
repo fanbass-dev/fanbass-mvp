@@ -9,11 +9,7 @@ import { EventForm } from './EventForm'
 import { LineupSection } from './LineupSection'
 import { ArtistRankingForm } from '../artists/ArtistRankingForm'
 import { useEventRankings } from './useEventRankings'
-import {
-  normalizeLineupForRanking,
-  areLineupsEqual,
-  type B2BSet,
-} from '../../utils/normalizeLineupForRanking'
+import { normalizeLineupForRanking, areLineupsEqual } from '../../utils/normalizeLineupForRanking'
 import type { Event, Artist } from '../../types/types'
 
 export function EventPage() {
@@ -29,7 +25,9 @@ export function EventPage() {
   const artistIds = useMemo(() => lineup.flatMap((l) => l.artists.map((a) => a.id)), [lineup])
   const { rankings, updateTier } = useEventRankings(artistIds)
 
-  const [b2bSets, setB2bSets] = useState<B2BSet[]>([])
+  const normalizedQueue = useMemo(() => {
+    return normalizeLineupForRanking(lineup)
+  }, [lineup])
 
   useEffect(() => {
     if (event) {
@@ -60,26 +58,6 @@ export function EventPage() {
 
     updateSlug()
   }, [event, initialName, initialDate, setEvent])
-
-  useEffect(() => {
-    const loadB2Bs = async () => {
-      const { data, error } = await supabase
-        .from('b2b_sets')
-        .select('id, name, artist_ids')
-
-      if (error) {
-        console.error('Failed to load b2b_sets:', error)
-      } else {
-        setB2bSets(data || [])
-      }
-    }
-
-    loadB2Bs()
-  }, [])
-
-  const normalizedQueue = useMemo(() => {
-    return normalizeLineupForRanking(lineup, b2bSets)
-  }, [lineup, b2bSets])
 
   const handleUpdateEventField = async (field: keyof Event, value: string | number) => {
     if (!event) return
@@ -139,6 +117,54 @@ export function EventPage() {
     }
   }
 
+  const handleAddArtist = async (artist: Artist) => {
+    if (!event) return
+
+    const { data: setData, error: setError } = await supabase
+      .from('event_sets')
+      .insert([{
+        event_id: event.id,
+        tier: 1,
+        display_name: artist.type === 'b2b' ? artist.name : null,
+        set_note: ''
+      }])
+      .select()
+      .single()
+
+    if (setError || !setData) {
+      console.error('Failed to insert event_set:', setError)
+      return
+    }
+
+    // For B2B artists, add all member artists to the set
+    const artistIds = artist.type === 'b2b' && artist.member_ids 
+      ? artist.member_ids
+      : [artist.id]
+
+    const joins = artistIds.map(id => ({
+      set_id: setData.id,
+      artist_id: id,
+      event_id: event.id
+    }))
+
+    const { error: joinError } = await supabase
+      .from('event_set_artists')
+      .insert(joins)
+
+    if (joinError) {
+      console.error('Failed to insert event_set_artists:', joinError)
+      return
+    }
+
+    setLineup(prev => [...prev, {
+      set_id: setData.id,
+      tier: 1,
+      artists: [artist],
+      set_note: '',
+      display_name: artist.type === 'b2b' ? artist.name : undefined
+    }])
+  }
+
   if (!event) return null
 
   return (
@@ -156,86 +182,11 @@ export function EventPage() {
         searching={searching}
         onChange={setSearchTerm}
         onAdd={(artistOrArtists) => {
-          const addOne = async (artist: Artist) => {
-            if (!event) return
-
-            if (lineup.some((entry) => entry.artists.some((a) => a.id === artist.id))) return
-
-            const { data: setData, error: setError } = await supabase
-              .from('event_sets')
-              .insert([{ event_id: event.id, tier: 1, display_name: null, set_note: '' }])
-              .select()
-              .single()
-
-            if (setError || !setData) {
-              console.error('Failed to insert event_set:', setError)
-              return
-            }
-
-            const { error: joinError } = await supabase
-              .from('event_set_artists')
-              .insert([{ set_id: setData.id, artist_id: artist.id }])
-
-            if (joinError) {
-              console.error('Failed to insert into event_set_artists:', joinError)
-              return
-            }
-
-            setLineup((prev) => [
-              ...prev,
-              {
-                set_id: setData.id,
-                tier: 1,
-                artists: [artist],
-                set_note: '',
-                display_name: '',
-              },
-            ])
-          }
-
           if (Array.isArray(artistOrArtists)) {
-            ; (async () => {
-              if (!event) return
-
-              const { data: setData, error: setError } = await supabase
-                .from('event_sets')
-                .insert([{ event_id: event.id, tier: 1, display_name: null, set_note: '' }])
-                .select()
-                .single()
-
-              if (setError || !setData) {
-                console.error('Failed to insert B2B event_set:', setError)
-                return
-              }
-
-              const joins = artistOrArtists.map((artist) => ({
-                set_id: setData.id,
-                artist_id: artist.id,
-              }))
-
-              const { error: joinError } = await supabase
-                .from('event_set_artists')
-                .insert(joins)
-
-              if (joinError) {
-                console.error('Failed to insert B2B artists:', joinError)
-                return
-              }
-
-              setLineup((prev) => [
-                ...prev,
-                {
-                  set_id: setData.id,
-                  tier: 1,
-                  artists: artistOrArtists,
-                  set_note: '',
-                  display_name: '',
-                },
-              ])
-            })()
-          } else {
-            addOne(artistOrArtists)
+            console.warn('Array of artists received - this should not happen with new schema')
+            return
           }
+          handleAddArtist(artistOrArtists)
         }}
         queue={lineup.flatMap((l) => l.artists)}
       />

@@ -4,8 +4,9 @@ export type Artist = {
   id: string
   name: string
 } & Partial<{
-  is_b2b: boolean
-  original_ids: string[]
+  type: 'solo' | 'b2b'
+  fingerprint: string
+  member_ids: string[]
 }>
 
 

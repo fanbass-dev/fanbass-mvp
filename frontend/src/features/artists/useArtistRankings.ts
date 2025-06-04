@@ -19,7 +19,7 @@ export function useArtistRankings() {
 
       const { data: placements, error: placementError } = await supabase
         .from('artist_placements')
-        .select('artist_id, b2b_set_id, tier')
+        .select('artist_id, tier')
         .eq('user_id', currentUser.id)
 
       if (placementError) {
@@ -29,33 +29,56 @@ export function useArtistRankings() {
 
       const rankingsMap: Record<string, Tier> = {}
       for (const p of placements || []) {
-        const key = p.artist_id || (p.b2b_set_id && `b2b-${p.b2b_set_id}`)
-        if (key) {
-          rankingsMap[key] = p.tier
-        }
+        rankingsMap[p.artist_id] = p.tier
       }
       setRankings(rankingsMap)
 
       const artistIds = placements?.map(p => p.artist_id).filter(Boolean)
-      const { data: artists } = await supabase
+      if (!artistIds?.length) {
+        setMyArtists([])
+        return
+      }
+
+      // First get the base artist information
+      const { data: artists, error: artistError } = await supabase
         .from('artists')
-        .select('id, name')
-        .in('id', artistIds || [])
+        .select('id, name, type, fingerprint')
+        .in('id', artistIds)
+        .returns<Artist[]>()
 
-      const b2bIds = placements?.map(p => p.b2b_set_id).filter(Boolean)
-      const { data: b2bs } = await supabase
-        .from('b2b_sets')
-        .select('id, name, artist_ids')
-        .in('id', b2bIds || [])
+      if (artistError) {
+        console.error('Error loading artists', artistError)
+        return
+      }
 
-      const pseudoB2Bs: Artist[] = (b2bs || []).map((set) => ({
-        id: `b2b-${set.id}`,
-        name: set.name,
-        is_b2b: true,
-        original_ids: set.artist_ids,
-      }))
+      // For B2B artists, get their member IDs
+      const b2bArtists = artists?.filter(a => a.type === 'b2b') || []
+      if (b2bArtists.length > 0) {
+        const { data: memberData, error: memberError } = await supabase
+          .from('artist_members')
+          .select('parent_artist_id, member_artist_id')
+          .in('parent_artist_id', b2bArtists.map(a => a.id))
 
-      setMyArtists([...(artists || []), ...pseudoB2Bs])
+        if (memberError) {
+          console.error('Error loading artist members', memberError)
+        } else {
+          // Group member IDs by artist
+          const membersByArtist = memberData?.reduce((acc, { parent_artist_id, member_artist_id }) => {
+            acc[parent_artist_id] = acc[parent_artist_id] || []
+            acc[parent_artist_id].push(member_artist_id)
+            return acc
+          }, {} as Record<string, string[]>)
+
+          // Add member_ids to the artists
+          artists?.forEach(artist => {
+            if (artist.type === 'b2b') {
+              artist.member_ids = membersByArtist[artist.id] || []
+            }
+          })
+        }
+      }
+
+      setMyArtists(artists || [])
     }
 
     fetchData()
@@ -67,20 +90,16 @@ export function useArtistRankings() {
       return [...prev, artist]
     })
 
-    const isB2B = artist.id.startsWith('b2b-')
-    const key = isB2B ? 'b2b_set_id' : 'artist_id'
-    const value = isB2B ? artist.id.replace('b2b-', '') : artist.id
-
     const { error } = await supabase
       .from('artist_placements')
       .upsert(
         {
           user_id: user.id,
-          [key]: value,
+          artist_id: artist.id,
           tier: 'unranked',
         },
         {
-          onConflict: `user_id,${key}`,
+          onConflict: 'user_id,artist_id',
         }
       )
 
@@ -97,16 +116,12 @@ export function useArtistRankings() {
   const removeArtistFromQueue = async (id: string) => {
     if (!user) return
 
-    const isB2B = id.startsWith('b2b-')
-    const key = isB2B ? 'b2b_set_id' : 'artist_id'
-    const value = isB2B ? id.replace('b2b-', '') : id
-
     const { error } = await supabase
       .from('artist_placements')
       .delete()
       .match({
         user_id: user.id,
-        [key]: value,
+        artist_id: id,
       })
 
     if (error) {
@@ -131,20 +146,16 @@ export function useArtistRankings() {
       [id]: tier,
     }))
 
-    const isB2B = id.startsWith('b2b-')
-    const key = isB2B ? 'b2b_set_id' : 'artist_id'
-    const value = isB2B ? id.replace('b2b-', '') : id
-
     const { error } = await supabase
       .from('artist_placements')
       .upsert(
         {
           user_id: user.id,
-          [key]: value,
+          artist_id: id,
           tier,
         },
         {
-          onConflict: `user_id,${key}`,
+          onConflict: 'user_id,artist_id',
         }
       )
 

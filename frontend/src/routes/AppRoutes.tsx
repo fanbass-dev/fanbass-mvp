@@ -15,6 +15,7 @@ type Props = {
   onAddToQueue: (artist: Artist) => void
   useFormUI: boolean
   currentUser: any
+  myArtists: Artist[]
 }
 
 export function AppRoutes({
@@ -25,6 +26,7 @@ export function AppRoutes({
   onAddToQueue,
   useFormUI,
   currentUser,
+  myArtists,
 }: Props) {
   return (
     <Routes>
@@ -38,6 +40,7 @@ export function AppRoutes({
             onSearchChange={onSearchChange}
             onAddToQueue={onAddToQueue}
             useFormUI={useFormUI}
+            myArtists={myArtists}
           />
         }
       />
