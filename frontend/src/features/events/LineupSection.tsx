@@ -47,9 +47,9 @@ export function LineupSection({ event, lineup, setLineup, onTierChange, onSetNot
     const b2bArtist = entry.artists.find(a => a.type === 'b2b')
     if (b2bArtist) return b2bArtist.name
     
-    // Otherwise join artist names with B2B if multiple
+    // Otherwise join artist names with B2B if multiple, sorted alphabetically
     return entry.artists.length > 1
-      ? entry.artists.map(a => a.name).join(' B2B ')
+      ? entry.artists.map(a => a.name).sort().join(' B2B ')
       : entry.artists[0].name
   }
 

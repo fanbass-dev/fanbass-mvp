@@ -98,8 +98,11 @@ export function SearchBar({
     if (b2bQueue.length < 2) return
 
     const sortedIds = b2bQueue.map(a => a.id).sort()
-    // Ensure consistent case for the name to avoid unique constraint violations
-    const name = b2bQueue.map(a => a.name.toUpperCase()).join(' B2B ')
+    // Sort names alphabetically to ensure consistent ordering
+    const name = b2bQueue
+      .map(a => a.name.toUpperCase())
+      .sort()
+      .join(' B2B ')
     const fingerprint = sortedIds.join('_')
 
     try {

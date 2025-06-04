@@ -17,18 +17,18 @@ export function useEventRankings(artistIds: string[]) {
 
       setUserId(user.id)
 
+      // Get all artist placements for this user
       const { data, error } = await supabase
         .from('artist_placements')
         .select('artist_id, tier')
         .eq('user_id', user.id)
+        .in('artist_id', artistIds)
 
       if (error || !data) return
 
       const eventFiltered: Record<string, Tier> = {}
       data.forEach((row: { artist_id: string; tier: Tier }) => {
-        if (artistIds.includes(row.artist_id)) {
-          eventFiltered[row.artist_id] = row.tier
-        }
+        eventFiltered[row.artist_id] = row.tier
       })
 
       setRankings(eventFiltered)

@@ -11,6 +11,7 @@ import { ArtistRankingForm } from '../artists/ArtistRankingForm'
 import { useEventRankings } from './useEventRankings'
 import { normalizeLineupForRanking, areLineupsEqual } from '../../utils/normalizeLineupForRanking'
 import type { Event, Artist } from '../../types/types'
+import type { Session } from '@supabase/supabase-js'
 
 export function EventPage() {
   const { eventKey } = useParams()
@@ -22,7 +23,23 @@ export function EventPage() {
   const [searchTerm, setSearchTerm] = useState('')
   const { searchResults, searching } = useArtistSearch(searchTerm)
 
-  const artistIds = useMemo(() => lineup.flatMap((l) => l.artists.map((a) => a.id)), [lineup])
+  const artistIds = useMemo(() => {
+    const ids = new Set<string>()
+    lineup.forEach(entry => {
+      // If there's a B2B artist in the entry, use that
+      const b2bArtist = entry.artists.find(a => a.type === 'b2b')
+      if (b2bArtist) {
+        ids.add(b2bArtist.id)
+      } else {
+        // Add individual artists if not a B2B set
+        entry.artists.forEach(artist => {
+          ids.add(artist.id)
+        })
+      }
+    })
+    return Array.from(ids)
+  }, [lineup])
+  
   const { rankings, updateTier } = useEventRankings(artistIds)
 
   const normalizedQueue = useMemo(() => {
@@ -136,9 +153,9 @@ export function EventPage() {
       return
     }
 
-    // For B2B artists, add all member artists to the set
+    // For B2B artists, add both the B2B artist and its members to the set
     const artistIds = artist.type === 'b2b' && artist.member_ids 
-      ? artist.member_ids
+      ? [artist.id, ...artist.member_ids]  // Include both B2B and member IDs
       : [artist.id]
 
     const joins = artistIds.map(id => ({

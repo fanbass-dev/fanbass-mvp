@@ -24,7 +24,7 @@ export function useEvent(eventKey: string | undefined) {
 
       const { data: viewData, error } = await supabase
         .from('event_sets_view')
-        .select('tier, set_note, display_name, set_id, artist_id, artist_name')
+        .select('tier, set_note, display_name, set_id, artist_id, artist_name, type')
         .eq('event_id', eventData.id)
 
       if (error) {
@@ -39,7 +39,11 @@ export function useEvent(eventKey: string | undefined) {
 
       for (const row of viewData ?? []) {
         const existing = grouped.get(row.set_id)
-        const artist: Artist = { id: row.artist_id, name: row.artist_name }
+        const artist: Artist = { 
+          id: row.artist_id, 
+          name: row.artist_name,
+          type: row.type
+        }
         if (existing) {
           existing.artists.push(artist)
         } else {
