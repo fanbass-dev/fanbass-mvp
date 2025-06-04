@@ -10,7 +10,6 @@ export function useArtistRankings() {
   const [user, setUser] = useState<any>(null)
   const [myArtists, setMyArtists] = useState<Artist[]>([])
   const [rankings, setRankings] = useState<Record<string, Tier>>({})
-  const [refreshTrigger, setRefreshTrigger] = useState(0)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -83,7 +82,7 @@ export function useArtistRankings() {
     }
 
     fetchData()
-  }, [refreshTrigger])
+  }, [])
 
   const addArtistToQueue = async (artist: Artist) => {
     setMyArtists((prev) => {
@@ -127,18 +126,18 @@ export function useArtistRankings() {
 
     if (error) {
       console.error('Failed to remove placement:', error)
-      return
+      return false
     }
 
-    // Update rankings state directly
+    // Update both states directly
     setRankings(prev => {
       const next = { ...prev }
       delete next[id]
       return next
     })
+    setMyArtists(prev => prev.filter(artist => artist.id !== id))
 
-    // Trigger a re-fetch of the artists
-    setRefreshTrigger(prev => prev + 1)
+    return true
   }
 
   const updateTier = async (id: string, tier: Tier) => {
