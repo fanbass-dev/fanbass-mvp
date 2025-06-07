@@ -193,6 +193,16 @@ export function EventPage() {
 
       <div className="border-t border-gray-700 my-8" />
 
+      <div className="flex items-center justify-between gap-2 md:gap-4 mb-4">
+        <h2 className="text-lg font-semibold">Lineup</h2>
+        <button
+          onClick={() => setUseMyView((v) => !v)}
+          className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded"
+        >
+          {useMyView ? 'Show Event View' : 'Show My Rankings'}
+        </button>
+      </div>
+
       <SearchBar
         searchTerm={searchTerm}
         searchResults={searchResults}
@@ -209,16 +219,6 @@ export function EventPage() {
       />
 
       <div className="space-y-6">
-        <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-2 md:gap-4">
-          <h2 className="text-lg font-semibold">Lineup</h2>
-          <button
-            onClick={() => setUseMyView((v) => !v)}
-            className="bg-gray-700 hover:bg-gray-600 text-white text-sm px-4 py-2 rounded"
-          >
-            {useMyView ? 'Show Event View' : 'Show My Rankings'}
-          </button>
-        </div>
-
         {lineup.length === 0 ? (
           <p className="text-subtle text-sm">No artists added yet. Use search to add them.</p>
         ) : useMyView ? (
