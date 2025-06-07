@@ -18,6 +18,7 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
   const [isProfileOpen, setIsProfileOpen] = useState(false)
   const { profile, loading, isAdmin } = useUserContext()
   const profileMenuRef = useRef<HTMLDivElement>(null)
+  const mobileProfileMenuRef = useRef<HTMLDivElement>(null)
   
   const displayText = useMemo(() => {
     return loading ? 'Loading...' : profile?.displayName || 'Unknown User'
@@ -26,7 +27,12 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
   // Close profile menu when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
+      const target = event.target as Node
+      const clickedInMobileMenu = mobileProfileMenuRef.current?.contains(target)
+      const clickedInDesktopMenu = profileMenuRef.current?.contains(target)
+      
+      // Only close if clicked outside both menus
+      if (!clickedInMobileMenu && !clickedInDesktopMenu) {
         setIsProfileOpen(false)
       }
     }
@@ -54,7 +60,7 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
-          <div className="relative" ref={profileMenuRef}>
+          <div className="relative" ref={mobileProfileMenuRef}>
             <button 
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-2 text-sm hover:text-brand transition"
