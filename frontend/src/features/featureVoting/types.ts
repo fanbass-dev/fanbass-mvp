@@ -6,4 +6,6 @@ export type Feature = {
   vote_count: number
   user_voted: boolean
   created_at: string // ISO string
+  submitter_id: string
+  submitter_username: string | null
 }

@@ -31,9 +31,20 @@ export function FeatureItem({ feature, onVote }: Props) {
         }}
       >
         <h3 style={{ margin: 0 }}>{feature.title}</h3>
-        <span style={{ fontSize: '0.85rem', color: '#555' }}>
-          Submitted: {new Date(feature.created_at).toLocaleDateString()}
-        </span>
+        <div style={{ 
+          display: 'flex', 
+          flexDirection: 'column', 
+          alignItems: 'flex-end',
+          fontSize: '0.85rem',
+          color: '#555'
+        }}>
+          <span>
+            Submitted by: {feature.submitter_username}
+          </span>
+          <span>
+            {new Date(feature.created_at).toLocaleDateString()}
+          </span>
+        </div>
       </div>
 
       {feature.description && (

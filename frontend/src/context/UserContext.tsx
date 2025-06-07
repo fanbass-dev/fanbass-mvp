@@ -66,7 +66,7 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
         setProfile({
           username: profileData?.username ?? null,
-          displayName: displayNameData || currentUser.id.substring(0, 8)
+          displayName: displayNameData
         })
       } else {
         setRoles([])
