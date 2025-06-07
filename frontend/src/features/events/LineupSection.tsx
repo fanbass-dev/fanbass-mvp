@@ -66,30 +66,32 @@ export function LineupSection({ event, lineup, setLineup, onTierChange, onSetNot
             return (
               <div
                 key={uniqueKey}
-                className="flex flex-col md:flex-row md:items-center justify-between gap-2 py-2 relative"
+                className="flex flex-row items-center justify-between gap-2 py-2 relative"
               >
-                <div className="flex flex-row items-center gap-2">
-                  <span className="font-medium">{nameToShow}</span>
-                  {entry.set_note && (
-                    <input
-                      type="text"
-                      className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm"
-                      value={entry.set_note}
-                      size={Math.max(entry.set_note.length, 1)}
-                      onChange={(e) =>
-                        onSetNoteChange(primaryId, e.target.value)
-                      }
-                    />
-                  )}
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="font-medium truncate">{nameToShow}</span>
+                    {entry.set_note && (
+                      <input
+                        type="text"
+                        className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm flex-shrink-0"
+                        value={entry.set_note}
+                        size={Math.max(entry.set_note.length, 1)}
+                        onChange={(e) =>
+                          onSetNoteChange(primaryId, e.target.value)
+                        }
+                      />
+                    )}
+                  </div>
                 </div>
 
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 flex-shrink-0">
                   <select
                     value={entry.tier}
                     onChange={(e) =>
                       onTierChange(primaryId, Number(e.target.value))
                     }
-                    className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm"
+                    className="bg-gray-800 border border-gray-600 rounded px-2 py-1 text-sm w-[85px]"
                   >
                     {Array.from({ length: event.num_tiers }, (_, j) => (
                       <option key={j + 1} value={j + 1}>
