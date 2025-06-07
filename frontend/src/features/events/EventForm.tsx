@@ -40,7 +40,7 @@ export function EventForm({ event, onUpdate }: Props) {
       </div>
 
       <div className="flex flex-col">
-        <label htmlFor="num_tiers" className="text-sm mb-1">Number of Tiers</label>
+        <label htmlFor="num_tiers" className="text-sm mb-1">Number of Lineup Tiers</label>
         <input
           id="num_tiers"
           type="number"

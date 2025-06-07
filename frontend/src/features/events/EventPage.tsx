@@ -1,17 +1,16 @@
-import { useEffect, useState, useMemo } from 'react'
+import { useState, useEffect, useMemo } from 'react'
 import { useParams } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
 import { useArtistSearch } from '../artists/useArtistSearch'
 import { SearchBar } from '../../components/SearchBar'
+import { ArtistRankingForm } from '../artists/ArtistRankingForm'
+import { LineupSection } from './LineupSection'
+import { EventForm } from './EventForm'
 import { useEvent } from './useEvent'
 import { slugify } from './eventUtils'
-import { EventForm } from './EventForm'
-import { LineupSection } from './LineupSection'
-import { ArtistRankingForm } from '../artists/ArtistRankingForm'
 import { useEventRankings } from './useEventRankings'
 import { normalizeLineupForRanking, areLineupsEqual } from '../../utils/normalizeLineupForRanking'
-import type { Event, Artist } from '../../types/types'
-import type { Session } from '@supabase/supabase-js'
+import type { Artist, Event } from '../../types/types'
 
 export function EventPage() {
   const { eventKey } = useParams()
@@ -208,7 +207,7 @@ export function EventPage() {
         searchResults={searchResults}
         searching={searching}
         onChange={setSearchTerm}
-        onAdd={(artistOrArtists) => {
+        onAdd={(artistOrArtists: Artist | Artist[]) => {
           if (Array.isArray(artistOrArtists)) {
             console.warn('Array of artists received - this should not happen with new schema')
             return

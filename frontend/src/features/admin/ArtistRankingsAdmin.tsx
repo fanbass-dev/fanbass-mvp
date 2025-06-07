@@ -177,6 +177,12 @@ export default function ArtistRankingsAdmin() {
         <div className="flex flex-col items-end text-sm text-gray-400">
           <div>Unique Artists: {rows.length}</div>
           <div>Total Rankings: {totalPlacements}</div>
+          <button
+            onClick={() => setShowUnranked(prev => !prev)}
+            className="mt-2 text-brand hover:text-brand-light"
+          >
+            {showUnranked ? 'Show Ranked Only' : 'Show All Artists'}
+          </button>
         </div>
       </div>
 

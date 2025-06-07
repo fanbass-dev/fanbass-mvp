@@ -23,7 +23,6 @@ function App() {
       <UserProvider>
         <div style={{ fontFamily: 'sans-serif', height: '100vh', display: 'flex', flexDirection: 'column' }}>
           <Header
-            userEmail={user.email}
             onSignOut={signOut}
             useFormUI={useFormUI}
             onToggleView={() => setUseFormUI((prev) => !prev)}
