@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useParams, useNavigate } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
+import { useActivityTracking } from '../../hooks/useActivityTracking'
 
 type Props = {
   currentUser: any
@@ -10,6 +11,7 @@ export function ArtistPage({ currentUser }: Props) {
   const { id } = useParams()
   const isNew = id === 'new'
   const navigate = useNavigate()
+  const { trackActivity } = useActivityTracking()
 
   const [name, setName] = useState('')
   const [loading, setLoading] = useState(false)
@@ -51,11 +53,15 @@ export function ArtistPage({ currentUser }: Props) {
 
     try {
       if (isNew) {
-        const { error } = await supabase.from('artists').insert({
+        const { data, error } = await supabase.from('artists').insert({
           name: upperName,
           created_by: currentUser.id,
-        })
+        }).select().single()
+        
         if (error) throw error
+        
+        // Track the activity
+        await trackActivity('create_artist', { artist_id: data.id })
       } else {
         const { error } = await supabase
           .from('artists')

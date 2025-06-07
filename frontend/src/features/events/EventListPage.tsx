@@ -1,23 +1,19 @@
 import { useEffect, useState } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../../supabaseClient'
-
-type Event = {
-  id: string
-  name: string
-  date: string
-  slug: string
-}
+import { useActivityTracking } from '../../hooks/useActivityTracking'
+import type { Event } from '../../types/types'
 
 export function EventListPage() {
   const [events, setEvents] = useState<Event[]>([])
   const navigate = useNavigate()
+  const { trackActivity } = useActivityTracking()
 
   useEffect(() => {
     const loadEvents = async () => {
       const { data } = await supabase
         .from('events')
-        .select('id, name, date, slug')
+        .select('id, name, date, slug, location, num_tiers, status')
         .order('date', { ascending: false })
 
       setEvents(data || [])
@@ -45,6 +41,9 @@ export function EventListPage() {
       console.error('Failed to create event:', error)
       return
     }
+
+    // Track the activity
+    await trackActivity('create_event', { event_id: data.id })
 
     navigate(`/event/${data.id}`)
   }

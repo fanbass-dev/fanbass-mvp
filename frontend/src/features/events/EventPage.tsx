@@ -11,12 +11,14 @@ import { slugify } from './eventUtils'
 import { useEventRankings } from './useEventRankings'
 import { normalizeLineupForRanking, areLineupsEqual } from '../../utils/normalizeLineupForRanking'
 import type { Artist, Event } from '../../types/types'
+import { useActivityTracking } from '../../hooks/useActivityTracking'
 
 export function EventPage() {
   const { eventKey } = useParams()
   const [initialName, setInitialName] = useState('')
   const [initialDate, setInitialDate] = useState('')
   const [useMyView, setUseMyView] = useState(false)
+  const { trackActivity } = useActivityTracking()
 
   const { event, setEvent, lineup, setLineup, creator } = useEvent(eventKey)
   const [searchTerm, setSearchTerm] = useState('')
@@ -171,6 +173,13 @@ export function EventPage() {
       console.error('Failed to insert event_set_artists:', joinError)
       return
     }
+
+    // Track the activity
+    await trackActivity('add_artist_to_lineup', {
+      artist_id: artist.id,
+      event_id: event.id,
+      set_id: setData.id
+    })
 
     setLineup(prev => [...prev, {
       set_id: setData.id,
