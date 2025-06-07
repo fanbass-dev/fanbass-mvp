@@ -5,6 +5,7 @@ import type { Event, LineupEntry, Artist } from '../../types/types'
 export function useEvent(eventKey: string | undefined) {
   const [event, setEvent] = useState<Event | null>(null)
   const [lineup, setLineup] = useState<LineupEntry[]>([])
+  const [creator, setCreator] = useState<{ displayName: string } | null>(null)
 
   useEffect(() => {
     const loadEvent = async () => {
@@ -15,12 +16,22 @@ export function useEvent(eventKey: string | undefined) {
 
       const { data: eventData } = await supabase
         .from('events')
-        .select('*')
+        .select('*, created_by')
         .eq(field, eventKey)
         .single()
 
       if (!eventData) return
       setEvent(eventData)
+
+      // Fetch creator info if available
+      if (eventData.created_by) {
+        const { data: displayName } = await supabase
+          .rpc('get_display_name', { user_id: eventData.created_by })
+        
+        if (displayName) {
+          setCreator({ displayName })
+        }
+      }
 
       const { data: viewData, error } = await supabase
         .from('event_sets_view')
@@ -72,7 +83,7 @@ export function useEvent(eventKey: string | undefined) {
     loadEvent()
   }, [eventKey])
 
-  return { event, setEvent, lineup, setLineup }
+  return { event, setEvent, lineup, setLineup, creator }
 }
 
 export async function deleteLineupEntry(eventId: string, setId: string) {

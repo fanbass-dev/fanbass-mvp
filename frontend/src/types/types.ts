@@ -18,6 +18,8 @@ export type Event = {
   num_tiers: number
   status?: string
   slug?: string
+  created_by?: string
+  created_at?: string
 }
 
 export type LineupEntry = {

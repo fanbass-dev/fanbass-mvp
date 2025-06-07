@@ -18,7 +18,7 @@ export function EventPage() {
   const [initialDate, setInitialDate] = useState('')
   const [useMyView, setUseMyView] = useState(false)
 
-  const { event, setEvent, lineup, setLineup } = useEvent(eventKey)
+  const { event, setEvent, lineup, setLineup, creator } = useEvent(eventKey)
   const [searchTerm, setSearchTerm] = useState('')
   const { searchResults, searching } = useArtistSearch(searchTerm)
 
@@ -186,7 +186,27 @@ export function EventPage() {
   return (
     <div className="max-w-3xl w-full mx-auto px-4 md:px-8 py-6 text-white">
       <div>
-        <h2 className="text-xl font-semibold mb-4">Event Details</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="text-xl font-semibold">Event Details</h2>
+          <div className="text-sm text-gray-400 flex items-center gap-4">
+            {creator && (
+              <div className="flex items-center gap-1">
+                <span className="text-gray-500">Added by</span>
+                <span>{creator.displayName}</span>
+              </div>
+            )}
+            {event?.created_at && (
+              <div className="flex items-center gap-1">
+                <span className="text-gray-500">on</span>
+                <span>{new Date(event.created_at).toLocaleDateString(undefined, {
+                  year: 'numeric',
+                  month: 'long',
+                  day: 'numeric'
+                })}</span>
+              </div>
+            )}
+          </div>
+        </div>
         <EventForm event={event} onUpdate={handleUpdateEventField} />
       </div>
 
