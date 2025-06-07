@@ -12,7 +12,7 @@ type Row = {
     artistNames: string[]
 }
 
-type EventPreview = Pick<Event, 'id' | 'name' | 'date'>
+type EventPreview = Pick<Event, 'id' | 'name' | 'date' | 'created_by'>
 
 export function LineupUploader() {
     const [eventId, setEventId] = useState('')
@@ -25,7 +25,7 @@ export function LineupUploader() {
         const loadEvents = async () => {
             const { data } = await supabase
                 .from('events')
-                .select('id, name, date')
+                .select('id, name, date, created_by')
             if (data) setEvents(data as EventPreview[])
         }
         loadEvents()

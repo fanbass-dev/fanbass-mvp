@@ -13,7 +13,7 @@ export function EventListPage() {
     const loadEvents = async () => {
       const { data } = await supabase
         .from('events')
-        .select('id, name, date, slug, location, num_tiers, status')
+        .select('id, name, date, slug, location, num_tiers, status, created_by')
         .order('date', { ascending: false })
 
       setEvents(data || [])
@@ -23,6 +23,14 @@ export function EventListPage() {
   }, [])
 
   const handleCreateNewEvent = async () => {
+    // Get the current user's ID
+    const { data: { user } } = await supabase.auth.getUser()
+    
+    if (!user) {
+      console.error('No authenticated user found')
+      return
+    }
+
     const { data, error } = await supabase
       .from('events')
       .insert([
@@ -32,6 +40,7 @@ export function EventListPage() {
           location: '',
           num_tiers: 3,
           status: 'draft',
+          created_by: user.id,
         },
       ])
       .select('id')

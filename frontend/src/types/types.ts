@@ -16,9 +16,9 @@ export type Event = {
   date: string
   location: string
   num_tiers: number
+  created_by: string
   status?: string
   slug?: string
-  created_by?: string
   created_at?: string
 }
 
