@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUserContext } from '../context/UserContext'
-import { Menu, X, User, LogOut } from 'lucide-react'
+import { Menu, X, User, LogOut, BarChart2 } from 'lucide-react'
 import { FaDiscord as RawFaDiscord } from 'react-icons/fa'
 
 const FaDiscord = RawFaDiscord as unknown as React.FC<React.SVGProps<SVGSVGElement>>
@@ -40,10 +40,12 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const handleProfileClick = (action: 'profile' | 'logout') => {
+  const handleProfileClick = (action: 'profile' | 'stats' | 'logout') => {
     setIsProfileOpen(false)
     if (action === 'profile') {
       navigate('/settings/profile')
+    } else if (action === 'stats') {
+      navigate('/settings/stats')
     } else {
       onSignOut()
     }
@@ -79,6 +81,13 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
                   >
                     <User className="w-4 h-4" />
                     Profile
+                  </button>
+                  <button
+                    onClick={() => handleProfileClick('stats')}
+                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2"
+                  >
+                    <BarChart2 className="w-4 h-4" />
+                    My Stats
                   </button>
                   <button
                     onClick={() => handleProfileClick('logout')}
@@ -140,6 +149,13 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
                     >
                       <User className="w-4 h-4" />
                       Profile
+                    </button>
+                    <button
+                      onClick={() => handleProfileClick('stats')}
+                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2"
+                    >
+                      <BarChart2 className="w-4 h-4" />
+                      My Stats
                     </button>
                     <button
                       onClick={() => handleProfileClick('logout')}

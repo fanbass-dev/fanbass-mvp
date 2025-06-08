@@ -9,7 +9,6 @@ type Props = {
 }
 
 export function FeatureList({ features, onVote }: Props) {
-  console.log('Rendering features:', features) // 👈 add this
   return (
     <div>
       {features.map((feature) => (
@@ -18,4 +17,3 @@ export function FeatureList({ features, onVote }: Props) {
     </div>
   )
 }
-
