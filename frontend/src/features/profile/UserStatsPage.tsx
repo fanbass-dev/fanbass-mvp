@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react'
 import { supabase } from '../../supabaseClient'
 import { useUserContext } from '../../context/UserContext'
+import { UserStats as GamificationStats } from '../../components/UserStats'
 
-type UserStats = {
+type ActivityStats = {
   events_created: number
   artists_created: number
   artists_added_to_lineup: number
@@ -10,7 +11,7 @@ type UserStats = {
 
 export function UserStatsPage() {
   const { user } = useUserContext()
-  const [stats, setStats] = useState<UserStats | null>(null)
+  const [stats, setStats] = useState<ActivityStats | null>(null)
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState<string | null>(null)
 
@@ -24,7 +25,7 @@ export function UserStatsPage() {
 
         if (error) throw error
 
-        const stats: UserStats = {
+        const stats: ActivityStats = {
           events_created: data.filter(a => a.activity_type === 'create_event').length,
           artists_created: data.filter(a => a.activity_type === 'create_artist').length,
           artists_added_to_lineup: data.filter(a => a.activity_type === 'add_artist_to_lineup').length
@@ -60,7 +61,8 @@ export function UserStatsPage() {
     <div className="max-w-3xl w-full mx-auto px-4 md:px-8 py-6">
       <h1 className="text-xl font-semibold mb-4">My Stats</h1>
       
-      <div className="grid grid-cols-3 gap-2">
+      {/* Activity Stats */}
+      <div className="grid grid-cols-3 gap-2 mb-8">
         <div className="bg-gray-800 rounded-lg px-1.5 flex flex-col items-center justify-center text-center">
           <div className="py-2 space-y-0.5">
             <p className="text-2xl font-bold text-brand">{stats.events_created}</p>
@@ -81,6 +83,12 @@ export function UserStatsPage() {
             <h2 className="text-base text-gray-300">Sets Added</h2>
           </div>
         </div>
+      </div>
+
+      {/* Gamification Stats */}
+      <div className="mt-8 pt-8 border-t border-gray-700">
+        <h2 className="text-lg font-semibold mb-6">Progress & Achievements</h2>
+        <GamificationStats />
       </div>
     </div>
   )

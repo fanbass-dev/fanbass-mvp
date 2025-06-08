@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { useUserContext } from '../context/UserContext'
 import { Menu, X, User, LogOut, BarChart2 } from 'lucide-react'
 import { FaDiscord as RawFaDiscord } from 'react-icons/fa'
+import { GamificationService } from '../services/gamification'
+import { UserLevel, UserTitle } from '../config/gamification'
 
 const FaDiscord = RawFaDiscord as unknown as React.FC<React.SVGProps<SVGSVGElement>>
 
@@ -16,13 +18,30 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
-  const { profile, loading, isAdmin } = useUserContext()
+  const { profile, loading, isAdmin, user } = useUserContext()
+  const [userLevel, setUserLevel] = useState<UserLevel | null>(null)
+  const [userTitle, setUserTitle] = useState<UserTitle | null>(null)
   const profileMenuRef = useRef<HTMLDivElement>(null)
   const mobileProfileMenuRef = useRef<HTMLDivElement>(null)
   
   const displayText = useMemo(() => {
     return loading ? 'Loading...' : profile?.displayName || 'Unknown User'
   }, [loading, profile?.displayName])
+
+  // Load user level and title
+  useEffect(() => {
+    async function loadUserLevel() {
+      if (!user?.id) return
+      try {
+        const { level, title } = await GamificationService.getUserLevel(user.id)
+        setUserLevel(level)
+        setUserTitle(title)
+      } catch (err) {
+        console.error('Error loading user level:', err)
+      }
+    }
+    loadUserLevel()
+  }, [user?.id])
 
   // Close profile menu when clicking outside
   useEffect(() => {
@@ -67,11 +86,20 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
               onClick={() => setIsProfileOpen(!isProfileOpen)}
               className="flex items-center gap-2 text-sm hover:text-brand transition"
             >
-              <strong>{displayText}</strong>
+              <div className="text-right">
+                <strong>{displayText}</strong>
+                {userLevel && userTitle && (
+                  <div className="text-xs">
+                    <span className={userTitle.color}>{userTitle.name}</span>
+                    <span className="text-gray-400 ml-1">Lvl {userLevel.currentLevel.toString()}</span>
+                  </div>
+                )}
+              </div>
               <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center">
                 <User className="w-4 h-4" />
               </div>
             </button>
+            
             {isProfileOpen && (
               <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
                 <div className="py-1" role="menu" aria-orientation="vertical">
@@ -103,7 +131,7 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
         </div>
 
         {/* Desktop View */}
-        <div className="hidden md:flex justify-between items-center gap-4 mt-0">
+        <div className="hidden md:flex items-center justify-between">
           <nav className="flex flex-wrap items-center gap-2 relative">
             <button onClick={() => navigate('/')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base">Artists</button>
             <button onClick={() => navigate('/events')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base">Events</button>
@@ -129,45 +157,51 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
             </a>
           </nav>
 
-          <div className="flex items-center gap-4">
-            <div className="relative" ref={profileMenuRef}>
-              <button 
-                onClick={() => setIsProfileOpen(!isProfileOpen)}
-                className="flex items-center gap-2 text-sm hover:text-brand transition group"
-              >
+          <div className="relative" ref={profileMenuRef}>
+            <button 
+              onClick={() => setIsProfileOpen(!isProfileOpen)}
+              className="flex items-center gap-2 text-sm hover:text-brand transition group"
+            >
+              <div className="text-right">
                 <strong>{displayText}</strong>
-                <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center group-hover:bg-gray-600">
-                  <User className="w-4 h-4" />
-                </div>
-              </button>
-              {isProfileOpen && (
-                <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
-                  <div className="py-1" role="menu" aria-orientation="vertical">
-                    <button
-                      onClick={() => handleProfileClick('profile')}
-                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2"
-                    >
-                      <User className="w-4 h-4" />
-                      Profile
-                    </button>
-                    <button
-                      onClick={() => handleProfileClick('stats')}
-                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2"
-                    >
-                      <BarChart2 className="w-4 h-4" />
-                      My Stats
-                    </button>
-                    <button
-                      onClick={() => handleProfileClick('logout')}
-                      className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2"
-                    >
-                      <LogOut className="w-4 h-4" />
-                      Log out
-                    </button>
+                {userLevel && userTitle && (
+                  <div className="text-xs">
+                    <span className={userTitle.color}>{userTitle.name}</span>
+                    <span className="text-gray-400 ml-1">Lvl {userLevel.currentLevel.toString()}</span>
                   </div>
+                )}
+              </div>
+              <div className="w-8 h-8 rounded-full bg-gray-700 flex items-center justify-center group-hover:bg-gray-600">
+                <User className="w-4 h-4" />
+              </div>
+            </button>
+            {isProfileOpen && (
+              <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
+                <div className="py-1" role="menu" aria-orientation="vertical">
+                  <button
+                    onClick={() => handleProfileClick('profile')}
+                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2"
+                  >
+                    <User className="w-4 h-4" />
+                    Profile
+                  </button>
+                  <button
+                    onClick={() => handleProfileClick('stats')}
+                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2"
+                  >
+                    <BarChart2 className="w-4 h-4" />
+                    My Stats
+                  </button>
+                  <button
+                    onClick={() => handleProfileClick('logout')}
+                    className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700 flex items-center gap-2"
+                  >
+                    <LogOut className="w-4 h-4" />
+                    Log out
+                  </button>
                 </div>
-              )}
-            </div>
+              </div>
+            )}
           </div>
         </div>
 
