@@ -70,6 +70,11 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
+  // Log when state changes
+  useEffect(() => {
+    console.log('menuOpenId changed to:', menuOpenId)
+  }, [menuOpenId])
+
   const menuRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
@@ -79,6 +84,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
         menuRefs.current[menuOpenId] &&
         !menuRefs.current[menuOpenId]!.contains(event.target as Node)
       ) {
+        console.log('Click outside detected, closing menu:', menuOpenId)
         setMenuOpenId(null)
       }
     }
@@ -160,22 +166,16 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                             onUpdateTier={updateTier}
                           />
                           {removeArtist && (
-                            <div
-                              className="relative z-[40]"
+                            <div 
+                              className="relative flex items-center gap-1"
                               ref={(el) => {
                                 menuRefs.current[artist.id] = el
                               }}
                             >
-                              <button
-                                onClick={() =>
-                                  setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
-                                }
-                                className="text-white text-xl px-1"
-                              >
-                                ⋯
-                              </button>
                               {menuOpenId === artist.id && (
-                                <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[41]">
+                                <div 
+                                  className="bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg"
+                                >
                                   <button
                                     onClick={() => {
                                       removeArtist(artist.id)
@@ -188,6 +188,14 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                                   </button>
                                 </div>
                               )}
+                              <button
+                                onClick={() => {
+                                  setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
+                                }}
+                                className="text-white text-xl px-1"
+                              >
+                                ⋯
+                              </button>
                             </div>
                           )}
                         </div>
