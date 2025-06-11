@@ -35,8 +35,8 @@ export function MainLayout({
   const [isSearchVisible, setIsSearchVisible] = useState(false)
 
   return (
-    <div className="max-w-3xl w-full mx-auto text-white">
-      <div className="sticky top-[80px] bg-surface shadow-md z-[45]">
+    <div className="flex flex-col h-screen">
+      <div className="sticky top-0 bg-surface shadow-md z-[45]">
         <div className="px-4 md:px-8 py-4 border-b border-gray-800">
           <div className="flex items-center justify-between">
             <h2>My Artist Rankings</h2>
@@ -68,8 +68,8 @@ export function MainLayout({
         </div>
       </div>
 
-      <div className="px-4 md:px-8">
-        <div className="transition-all duration-300">
+      <div className="flex-1 overflow-hidden px-4 md:px-8">
+        <div className="h-full">
           {useFormUI ? (
             <ArtistRankingForm
               queue={myArtists}

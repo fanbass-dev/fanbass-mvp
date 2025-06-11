@@ -113,11 +113,11 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
   }
 
   return (
-    <div className="relative">
+    <div className="h-full flex flex-col">
       {Object.keys(grouped).length === 0 ? (
         <p>No artists added yet. Use search to add.</p>
       ) : (
-        <div className="h-[calc(100vh-180px)] overflow-y-auto">
+        <div className="flex-1 overflow-y-auto">
           {(Object.keys(TIER_LABELS) as Tier[]).map((tier) => {
             const isNotForMe = tier === 'not_for_me'
             const isExpanded = !isNotForMe || notForMeExpanded
@@ -127,8 +127,8 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
             if (isNotForMe && artists.length === 0) return null
 
             return (
-              <div key={tier} className="mb-8">
-                <div className={`sticky top-0 bg-surface z-[40] border-b border-gray-800 shadow-sm py-3`}>
+              <div key={tier} className="mb-4">
+                <div className={`sticky top-0 bg-surface z-[40] border-b border-gray-800 shadow-sm py-2`}>
                   <h3 className="flex justify-between items-center">
                     <span>
                       {TIER_LABELS[tier]} ({grouped[tier]?.length || 0})
@@ -145,7 +145,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                 </div>
 
                 {isExpanded && (
-                  <div className="mt-3">
+                  <div className="mt-2">
                     {artists.map((artist) => (
                       <div
                         key={artist.id}
