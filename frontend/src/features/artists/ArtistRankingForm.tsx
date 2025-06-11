@@ -155,7 +155,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                     {artists.map((artist) => (
                       <div
                         key={artist.id}
-                        className="flex items-center justify-between gap-3 mb-3 relative overflow-visible"
+                        className="flex items-center justify-between gap-3 mb-2 relative overflow-visible"
                       >
                         <div className="text-sm truncate basis-1/2">{artist.name}</div>
 
@@ -174,14 +174,14 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                             >
                               {menuOpenId === artist.id && (
                                 <div 
-                                  className="bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg"
+                                  className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg"
                                 >
                                   <button
                                     onClick={() => {
                                       removeArtist(artist.id)
                                       setMenuOpenId(null)
                                     }}
-                                    className="flex items-center justify-center text-red-600 hover:text-red-700 p-1"
+                                    className="flex items-center justify-center text-red-600 hover:text-red-700 p-0.5"
                                     aria-label="Remove artist"
                                   >
                                     <Trash className="w-4 h-4" />
@@ -192,7 +192,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                                 onClick={() => {
                                   setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
                                 }}
-                                className="text-white text-xl px-1"
+                                className="text-white text-xl px-1 py-0.5"
                               >
                                 ⋯
                               </button>
