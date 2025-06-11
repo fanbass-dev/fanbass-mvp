@@ -43,7 +43,7 @@ function RankDropdown({
         <ChevronDown className="absolute right-2 w-4 h-4 text-gray-400" />
       </button>
               {isOpen && (
-          <div className="absolute top-full right-0 mt-1 w-36 bg-gray-800 border border-gray-700 rounded shadow-lg py-1 z-[100]">
+          <div className="absolute top-full right-0 mt-1 w-36 bg-gray-800 border border-gray-700 rounded shadow-lg py-1 z-[41]">
           {(Object.keys(TIER_LABELS) as Tier[]).map((tier) => (
             <button
               key={tier}
@@ -127,7 +127,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
 
           return (
             <div key={tier} className="mb-8">
-              <div className={`sticky ${isSearchVisible ? 'top-[132px]' : 'top-[80px]'} bg-surface z-[45] border-b border-gray-800 shadow-sm py-3`}>
+              <div className={`sticky ${isSearchVisible ? 'top-[132px]' : 'top-[80px]'} bg-surface z-[40] border-b border-gray-800 shadow-sm py-3`}>
                 <h3 className="flex justify-between items-center">
                   <span>
                     {TIER_LABELS[tier]} ({grouped[tier]?.length || 0})
@@ -160,7 +160,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                         />
                         {removeArtist && (
                           <div
-                            className="relative z-[45]"
+                            className="relative z-[40]"
                             ref={(el) => {
                               menuRefs.current[artist.id] = el
                             }}
@@ -174,7 +174,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                               ⋯
                             </button>
                             {menuOpenId === artist.id && (
-                              <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[100]">
+                              <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[41]">
                                 <button
                                   onClick={() => {
                                     removeArtist(artist.id)

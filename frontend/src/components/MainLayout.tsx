@@ -36,7 +36,7 @@ export function MainLayout({
 
   return (
     <div className="max-w-3xl w-full mx-auto text-white">
-      <div className="sticky top-[80px] bg-surface shadow-md z-[50]">
+      <div className="sticky top-[80px] bg-surface shadow-md z-[45]">
         <div className="px-4 md:px-8 py-4 border-b border-gray-800">
           <div className="flex items-center justify-between">
             <h2>My Artist Rankings</h2>
