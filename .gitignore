@@ -30,3 +30,9 @@ docs/sensitive/
 
 # Cursor AI rules
 .cursor/
+
+# Random backup files
+backups/
+
+# Screenshots for testing
+browser_screenshots/

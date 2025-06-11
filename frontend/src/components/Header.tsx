@@ -15,6 +15,8 @@ type Props = {
 }
 
 export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
+  console.log('Header component rendered!', { useFormUI, timestamp: new Date().toISOString() })
+  
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)

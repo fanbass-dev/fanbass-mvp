@@ -5,11 +5,13 @@ import { supabase } from '../../supabaseClient'
 import { getCurrentUser } from '../../services/authService'
 import { Artist } from '../../types/types'
 import type { Tier } from '../../constants/tiers'
+import { useActivityTracking } from '../../hooks/useActivityTracking'
 
 export function useArtistRankings() {
   const [user, setUser] = useState<any>(null)
   const [myArtists, setMyArtists] = useState<Artist[]>([])
   const [rankings, setRankings] = useState<Record<string, Tier>>({})
+  const { trackActivity } = useActivityTracking()
 
   useEffect(() => {
     const fetchData = async () => {
@@ -164,6 +166,9 @@ export function useArtistRankings() {
 
     if (error) {
       console.error('Failed to update tier:', error)
+    } else {
+      // Track the activity
+      await trackActivity('rank_artist', { artist_id: id })
     }
   }
 

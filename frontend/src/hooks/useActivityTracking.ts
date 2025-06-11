@@ -1,8 +1,9 @@
 import { supabase } from '../supabaseClient'
+import { ActivityType } from '../config/gamification'
 
 export function useActivityTracking() {
   const trackActivity = async (
-    activity_type: 'create_artist' | 'create_event' | 'add_artist_to_lineup',
+    activity_type: ActivityType,
     metadata: {
       artist_id?: string
       event_id?: string

@@ -1,73 +1,7 @@
 import { supabase } from '../supabaseClient';
-import { XP_CONFIG, ActivityType, UserTitle, XPReward, UserLevel } from '../config/gamification';
+import { ActivityType, UserTitle, XPReward, UserLevel } from '../config/gamification';
 
 export class GamificationService {
-    /**
-     * Grants XP for an activity and returns the reward details
-     */
-    static async grantXP(userId: string, activityType: ActivityType): Promise<{
-        xpGained: bigint;
-        levelsGained: bigint;
-        wasCrit: boolean;
-        newTitle?: UserTitle;
-        totalLevel?: bigint;
-    }> {
-        const baseXP = XP_CONFIG.ACTIVITIES[activityType];
-        
-        // Generate multipliers
-        const chaos = Math.random() * (XP_CONFIG.CHAOS_MAX - XP_CONFIG.CHAOS_MIN) + XP_CONFIG.CHAOS_MIN;
-        const crit = Math.random() < XP_CONFIG.CRIT_CHANCE ? 2.0 : 1.0;
-        
-        // Get user's current prestige multiplier and XP overflow
-        const { data: userData } = await supabase
-            .from('user_levels')
-            .select('prestige_multiplier, xp_overflow')
-            .eq('user_id', userId)
-            .single();
-            
-        const prestigeMultiplier = userData?.prestige_multiplier || 1.0;
-        const currentOverflow = BigInt(userData?.xp_overflow || 0);
-        
-        // Calculate final XP with all multipliers
-        const xpGain = BigInt(Math.round(Number(baseXP) * chaos * crit * prestigeMultiplier));
-        const totalXP = xpGain + currentOverflow;
-        const levelsGained = totalXP / XP_CONFIG.XP_PER_LEVEL;
-        const newOverflow = totalXP % XP_CONFIG.XP_PER_LEVEL;
-        
-        // Update everything atomically using our database function
-        const { error } = await supabase.rpc('update_user_xp', {
-            p_user_id: userId,
-            p_xp_gained: xpGain.toString(),
-            p_levels_gained: levelsGained.toString(),
-            p_new_overflow: newOverflow.toString(),
-            p_activity_type: activityType,
-            p_chaos_multi: chaos,
-            p_crit_multi: crit
-        });
-
-        if (error) {
-            console.error('Error granting XP:', error);
-            throw error;
-        }
-
-        // Get user's new total level for title calculation
-        const { data: newLevelData } = await supabase
-            .from('user_levels')
-            .select('current_level')
-            .eq('user_id', userId)
-            .single();
-
-        const totalLevel = BigInt(newLevelData?.current_level || 0);
-        
-        return {
-            xpGained: xpGain,
-            levelsGained,
-            wasCrit: crit > 1,
-            newTitle: this.calculateTitle(Number(totalLevel)),
-            totalLevel
-        };
-    }
-
     /**
      * Gets a user's current level and title
      */
@@ -158,8 +92,45 @@ export class GamificationService {
      * Calculates the user's title based on their level
      */
     private static calculateTitle(level: number): UserTitle {
-        return XP_CONFIG.TITLES.find(
+        const TITLES = [
+            {
+                min: 1,
+                max: 49,
+                name: "Ceiling Fan",
+                description: "Just discovered what music is",
+                color: "text-gray-400"
+            },
+            {
+                min: 50,
+                max: 499,
+                name: "Bassline Baddie",
+                description: "Can tell a kick drum from a snare... sometimes",
+                color: "text-blue-400"
+            },
+            {
+                min: 500,
+                max: 4999,
+                name: "Subwoofer Sage",
+                description: "Neighbors hate this one weird trick",
+                color: "text-purple-400"
+            },
+            {
+                min: 5000,
+                max: 9999,
+                name: "Interstellar Raver",
+                description: "Has achieved resonance with the cosmic frequencies",
+                color: "text-yellow-400"
+            },
+            {
+                min: 10000,
+                name: "✶ Trans-Dimensional Fan Deity ✶",
+                description: "Has transcended the mortal plane of music appreciation",
+                color: "text-red-400"
+            }
+        ] as const;
+
+        return TITLES.find(
             title => level >= title.min && (!title.max || level <= title.max)
-        ) || XP_CONFIG.TITLES[0];
+        ) || TITLES[0];
     }
 } 

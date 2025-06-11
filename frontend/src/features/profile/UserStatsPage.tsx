@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react'
 import { supabase } from '../../supabaseClient'
 import { useUserContext } from '../../context/UserContext'
 import { UserStats as GamificationStats } from '../../components/UserStats'
+import { GamificationGuide } from '../../components/GamificationGuide'
 
 type ActivityStats = {
   events_created: number
@@ -89,6 +90,11 @@ export function UserStatsPage() {
       <div className="mt-8 pt-8 border-t border-gray-700">
         <h2 className="text-lg font-semibold mb-6">Progress & Achievements</h2>
         <GamificationStats />
+      </div>
+
+      {/* Gamification Guide */}
+      <div className="mt-8 pt-8 border-t border-gray-700">
+        <GamificationGuide />
       </div>
     </div>
   )

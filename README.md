@@ -36,3 +36,6 @@ MVP for FanBass – fan-first music data platform
    ```bash
    supabase migration list
    ```
+
+
+To enable browser tools for cursor, run npx @agentdeskai/browser-tools-server@1.2.0
