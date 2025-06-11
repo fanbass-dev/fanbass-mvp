@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useMemo } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useUserContext } from '../context/UserContext'
-import { Menu, X, User, LogOut, BarChart2 } from 'lucide-react'
+import { Menu, X, User, LogOut, BarChart2, ChevronDown } from 'lucide-react'
 import { FaDiscord as RawFaDiscord } from 'react-icons/fa'
 import { GamificationService } from '../services/gamification'
 import { UserLevel, UserTitle } from '../config/gamification'
@@ -18,11 +18,13 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
   const navigate = useNavigate()
   const [isOpen, setIsOpen] = useState(false)
   const [isProfileOpen, setIsProfileOpen] = useState(false)
+  const [isAdminOpen, setIsAdminOpen] = useState(false)
   const { profile, loading, isAdmin, user } = useUserContext()
   const [userLevel, setUserLevel] = useState<UserLevel | null>(null)
   const [userTitle, setUserTitle] = useState<UserTitle | null>(null)
   const profileMenuRef = useRef<HTMLDivElement>(null)
   const mobileProfileMenuRef = useRef<HTMLDivElement>(null)
+  const adminMenuRef = useRef<HTMLDivElement>(null)
   
   const displayText = useMemo(() => {
     return loading ? 'Loading...' : profile?.displayName || 'Unknown User'
@@ -43,16 +45,19 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
     loadUserLevel()
   }, [user?.id])
 
-  // Close profile menu when clicking outside
+  // Close menus when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
       const target = event.target as Node
       const clickedInMobileMenu = mobileProfileMenuRef.current?.contains(target)
       const clickedInDesktopMenu = profileMenuRef.current?.contains(target)
+      const clickedInAdminMenu = adminMenuRef.current?.contains(target)
       
-      // Only close if clicked outside both menus
       if (!clickedInMobileMenu && !clickedInDesktopMenu) {
         setIsProfileOpen(false)
+      }
+      if (!clickedInAdminMenu) {
+        setIsAdminOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -73,7 +78,7 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
   return (
     <header className="fixed top-0 left-0 w-full px-4 py-3 z-50 bg-surface text-white border-b border-gray-800 shadow-sm">
       <div className="max-w-3xl w-full mx-auto">
-        {/* Top Row: mobile menu toggle */}
+        {/* Mobile View */}
         <div className="flex items-center justify-between md:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
@@ -141,8 +146,39 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
             {isAdmin && (
               <>
                 <div className="w-px h-6 bg-gray-700 mx-1" />
-                <button onClick={() => navigate('/admin/artist-rankings')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base">Artist Rankings</button>
-                <button onClick={() => navigate('/admin/lineup-uploader')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base">Lineup Uploader</button>
+                <div className="relative" ref={adminMenuRef}>
+                  <button
+                    onClick={() => setIsAdminOpen(!isAdminOpen)}
+                    className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base flex items-center gap-1"
+                  >
+                    Admin
+                    <ChevronDown className={`w-4 h-4 transition-transform ${isAdminOpen ? 'rotate-180' : ''}`} />
+                  </button>
+                  {isAdminOpen && (
+                    <div className="absolute left-0 mt-2 w-48 rounded-md shadow-lg bg-gray-800 ring-1 ring-black ring-opacity-5">
+                      <div className="py-1" role="menu" aria-orientation="vertical">
+                        <button
+                          onClick={() => {
+                            navigate('/admin/artist-rankings')
+                            setIsAdminOpen(false)
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
+                        >
+                          Artist Rankings
+                        </button>
+                        <button
+                          onClick={() => {
+                            navigate('/admin/lineup-uploader')
+                            setIsAdminOpen(false)
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
+                        >
+                          Lineup Uploader
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
               </>
             )}
 
