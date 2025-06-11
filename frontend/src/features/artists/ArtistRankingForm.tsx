@@ -37,7 +37,7 @@ function RankDropdown({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="w-24 text-sm pl-3 pr-8 py-1.5 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors flex items-center justify-between relative z-[1]"
+        className="h-7 w-24 text-sm pl-3 pr-8 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors flex items-center justify-between relative z-[1]"
       >
         <span className="text-gray-300">Rank</span>
         <ChevronDown className="absolute right-2 w-4 h-4 text-gray-400" />
@@ -174,14 +174,14 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                             >
                               {menuOpenId === artist.id && (
                                 <div 
-                                  className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg"
+                                  className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg flex items-center"
                                 >
                                   <button
                                     onClick={() => {
                                       removeArtist(artist.id)
                                       setMenuOpenId(null)
                                     }}
-                                    className="flex items-center justify-center text-red-600 hover:text-red-700 p-0.5"
+                                    className="h-7 flex items-center justify-center text-red-600 hover:text-red-700 px-2"
                                     aria-label="Remove artist"
                                   >
                                     <Trash className="w-4 h-4" />
@@ -192,7 +192,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                                 onClick={() => {
                                   setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
                                 }}
-                                className="text-white text-xl px-1 py-0.5"
+                                className="h-7 text-white text-xl px-2 flex items-center"
                               >
                                 ⋯
                               </button>
