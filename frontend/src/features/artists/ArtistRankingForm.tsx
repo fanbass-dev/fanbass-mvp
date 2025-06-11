@@ -113,11 +113,11 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
   }
 
   return (
-    <div className="h-full flex flex-col">
+    <div className="h-[calc(100vh-200px)]">
       {Object.keys(grouped).length === 0 ? (
         <p>No artists added yet. Use search to add.</p>
       ) : (
-        <div className="flex-1 overflow-y-auto">
+        <div className="h-full overflow-y-auto">
           {(Object.keys(TIER_LABELS) as Tier[]).map((tier) => {
             const isNotForMe = tier === 'not_for_me'
             const isExpanded = !isNotForMe || notForMeExpanded

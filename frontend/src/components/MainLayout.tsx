@@ -35,7 +35,7 @@ export function MainLayout({
   const [isSearchVisible, setIsSearchVisible] = useState(false)
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col flex-1">
       <div className="sticky top-0 bg-surface shadow-md z-[45]">
         <div className="max-w-3xl w-full mx-auto">
           <div className="px-4 md:px-8 py-4 border-b border-gray-800">
@@ -70,9 +70,9 @@ export function MainLayout({
         </div>
       </div>
 
-      <div className="flex-1 overflow-hidden">
-        <div className="max-w-3xl w-full mx-auto h-full">
-          <div className="px-4 md:px-8 h-full">
+      <div className="flex-1">
+        <div className="max-w-3xl w-full mx-auto">
+          <div className="px-4 md:px-8 flex-1 min-h-0">
             {useFormUI ? (
               <ArtistRankingForm
                 queue={myArtists}
