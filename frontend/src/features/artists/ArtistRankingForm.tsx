@@ -117,110 +117,112 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
       {Object.keys(grouped).length === 0 ? (
         <p>No artists added yet. Use search to add.</p>
       ) : (
-        (Object.keys(TIER_LABELS) as Tier[]).map((tier) => {
-          const isNotForMe = tier === 'not_for_me'
-          const isExpanded = !isNotForMe || notForMeExpanded
-          const isUnranked = tier === 'unranked'
-          const artists = isUnranked ? currentUnrankedArtists : (grouped[tier] || [])
+        <div className="h-[calc(100vh-180px)] overflow-y-auto">
+          {(Object.keys(TIER_LABELS) as Tier[]).map((tier) => {
+            const isNotForMe = tier === 'not_for_me'
+            const isExpanded = !isNotForMe || notForMeExpanded
+            const isUnranked = tier === 'unranked'
+            const artists = isUnranked ? currentUnrankedArtists : (grouped[tier] || [])
 
-          if (isNotForMe && artists.length === 0) return null
+            if (isNotForMe && artists.length === 0) return null
 
-          return (
-            <div key={tier} className="mb-8">
-              <div className={`sticky ${isSearchVisible ? 'top-[132px]' : 'top-[80px]'} bg-surface z-[40] border-b border-gray-800 shadow-sm py-3`}>
-                <h3 className="flex justify-between items-center">
-                  <span>
-                    {TIER_LABELS[tier]} ({grouped[tier]?.length || 0})
-                  </span>
-                  {isNotForMe && (
-                    <button
-                      onClick={() => setNotForMeExpanded(!notForMeExpanded)}
-                      className="text-sm border border-gray-500 px-2 py-1 rounded"
-                    >
-                      {notForMeExpanded ? 'Hide' : 'Show'}
-                    </button>
-                  )}
-                </h3>
-              </div>
-
-              {isExpanded && (
-                <div className="mt-3">
-                  {artists.map((artist) => (
-                    <div
-                      key={artist.id}
-                      className="flex items-center justify-between gap-3 mb-3 relative overflow-visible"
-                    >
-                      <div className="text-sm truncate basis-1/2">{artist.name}</div>
-
-                      <div className="flex items-center gap-2 relative">
-                        <RankDropdown
-                          artistId={artist.id}
-                          currentTier={rankings[artist.id] || 'unranked'}
-                          onUpdateTier={updateTier}
-                        />
-                        {removeArtist && (
-                          <div
-                            className="relative z-[40]"
-                            ref={(el) => {
-                              menuRefs.current[artist.id] = el
-                            }}
-                          >
-                            <button
-                              onClick={() =>
-                                setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
-                              }
-                              className="text-white text-xl px-1"
-                            >
-                              ⋯
-                            </button>
-                            {menuOpenId === artist.id && (
-                              <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[41]">
-                                <button
-                                  onClick={() => {
-                                    removeArtist(artist.id)
-                                    setMenuOpenId(null)
-                                  }}
-                                  className="flex items-center justify-center text-red-600 hover:text-red-700 p-1"
-                                  aria-label="Remove artist"
-                                >
-                                  <Trash className="w-4 h-4" />
-                                </button>
-                              </div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {isUnranked && totalPages > 1 && (
-                    <div className="flex items-center justify-center gap-4 mt-4">
+            return (
+              <div key={tier} className="mb-8">
+                <div className={`sticky top-0 bg-surface z-[40] border-b border-gray-800 shadow-sm py-3`}>
+                  <h3 className="flex justify-between items-center">
+                    <span>
+                      {TIER_LABELS[tier]} ({grouped[tier]?.length || 0})
+                    </span>
+                    {isNotForMe && (
                       <button
-                        onClick={() => handlePageChange(currentPage - 1)}
-                        disabled={currentPage === 1}
-                        className="p-1 disabled:opacity-50"
-                        aria-label="Previous page"
+                        onClick={() => setNotForMeExpanded(!notForMeExpanded)}
+                        className="text-sm border border-gray-500 px-2 py-1 rounded"
                       >
-                        <ChevronLeft className="w-5 h-5" />
+                        {notForMeExpanded ? 'Hide' : 'Show'}
                       </button>
-                      <span className="text-sm">
-                        Page {currentPage} of {totalPages}
-                      </span>
-                      <button
-                        onClick={() => handlePageChange(currentPage + 1)}
-                        disabled={currentPage === totalPages}
-                        className="p-1 disabled:opacity-50"
-                        aria-label="Next page"
-                      >
-                        <ChevronRight className="w-5 h-5" />
-                      </button>
-                    </div>
-                  )}
+                    )}
+                  </h3>
                 </div>
-              )}
-            </div>
-          )
-        })
+
+                {isExpanded && (
+                  <div className="mt-3">
+                    {artists.map((artist) => (
+                      <div
+                        key={artist.id}
+                        className="flex items-center justify-between gap-3 mb-3 relative overflow-visible"
+                      >
+                        <div className="text-sm truncate basis-1/2">{artist.name}</div>
+
+                        <div className="flex items-center gap-2 relative">
+                          <RankDropdown
+                            artistId={artist.id}
+                            currentTier={rankings[artist.id] || 'unranked'}
+                            onUpdateTier={updateTier}
+                          />
+                          {removeArtist && (
+                            <div
+                              className="relative z-[40]"
+                              ref={(el) => {
+                                menuRefs.current[artist.id] = el
+                              }}
+                            >
+                              <button
+                                onClick={() =>
+                                  setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
+                                }
+                                className="text-white text-xl px-1"
+                              >
+                                ⋯
+                              </button>
+                              {menuOpenId === artist.id && (
+                                <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[41]">
+                                  <button
+                                    onClick={() => {
+                                      removeArtist(artist.id)
+                                      setMenuOpenId(null)
+                                    }}
+                                    className="flex items-center justify-center text-red-600 hover:text-red-700 p-1"
+                                    aria-label="Remove artist"
+                                  >
+                                    <Trash className="w-4 h-4" />
+                                  </button>
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    ))}
+                    
+                    {isUnranked && totalPages > 1 && (
+                      <div className="flex items-center justify-center gap-4 mt-4">
+                        <button
+                          onClick={() => handlePageChange(currentPage - 1)}
+                          disabled={currentPage === 1}
+                          className="p-1 disabled:opacity-50"
+                          aria-label="Previous page"
+                        >
+                          <ChevronLeft className="w-5 h-5" />
+                        </button>
+                        <span className="text-sm">
+                          Page {currentPage} of {totalPages}
+                        </span>
+                        <button
+                          onClick={() => handlePageChange(currentPage + 1)}
+                          disabled={currentPage === totalPages}
+                          className="p-1 disabled:opacity-50"
+                          aria-label="Next page"
+                        >
+                          <ChevronRight className="w-5 h-5" />
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
+            )
+          })}
+        </div>
       )}
     </div>
   )
