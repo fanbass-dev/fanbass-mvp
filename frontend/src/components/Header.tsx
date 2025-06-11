@@ -71,7 +71,7 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
   }
 
   return (
-    <header className="w-full px-4 py-3 z-20 relative bg-surface text-white border-b border-gray-800 shadow-sm">
+    <header className="fixed top-0 left-0 w-full px-4 py-3 z-50 bg-surface text-white border-b border-gray-800 shadow-sm">
       <div className="max-w-3xl w-full mx-auto">
         {/* Top Row: mobile menu toggle */}
         <div className="flex items-center justify-between md:hidden">
