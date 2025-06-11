@@ -60,7 +60,6 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
 
   return (
     <div className="relative z-10">
-      <h2>My Artists</h2>
       {Object.keys(grouped).length === 0 ? (
         <p>No artists added yet. Use search to add.</p>
       ) : (

@@ -203,7 +203,7 @@ export function SearchBar({
         <input
           ref={inputRef}
           type="text"
-          placeholder="Search artists"
+          placeholder="Search to add artists"
           className="searchInput"
           value={inputValue}
           onChange={(e) => setInputValue(e.target.value)}

@@ -32,6 +32,7 @@ export function MainLayout({
 }: Props) {
   return (
     <div className="max-w-3xl w-full mx-auto px-4 md:px-8 py-6 text-white">
+      <h2>My Artist Rankings</h2>
       <SearchBar
         searchTerm={searchTerm}
         searchResults={searchResults}
