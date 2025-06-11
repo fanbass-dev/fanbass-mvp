@@ -1,9 +1,11 @@
+import { useState } from 'react'
 import { ArtistRankingForm } from '../features/artists/ArtistRankingForm'
 import ArtistCanvas from '../features/artists/pixiCanvas/ArtistCanvas'
 import type { Artist } from '../types/types'
 import './MainLayout.css'
 import { SearchBar } from './SearchBar'
 import type { Tier } from '../constants/tiers'
+import { ChevronDown } from 'lucide-react'
 
 type Props = {
   searchTerm: string
@@ -30,35 +32,55 @@ export function MainLayout({
   updateTier,
   removeArtist,
 }: Props) {
-  return (
-    <div className="max-w-3xl w-full mx-auto px-4 md:px-8 py-6 text-white">
-      <h2>My Artist Rankings</h2>
-      <SearchBar
-        searchTerm={searchTerm}
-        searchResults={searchResults}
-        searching={searching}
-        onChange={onSearchChange}
-        onAdd={(artistOrArtists) => {
-          if (Array.isArray(artistOrArtists)) {
-            console.warn('Received array of artists - this should not happen with new schema')
-            return
-          }
-          onAddToQueue(artistOrArtists)
-        }}
-        queue={myArtists}
-      />
+  const [isSearchVisible, setIsSearchVisible] = useState(false)
 
-      <div className="mt-6">
-        {useFormUI ? (
-          <ArtistRankingForm
-            queue={myArtists}
-            rankings={rankings}
-            updateTier={updateTier}
-            removeArtist={removeArtist}
-          />
-        ) : (
-          <ArtistCanvas artists={myArtists} />
-        )}
+  return (
+    <div className="max-w-3xl w-full mx-auto text-white">
+      <div className="sticky top-[72px] bg-surface shadow-md z-40 border-b border-gray-800">
+        <div className="px-4 md:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <h2>My Artist Rankings</h2>
+            <button
+              onClick={() => setIsSearchVisible(!isSearchVisible)}
+              className="flex items-center gap-1 text-sm text-gray-400 hover:text-white transition"
+            >
+              <span>{isSearchVisible ? 'Hide Search' : 'Add Artists'} </span>
+              <ChevronDown className={`w-4 h-4 transition-transform ${isSearchVisible ? 'rotate-180' : ''}`} />
+            </button>
+          </div>
+
+          <div className={`transition-all duration-300 overflow-hidden ${isSearchVisible ? 'max-h-[500px] opacity-100' : 'max-h-0 opacity-0'}`}>
+            <SearchBar
+              searchTerm={searchTerm}
+              searchResults={searchResults}
+              searching={searching}
+              onChange={onSearchChange}
+              onAdd={(artistOrArtists) => {
+                if (Array.isArray(artistOrArtists)) {
+                  console.warn('Received array of artists - this should not happen with new schema')
+                  return
+                }
+                onAddToQueue(artistOrArtists)
+              }}
+              queue={myArtists}
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="px-4 md:px-8 py-6">
+        <div className={`transition-all duration-300`}>
+          {useFormUI ? (
+            <ArtistRankingForm
+              queue={myArtists}
+              rankings={rankings}
+              updateTier={updateTier}
+              removeArtist={removeArtist}
+            />
+          ) : (
+            <ArtistCanvas artists={myArtists} />
+          )}
+        </div>
       </div>
     </div>
   )
