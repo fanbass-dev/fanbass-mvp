@@ -1,16 +1,70 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Artist } from '../../types/types'
 import { TIER_LABELS, type Tier } from '../../constants/tiers'
-import { Trash, ChevronLeft, ChevronRight } from 'lucide-react'
+import { Trash, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
 
 type Props = {
   queue: Artist[]
   rankings: Record<string, Tier>
   updateTier: (id: string, tier: Tier) => void
   removeArtist?: (id: string) => void
+  isSearchVisible: boolean
 }
 
-export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }: Props) {
+function RankDropdown({ 
+  artistId, 
+  currentTier, 
+  onUpdateTier 
+}: { 
+  artistId: string
+  currentTier: Tier
+  onUpdateTier: (id: string, tier: Tier) => void 
+}) {
+  const [isOpen, setIsOpen] = useState(false)
+  const dropdownRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setIsOpen(false)
+      }
+    }
+    document.addEventListener('mousedown', handleClickOutside)
+    return () => document.removeEventListener('mousedown', handleClickOutside)
+  }, [])
+
+  return (
+    <div className="relative" ref={dropdownRef}>
+      <button
+        onClick={() => setIsOpen(!isOpen)}
+        className="w-24 text-sm pl-3 pr-8 py-1.5 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors flex items-center justify-between relative z-[1]"
+      >
+        <span className="text-gray-300">Rank</span>
+        <ChevronDown className="absolute right-2 w-4 h-4 text-gray-400" />
+      </button>
+              {isOpen && (
+          <div className="absolute top-full right-0 mt-1 w-36 bg-gray-800 border border-gray-700 rounded shadow-lg py-1 z-[100]">
+          {(Object.keys(TIER_LABELS) as Tier[]).map((tier) => (
+            <button
+              key={tier}
+              onClick={() => {
+                onUpdateTier(artistId, tier)
+                setIsOpen(false)
+              }}
+              className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-700 transition-colors ${
+                tier === currentTier ? 'bg-gray-700' : ''
+              }`}
+            >
+              {TIER_LABELS[tier]}
+            </button>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, isSearchVisible }: Props) {
   const [notForMeExpanded, setNotForMeExpanded] = useState(false)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
@@ -59,7 +113,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
   }
 
   return (
-    <div className="relative z-10">
+    <div className="relative">
       {Object.keys(grouped).length === 0 ? (
         <p>No artists added yet. Use search to add.</p>
       ) : (
@@ -73,22 +127,24 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
 
           return (
             <div key={tier} className="mb-8">
-              <h3 className="flex justify-between items-center">
-                <span>
-                  {TIER_LABELS[tier]} ({grouped[tier]?.length || 0})
-                </span>
-                {isNotForMe && (
-                  <button
-                    onClick={() => setNotForMeExpanded(!notForMeExpanded)}
-                    className="text-sm border border-gray-500 px-2 py-1 rounded"
-                  >
-                    {notForMeExpanded ? 'Hide' : 'Show'}
-                  </button>
-                )}
-              </h3>
+              <div className={`sticky ${isSearchVisible ? 'top-[132px]' : 'top-[80px]'} bg-surface z-[45] border-b border-gray-800 shadow-sm py-3`}>
+                <h3 className="flex justify-between items-center">
+                  <span>
+                    {TIER_LABELS[tier]} ({grouped[tier]?.length || 0})
+                  </span>
+                  {isNotForMe && (
+                    <button
+                      onClick={() => setNotForMeExpanded(!notForMeExpanded)}
+                      className="text-sm border border-gray-500 px-2 py-1 rounded"
+                    >
+                      {notForMeExpanded ? 'Hide' : 'Show'}
+                    </button>
+                  )}
+                </h3>
+              </div>
 
               {isExpanded && (
-                <>
+                <div className="mt-3">
                   {artists.map((artist) => (
                     <div
                       key={artist.id}
@@ -96,21 +152,15 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                     >
                       <div className="text-sm truncate basis-1/2">{artist.name}</div>
 
-                      <div className="flex items-center gap-2 relative z-10">
-                        <select
-                          value={rankings[artist.id] || 'unranked'}
-                          onChange={(e) => updateTier(artist.id, e.target.value as Tier)}
-                          className="w-40 text-sm px-2 py-1 z-0"
-                        >
-                          {(Object.keys(TIER_LABELS) as Tier[]).map((t) => (
-                            <option key={t} value={t}>
-                              {TIER_LABELS[t]}
-                            </option>
-                          ))}
-                        </select>
+                      <div className="flex items-center gap-2 relative">
+                        <RankDropdown
+                          artistId={artist.id}
+                          currentTier={rankings[artist.id] || 'unranked'}
+                          onUpdateTier={updateTier}
+                        />
                         {removeArtist && (
                           <div
-                            className="relative z-20"
+                            className="relative z-[45]"
                             ref={(el) => {
                               menuRefs.current[artist.id] = el
                             }}
@@ -124,7 +174,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                               ⋯
                             </button>
                             {menuOpenId === artist.id && (
-                              <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[9999]">
+                              <div className="absolute bottom-full right-0 mb-1 bg-gray-800 text-white border border-gray-600 rounded-md p-1 shadow-lg z-[100]">
                                 <button
                                   onClick={() => {
                                     removeArtist(artist.id)
@@ -166,7 +216,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist }:
                       </button>
                     </div>
                   )}
-                </>
+                </div>
               )}
             </div>
           )
