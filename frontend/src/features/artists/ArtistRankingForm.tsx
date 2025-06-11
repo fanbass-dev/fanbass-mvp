@@ -70,11 +70,6 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
 
-  // Log when state changes
-  useEffect(() => {
-    console.log('menuOpenId changed to:', menuOpenId)
-  }, [menuOpenId])
-
   const menuRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
@@ -84,7 +79,6 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
         menuRefs.current[menuOpenId] &&
         !menuRefs.current[menuOpenId]!.contains(event.target as Node)
       ) {
-        console.log('Click outside detected, closing menu:', menuOpenId)
         setMenuOpenId(null)
       }
     }
