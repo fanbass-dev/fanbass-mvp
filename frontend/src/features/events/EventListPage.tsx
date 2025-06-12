@@ -111,13 +111,15 @@ export function EventListPage() {
                       <span>{formatDate(event.date)}</span>
                     </div>
                   </div>
-                  <div className="flex items-center gap-4 text-sm text-gray-400">
-                    {event.location && (
-                      <div className="flex items-center gap-1.5">
-                        <MapPin className="w-4 h-4" />
-                        <span>{event.location}</span>
-                      </div>
-                    )}
+                  <div className="flex items-center justify-between text-sm text-gray-400">
+                    <div className="flex items-center gap-1.5">
+                      {event.location && (
+                        <>
+                          <MapPin className="w-4 h-4" />
+                          <span>{event.location}</span>
+                        </>
+                      )}
+                    </div>
                     {event.status === 'draft' && (
                       <span className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-700 text-gray-300">
                         Draft
