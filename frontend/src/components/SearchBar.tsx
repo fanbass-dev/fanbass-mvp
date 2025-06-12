@@ -338,11 +338,15 @@ export function SearchBar({
 
       <CreateArtistModal
         isOpen={isCreateModalOpen}
-        onClose={() => setIsCreateModalOpen(false)}
+        onClose={() => {
+          setIsCreateModalOpen(false)
+          setTimeout(() => {
+            inputRef.current?.focus()
+          }, 0)
+        }}
         suggestedName={inputValue.trim().toUpperCase()}
         currentUser={currentUser}
         onSuccess={() => {
-          // Trigger a new search to include the newly created artist
           onChange(inputValue)
         }}
       />
