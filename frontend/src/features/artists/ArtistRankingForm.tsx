@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import type { Artist } from '../../types/types'
 import { TIER_LABELS, type Tier } from '../../constants/tiers'
-import { Trash, ChevronLeft, ChevronRight, ChevronDown } from 'lucide-react'
+import { Trash, ChevronLeft, ChevronRight, ChevronDown, Pencil } from 'lucide-react'
 
 type Props = {
   queue: Artist[]
@@ -190,9 +190,9 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                                 onClick={() => {
                                   setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
                                 }}
-                                className="h-7 text-white text-xl px-2 flex items-center"
+                                className="h-7 text-white text-xl px-2 flex items-center hover:text-gray-300 transition-colors"
                               >
-                                ⋯
+                                <Pencil className="w-4 h-4" />
                               </button>
                             </div>
                           )}
