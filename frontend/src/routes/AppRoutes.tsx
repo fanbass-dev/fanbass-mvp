@@ -7,6 +7,7 @@ import { EventListPage } from '../features/events/EventListPage'
 import ArtistRankingsAdmin from '../features/admin/ArtistRankingsAdmin'
 import { ProfileSettingsPage } from '../features/profile/ProfileSettingsPage'
 import { UserStatsPage } from '../features/profile/UserStatsPage'
+import AdminStatsPage from '../features/admin/AdminStatsPage'
 import type { Artist } from '../types/types'
 import type { Tier } from '../constants/tiers'
 
@@ -62,6 +63,7 @@ export function AppRoutes({
       <Route path="/event/:eventKey" element={<EventPage currentUser={currentUser} />} />
       <Route path="/events" element={<EventListPage />} />
       <Route path="/admin/artist-rankings" element={<ArtistRankingsAdmin />} />
+      <Route path="/admin/stats" element={<AdminStatsPage />} />
       <Route path="/settings/profile" element={<ProfileSettingsPage />} />
       <Route path="/settings/stats" element={<UserStatsPage />} />
     </Routes>

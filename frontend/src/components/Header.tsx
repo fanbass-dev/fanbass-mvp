@@ -174,6 +174,15 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
                         </button>
                         <button
                           onClick={() => {
+                            navigate('/admin/stats')
+                            setIsAdminOpen(false)
+                          }}
+                          className="w-full text-left px-4 py-2 text-sm text-white hover:bg-gray-700"
+                        >
+                          Platform Stats
+                        </button>
+                        <button
+                          onClick={() => {
                             navigate('/admin/lineup-uploader')
                             setIsAdminOpen(false)
                           }}
@@ -289,6 +298,15 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
                 className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
               >
                 Artist Rankings
+              </button>
+              <button 
+                onClick={() => {
+                  navigate('/admin/stats')
+                  setIsOpen(false)
+                }} 
+                className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
+              >
+                Platform Stats
               </button>
               <button 
                 onClick={() => {
