@@ -66,6 +66,7 @@ function RankDropdown({
 
 export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, isSearchVisible }: Props) {
   const [notForMeExpanded, setNotForMeExpanded] = useState(false)
+  const [unrankedExpanded, setUnrankedExpanded] = useState(true)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const [currentPage, setCurrentPage] = useState(1)
   const itemsPerPage = 10
@@ -120,8 +121,11 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
         <div className="h-full overflow-y-auto">
           {(Object.keys(TIER_LABELS) as Tier[]).map((tier) => {
             const isNotForMe = tier === 'not_for_me'
-            const isExpanded = !isNotForMe || notForMeExpanded
             const isUnranked = tier === 'unranked'
+            const isExpanded = 
+              (isNotForMe && notForMeExpanded) || 
+              (isUnranked && unrankedExpanded) || 
+              (!isNotForMe && !isUnranked)
             const artists = isUnranked ? currentUnrankedArtists : (grouped[tier] || [])
 
             if (isNotForMe && artists.length === 0) return null
@@ -133,12 +137,12 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                     <span>
                       {TIER_LABELS[tier]} ({grouped[tier]?.length || 0})
                     </span>
-                    {isNotForMe && (
+                    {(isNotForMe || isUnranked) && (
                       <button
-                        onClick={() => setNotForMeExpanded(!notForMeExpanded)}
+                        onClick={() => isNotForMe ? setNotForMeExpanded(!notForMeExpanded) : setUnrankedExpanded(!unrankedExpanded)}
                         className="text-sm border border-gray-500 px-2 py-1 rounded"
                       >
-                        {notForMeExpanded ? 'Hide' : 'Show'}
+                        {(isNotForMe ? notForMeExpanded : unrankedExpanded) ? 'Hide' : 'Show'}
                       </button>
                     )}
                   </h3>
