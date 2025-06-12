@@ -13,7 +13,11 @@ import { normalizeLineupForRanking, areLineupsEqual } from '../../utils/normaliz
 import type { Artist, Event } from '../../types/types'
 import { useActivityTracking } from '../../hooks/useActivityTracking'
 
-export function EventPage() {
+type Props = {
+  currentUser: any
+}
+
+export function EventPage({ currentUser }: Props) {
   const { eventKey } = useParams()
   const [initialName, setInitialName] = useState('')
   const [initialDate, setInitialDate] = useState('')
@@ -244,6 +248,7 @@ export function EventPage() {
           handleAddArtist(artistOrArtists)
         }}
         queue={lineup.flatMap((l) => l.artists)}
+        currentUser={currentUser}
       />
 
       <div className="space-y-6">

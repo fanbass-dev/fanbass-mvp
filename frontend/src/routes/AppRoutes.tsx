@@ -59,7 +59,7 @@ export function AppRoutes({
       />
       <Route path="/artist/:id" element={<ArtistPage currentUser={currentUser} />} />
       <Route path="/feature-voting" element={<FeatureVotingPage />} />
-      <Route path="/event/:eventKey" element={<EventPage />} />
+      <Route path="/event/:eventKey" element={<EventPage currentUser={currentUser} />} />
       <Route path="/events" element={<EventListPage />} />
       <Route path="/admin/artist-rankings" element={<ArtistRankingsAdmin />} />
       <Route path="/settings/profile" element={<ProfileSettingsPage />} />
