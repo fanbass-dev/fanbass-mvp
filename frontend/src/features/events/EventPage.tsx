@@ -254,6 +254,7 @@ export function EventPage() {
             queue={normalizedQueue}
             rankings={rankings}
             updateTier={updateTier}
+            isSearchVisible={false}
           />
         ) : (
           <LineupSection
