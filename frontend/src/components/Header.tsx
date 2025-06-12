@@ -249,16 +249,56 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
 
         {/* Mobile Nav Dropdown */}
         <nav ref={mobileMenuRef} className={`flex flex-col gap-2 mt-4 ${isOpen ? 'block' : 'hidden'} md:hidden`}>
-          <button onClick={() => navigate('/')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Artists</button>
-          <button onClick={() => navigate('/events')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Events</button>
+          <button 
+            onClick={() => {
+              navigate('/')
+              setIsOpen(false)
+            }} 
+            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
+          >
+            Artists
+          </button>
+          <button 
+            onClick={() => {
+              navigate('/events')
+              setIsOpen(false)
+            }} 
+            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
+          >
+            Events
+          </button>
           <div className="w-full h-px bg-gray-700 my-1" />
-          <button onClick={() => navigate('/feature-voting')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Feature Voting</button>
+          <button 
+            onClick={() => {
+              navigate('/feature-voting')
+              setIsOpen(false)
+            }} 
+            className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
+          >
+            Feature Voting
+          </button>
           
           {isAdmin && (
             <>
               <div className="w-full h-px bg-gray-700 my-1" />
-              <button onClick={() => navigate('/admin/artist-rankings')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Artist Rankings</button>
-              <button onClick={() => navigate('/admin/lineup-uploader')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Lineup Uploader</button>
+              <button 
+                onClick={() => {
+                  navigate('/admin/artist-rankings')
+                  setIsOpen(false)
+                }} 
+                className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
+              >
+                Artist Rankings
+              </button>
+              <button 
+                onClick={() => {
+                  navigate('/admin/lineup-uploader')
+                  setIsOpen(false)
+                }} 
+                className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center"
+              >
+                Lineup Uploader
+              </button>
             </>
           )}
 
@@ -266,6 +306,7 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
             href="https://discord.gg/HuXbDVVBjb"
             target="_blank"
             rel="noopener noreferrer"
+            onClick={() => setIsOpen(false)}
             className="bg-brand text-white hover:bg-[#7289da] px-4 py-2 rounded transition flex items-center gap-2 text-sm justify-center"
           >
             <FaDiscord className="w-4 h-4" />
