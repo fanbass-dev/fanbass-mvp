@@ -34,16 +34,16 @@ function RankDropdown({
   }, [])
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative debug-dropdown" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="h-7 px-2 text-sm text-gray-300 hover:text-white transition-colors flex items-center gap-1"
+        className="h-7 px-2 text-sm text-gray-300 hover:text-white transition-colors flex items-center gap-1 debug-dropdown-button"
       >
         <span>Rank</span>
         <ChevronDown className="w-4 h-4" />
       </button>
       {isOpen && (
-        <div className="absolute top-full right-0 mt-1 w-36 bg-gray-800 border border-gray-700 rounded shadow-lg py-1 z-[41]">
+        <div className="absolute top-full right-0 mt-1 w-36 bg-gray-800 border border-gray-700 rounded shadow-lg py-1 z-[41] debug-dropdown-content">
           {(Object.keys(TIER_LABELS) as Tier[]).map((tier) => (
             <button
               key={tier}
@@ -53,7 +53,7 @@ function RankDropdown({
               }}
               className={`w-full text-left px-3 py-1.5 text-sm hover:bg-gray-700 transition-colors ${
                 tier === currentTier ? 'bg-gray-700' : ''
-              }`}
+              } debug-dropdown-item`}
             >
               {TIER_LABELS[tier]}
             </button>
@@ -135,14 +135,14 @@ function PaginatedArtistList({
                 </div>
               ) : (
                 <div 
-                  className="relative flex items-center gap-1"
+                  className="relative flex items-center gap-1 h-7"
                   ref={(el) => {
                     menuRefs.current[artist.id] = el
                   }}
                 >
                   {menuOpenId === artist.id && (
                     <div 
-                      className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg flex items-center"
+                      className="absolute right-7 top-0 bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg flex items-center h-7"
                     >
                       <RankDropdown
                         artistId={artist.id}
