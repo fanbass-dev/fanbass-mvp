@@ -214,7 +214,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
       {Object.keys(grouped).length === 0 ? (
         <p>No artists added yet. Use search to add.</p>
       ) : (
-        <div className="h-full overflow-y-auto">
+        <div className="h-full overflow-y-auto scrollbar-thin scrollbar-track-gray-900 scrollbar-thumb-gray-700 hover:scrollbar-thumb-gray-600 [&::-webkit-scrollbar]:w-2 [&::-webkit-scrollbar-track]:bg-gray-900 [&::-webkit-scrollbar-thumb]:bg-gray-700 [&::-webkit-scrollbar-thumb]:rounded-full hover:[&::-webkit-scrollbar-thumb]:bg-gray-600">
           {(['unranked', ...Object.keys(TIER_LABELS).filter(t => t !== 'unranked')] as Tier[]).map((tier) => {
             const isNotForMe = tier === 'not_for_me'
             const isUnranked = tier === 'unranked'
