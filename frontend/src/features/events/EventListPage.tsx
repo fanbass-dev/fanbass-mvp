@@ -96,14 +96,14 @@ export function EventListPage() {
         ) : events.length === 0 ? (
           <div className="text-center py-8 text-gray-400">No events found</div>
         ) : (
-          <div className="grid gap-4">
+          <div className="grid gap-2">
             {events.map((event) => (
               <Link
                 key={event.id}
                 to={`/event/${event.slug || event.id}`}
-                className="block bg-background rounded-lg p-4 hover:bg-gray-900/50 transition-colors border border-gray-800/50"
+                className="block bg-background rounded-lg py-2.5 px-4 hover:bg-gray-900/50 transition-colors border border-gray-800/50"
               >
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-col gap-1">
                   <div className="flex items-center justify-between">
                     <h3 className="text-lg font-medium">{event.name}</h3>
                     <div className="flex items-center gap-1.5 text-sm text-gray-400">
