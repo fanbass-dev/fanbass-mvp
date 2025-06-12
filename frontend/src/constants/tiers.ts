@@ -13,5 +13,5 @@ export const TIER_LABELS: Record<Tier, string> = {
   nice_to_catch: 'Cool if convenient',
   depends_on_context: 'It depends',
   not_for_me: 'Not for me',
-  unranked: 'Unranked',
+  unranked: 'Unranked Queue',
 }

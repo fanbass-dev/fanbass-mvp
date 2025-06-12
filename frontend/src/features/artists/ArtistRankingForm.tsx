@@ -134,7 +134,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
               <div key={tier} className="mb-4">
                 <div className={`sticky top-0 bg-surface z-[40] border-b border-gray-800 shadow-sm py-2`}>
                   <h3 className="flex justify-between items-center">
-                    <span>
+                    <span className={isUnranked ? 'italic' : ''}>
                       {TIER_LABELS[tier]} ({grouped[tier]?.length || 0})
                     </span>
                     {(isNotForMe || isUnranked) && (
