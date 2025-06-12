@@ -25,6 +25,7 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
   const profileMenuRef = useRef<HTMLDivElement>(null)
   const mobileProfileMenuRef = useRef<HTMLDivElement>(null)
   const adminMenuRef = useRef<HTMLDivElement>(null)
+  const mobileMenuRef = useRef<HTMLDivElement>(null)
   
   const displayText = useMemo(() => {
     return loading ? 'Loading...' : profile?.displayName || 'Unknown User'
@@ -52,12 +53,17 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
       const clickedInMobileMenu = mobileProfileMenuRef.current?.contains(target)
       const clickedInDesktopMenu = profileMenuRef.current?.contains(target)
       const clickedInAdminMenu = adminMenuRef.current?.contains(target)
+      const clickedInBurgerMenu = mobileMenuRef.current?.contains(target)
+      const clickedInBurgerButton = target.parentElement?.classList.contains('burger-button')
       
       if (!clickedInMobileMenu && !clickedInDesktopMenu) {
         setIsProfileOpen(false)
       }
       if (!clickedInAdminMenu) {
         setIsAdminOpen(false)
+      }
+      if (!clickedInBurgerMenu && !clickedInBurgerButton) {
+        setIsOpen(false)
       }
     }
     document.addEventListener('mousedown', handleClickOutside)
@@ -82,7 +88,7 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
         <div className="flex items-center justify-between md:hidden">
           <button
             onClick={() => setIsOpen(!isOpen)}
-            className="text-white focus:outline-none"
+            className="text-white focus:outline-none burger-button"
           >
             {isOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
           </button>
@@ -242,7 +248,7 @@ export function Header({ onSignOut, useFormUI, onToggleView }: Props) {
         </div>
 
         {/* Mobile Nav Dropdown */}
-        <nav className={`flex flex-col gap-2 mt-4 ${isOpen ? 'block' : 'hidden'} md:hidden`}>
+        <nav ref={mobileMenuRef} className={`flex flex-col gap-2 mt-4 ${isOpen ? 'block' : 'hidden'} md:hidden`}>
           <button onClick={() => navigate('/')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Artists</button>
           <button onClick={() => navigate('/events')} className="bg-gray-800 text-white hover:bg-gray-700 px-4 py-2 rounded transition text-base text-center">Events</button>
           <div className="w-full h-px bg-gray-700 my-1" />
