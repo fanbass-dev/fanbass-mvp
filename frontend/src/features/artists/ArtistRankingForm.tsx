@@ -64,13 +64,21 @@ function RankDropdown({
   )
 }
 
-export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, isSearchVisible }: Props) {
-  const [notForMeExpanded, setNotForMeExpanded] = useState(false)
-  const [unrankedExpanded, setUnrankedExpanded] = useState(true)
-  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
-  const [currentPage, setCurrentPage] = useState(1)
-  const itemsPerPage = 10
+const ITEMS_PER_PAGE = 10
 
+function PaginatedArtistList({
+  artists,
+  rankings,
+  updateTier,
+  removeArtist,
+}: {
+  artists: Artist[]
+  rankings: Record<string, Tier>
+  updateTier: (id: string, tier: Tier) => void
+  removeArtist?: (id: string) => void
+}) {
+  const [currentPage, setCurrentPage] = useState(1)
+  const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
@@ -83,12 +91,106 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
         setMenuOpenId(null)
       }
     }
-
     document.addEventListener('mousedown', handleClickOutside)
     return () => {
       document.removeEventListener('mousedown', handleClickOutside)
     }
   }, [menuOpenId])
+
+  const totalPages = Math.ceil(artists.length / ITEMS_PER_PAGE)
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
+  const currentArtists = artists.slice(startIndex, startIndex + ITEMS_PER_PAGE)
+
+  const handlePageChange = (newPage: number) => {
+    setCurrentPage(Math.max(1, Math.min(newPage, totalPages)))
+  }
+
+  useEffect(() => {
+    // Reset to first page when artists array changes
+    setCurrentPage(1)
+  }, [artists])
+
+  return (
+    <div className="mt-2">
+      {currentArtists.map((artist) => (
+        <div
+          key={artist.id}
+          className="flex items-center justify-between gap-3 mb-2 relative overflow-visible"
+        >
+          <div className="text-sm truncate basis-1/2">{artist.name}</div>
+          <div className="flex items-center gap-2 relative">
+            {removeArtist && (
+              <div 
+                className="relative flex items-center gap-1"
+                ref={(el) => {
+                  menuRefs.current[artist.id] = el
+                }}
+              >
+                {menuOpenId === artist.id && (
+                  <div 
+                    className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg flex items-center"
+                  >
+                    <RankDropdown
+                      artistId={artist.id}
+                      currentTier={rankings[artist.id] || 'unranked'}
+                      onUpdateTier={updateTier}
+                    />
+                    <button
+                      onClick={() => {
+                        removeArtist(artist.id)
+                        setMenuOpenId(null)
+                      }}
+                      className="h-7 flex items-center justify-center text-red-600 hover:text-red-700 px-2"
+                      aria-label="Remove artist"
+                    >
+                      <Trash className="w-4 h-4" />
+                    </button>
+                  </div>
+                )}
+                <button
+                  onClick={() => {
+                    setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
+                  }}
+                  className="h-7 text-white text-xl px-2 flex items-center hover:text-gray-300 transition-colors"
+                >
+                  <Pencil className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+      ))}
+      
+      {totalPages > 1 && (
+        <div className="flex items-center justify-center gap-4 mt-4">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className="p-1 disabled:opacity-50"
+            aria-label="Previous page"
+          >
+            <ChevronLeft className="w-5 h-5" />
+          </button>
+          <span className="text-sm">
+            Page {currentPage} of {totalPages}
+          </span>
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className="p-1 disabled:opacity-50"
+            aria-label="Next page"
+          >
+            <ChevronRight className="w-5 h-5" />
+          </button>
+        </div>
+      )}
+    </div>
+  )
+}
+
+export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, isSearchVisible }: Props) {
+  const [notForMeExpanded, setNotForMeExpanded] = useState(false)
+  const [unrankedExpanded, setUnrankedExpanded] = useState(true)
 
   const grouped: Record<Tier, Artist[]> = {} as Record<Tier, Artist[]>
   queue.forEach((artist) => {
@@ -101,17 +203,6 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
   Object.values(grouped).forEach(artists => {
     artists.sort((a, b) => a.name.localeCompare(b.name))
   })
-
-  // Pagination for unranked section
-  const unrankedArtists = grouped['unranked'] || []
-  const totalPages = Math.ceil(unrankedArtists.length / itemsPerPage)
-  const startIndex = (currentPage - 1) * itemsPerPage
-  const endIndex = startIndex + itemsPerPage
-  const currentUnrankedArtists = unrankedArtists.slice(startIndex, endIndex)
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(Math.max(1, Math.min(newPage, totalPages)))
-  }
 
   return (
     <div className="h-[calc(100vh-200px)]">
@@ -126,7 +217,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
               (isNotForMe && notForMeExpanded) || 
               (isUnranked && unrankedExpanded) || 
               (!isNotForMe && !isUnranked)
-            const artists = isUnranked ? currentUnrankedArtists : (grouped[tier] || [])
+            const artists = grouped[tier] || []
 
             if (artists.length === 0) return null
 
@@ -135,7 +226,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                 <div className={`sticky top-0 bg-surface z-[40] border-b border-gray-800 shadow-sm py-2`}>
                   <h3 className="flex justify-between items-center">
                     <span className={isUnranked ? 'italic' : ''}>
-                      {TIER_LABELS[tier]} ({grouped[tier]?.length || 0})
+                      {TIER_LABELS[tier]} ({artists.length})
                     </span>
                     {(isNotForMe || isUnranked) && (
                       <button
@@ -149,81 +240,12 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                 </div>
 
                 {isExpanded && (
-                  <div className="mt-2">
-                    {artists.map((artist) => (
-                      <div
-                        key={artist.id}
-                        className="flex items-center justify-between gap-3 mb-2 relative overflow-visible"
-                      >
-                        <div className="text-sm truncate basis-1/2">{artist.name}</div>
-
-                        <div className="flex items-center gap-2 relative">
-                          {removeArtist && (
-                            <div 
-                              className="relative flex items-center gap-1"
-                              ref={(el) => {
-                                menuRefs.current[artist.id] = el
-                              }}
-                            >
-                              {menuOpenId === artist.id && (
-                                <div 
-                                  className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg flex items-center"
-                                >
-                                  <RankDropdown
-                                    artistId={artist.id}
-                                    currentTier={rankings[artist.id] || 'unranked'}
-                                    onUpdateTier={updateTier}
-                                  />
-                                  <button
-                                    onClick={() => {
-                                      removeArtist(artist.id)
-                                      setMenuOpenId(null)
-                                    }}
-                                    className="h-7 flex items-center justify-center text-red-600 hover:text-red-700 px-2"
-                                    aria-label="Remove artist"
-                                  >
-                                    <Trash className="w-4 h-4" />
-                                  </button>
-                                </div>
-                              )}
-                              <button
-                                onClick={() => {
-                                  setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
-                                }}
-                                className="h-7 text-white text-xl px-2 flex items-center hover:text-gray-300 transition-colors"
-                              >
-                                <Pencil className="w-4 h-4" />
-                              </button>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-                    ))}
-                    
-                    {isUnranked && totalPages > 1 && (
-                      <div className="flex items-center justify-center gap-4 mt-4">
-                        <button
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                          className="p-1 disabled:opacity-50"
-                          aria-label="Previous page"
-                        >
-                          <ChevronLeft className="w-5 h-5" />
-                        </button>
-                        <span className="text-sm">
-                          Page {currentPage} of {totalPages}
-                        </span>
-                        <button
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                          className="p-1 disabled:opacity-50"
-                          aria-label="Next page"
-                        >
-                          <ChevronRight className="w-5 h-5" />
-                        </button>
-                      </div>
-                    )}
-                  </div>
+                  <PaginatedArtistList
+                    artists={artists}
+                    rankings={rankings}
+                    updateTier={updateTier}
+                    removeArtist={removeArtist}
+                  />
                 )}
               </div>
             )

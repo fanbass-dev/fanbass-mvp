@@ -43,9 +43,9 @@ export function MainLayout({
               <h2>My Artist Rankings</h2>
               <button
                 onClick={() => setIsSearchVisible(!isSearchVisible)}
-                className="flex items-center gap-1 text-sm text-gray-400 hover:text-white transition"
+                className="flex items-center gap-2 px-3 py-1.5 text-sm bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors"
               >
-                <span>{isSearchVisible ? 'Hide Search' : 'Add Artists'} </span>
+                <span>{isSearchVisible ? 'Hide Search' : 'Add Artists'}</span>
                 <ChevronDown className={`w-4 h-4 transition-transform ${isSearchVisible ? 'rotate-180' : ''}`} />
               </button>
             </div>
