@@ -128,7 +128,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
               (!isNotForMe && !isUnranked)
             const artists = isUnranked ? currentUnrankedArtists : (grouped[tier] || [])
 
-            if (isNotForMe && artists.length === 0) return null
+            if (artists.length === 0) return null
 
             return (
               <div key={tier} className="mb-4">
