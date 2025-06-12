@@ -131,6 +131,7 @@ function PaginatedArtistList({
                       <Trash className="w-4 h-4" />
                     </button>
                   </div>
+                  <div className="w-[32px]" />
                 </div>
               ) : (
                 <div 
