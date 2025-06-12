@@ -66,6 +66,50 @@ function RankDropdown({
 
 const ITEMS_PER_PAGE = 10
 
+function DeleteConfirmationModal({
+  artist,
+  onConfirm,
+  onCancel,
+}: {
+  artist: Artist
+  onConfirm: () => void
+  onCancel: () => void
+}) {
+  // Close on escape key
+  useEffect(() => {
+    const handleEscape = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') onCancel()
+    }
+    window.addEventListener('keydown', handleEscape)
+    return () => window.removeEventListener('keydown', handleEscape)
+  }, [onCancel])
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+      <div className="bg-gray-800 rounded-lg p-3 max-w-sm w-full mx-4 shadow-xl">
+        <div className="mb-2">
+          <h3 className="text-lg">Remove Ranking</h3>
+        </div>
+        <p className="mb-3">Remove <span className="font-medium">{artist.name}</span> from your rankings?</p>
+        <div className="flex justify-end gap-3">
+          <button
+            onClick={onCancel}
+            className="px-4 py-1.5 text-sm text-gray-300 hover:text-white transition-colors rounded bg-gray-700/50 hover:bg-gray-700"
+          >
+            Cancel
+          </button>
+          <button
+            onClick={onConfirm}
+            className="px-4 py-1.5 text-sm text-red-500 hover:text-red-400 transition-colors rounded bg-red-500/10 hover:bg-red-500/20"
+          >
+            Remove
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 function PaginatedArtistList({
   artists,
   rankings,
@@ -84,6 +128,7 @@ function PaginatedArtistList({
   isUnranked?: boolean
 }) {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
+  const [deleteModalArtist, setDeleteModalArtist] = useState<Artist | null>(null)
   const menuRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
   useEffect(() => {
@@ -105,6 +150,18 @@ function PaginatedArtistList({
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const currentArtists = artists.slice(startIndex, startIndex + ITEMS_PER_PAGE)
 
+  const handleDelete = (artist: Artist) => {
+    setDeleteModalArtist(artist)
+  }
+
+  const handleConfirmDelete = () => {
+    if (deleteModalArtist && removeArtist) {
+      removeArtist(deleteModalArtist.id)
+      setMenuOpenId(null)
+    }
+    setDeleteModalArtist(null)
+  }
+
   return (
     <div className="mt-2">
       {currentArtists.map((artist) => (
@@ -124,7 +181,7 @@ function PaginatedArtistList({
                       onUpdateTier={updateTier}
                     />
                     <button
-                      onClick={() => removeArtist(artist.id)}
+                      onClick={() => handleDelete(artist)}
                       className="h-7 flex items-center justify-center text-red-600 hover:text-red-700 px-2"
                       aria-label="Remove artist"
                     >
@@ -150,10 +207,7 @@ function PaginatedArtistList({
                         onUpdateTier={updateTier}
                       />
                       <button
-                        onClick={() => {
-                          removeArtist(artist.id)
-                          setMenuOpenId(null)
-                        }}
+                        onClick={() => handleDelete(artist)}
                         className="h-7 flex items-center justify-center text-red-600 hover:text-red-700 px-2"
                         aria-label="Remove artist"
                       >
@@ -175,6 +229,13 @@ function PaginatedArtistList({
           </div>
         </div>
       ))}
+      {deleteModalArtist && (
+        <DeleteConfirmationModal
+          artist={deleteModalArtist}
+          onConfirm={handleConfirmDelete}
+          onCancel={() => setDeleteModalArtist(null)}
+        />
+      )}
     </div>
   )
 }
