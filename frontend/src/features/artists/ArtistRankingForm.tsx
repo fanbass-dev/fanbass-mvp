@@ -71,13 +71,16 @@ function PaginatedArtistList({
   rankings,
   updateTier,
   removeArtist,
+  currentPage,
+  onPageChange,
 }: {
   artists: Artist[]
   rankings: Record<string, Tier>
   updateTier: (id: string, tier: Tier) => void
   removeArtist?: (id: string) => void
+  currentPage: number
+  onPageChange: (page: number) => void
 }) {
-  const [currentPage, setCurrentPage] = useState(1)
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRefs = useRef<Record<string, HTMLDivElement | null>>({})
 
@@ -97,18 +100,8 @@ function PaginatedArtistList({
     }
   }, [menuOpenId])
 
-  const totalPages = Math.ceil(artists.length / ITEMS_PER_PAGE)
   const startIndex = (currentPage - 1) * ITEMS_PER_PAGE
   const currentArtists = artists.slice(startIndex, startIndex + ITEMS_PER_PAGE)
-
-  const handlePageChange = (newPage: number) => {
-    setCurrentPage(Math.max(1, Math.min(newPage, totalPages)))
-  }
-
-  useEffect(() => {
-    // Reset to first page when artists array changes
-    setCurrentPage(1)
-  }, [artists])
 
   return (
     <div className="mt-2">
@@ -160,30 +153,6 @@ function PaginatedArtistList({
           </div>
         </div>
       ))}
-      
-      {totalPages > 1 && (
-        <div className="flex items-center justify-center gap-4 mt-4">
-          <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
-            className="p-1 disabled:opacity-50"
-            aria-label="Previous page"
-          >
-            <ChevronLeft className="w-5 h-5" />
-          </button>
-          <span className="text-sm">
-            Page {currentPage} of {totalPages}
-          </span>
-          <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
-            className="p-1 disabled:opacity-50"
-            aria-label="Next page"
-          >
-            <ChevronRight className="w-5 h-5" />
-          </button>
-        </div>
-      )}
     </div>
   )
 }
@@ -191,6 +160,13 @@ function PaginatedArtistList({
 export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, isSearchVisible }: Props) {
   const [notForMeExpanded, setNotForMeExpanded] = useState(false)
   const [unrankedExpanded, setUnrankedExpanded] = useState(true)
+  const [currentPages, setCurrentPages] = useState<Record<Tier, number>>(() => {
+    const initial: Partial<Record<Tier, number>> = {}
+    Object.keys(TIER_LABELS).forEach(tier => {
+      initial[tier as Tier] = 1
+    })
+    return initial as Record<Tier, number>
+  })
 
   const grouped: Record<Tier, Artist[]> = {} as Record<Tier, Artist[]>
   queue.forEach((artist) => {
@@ -203,6 +179,13 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
   Object.values(grouped).forEach(artists => {
     artists.sort((a, b) => a.name.localeCompare(b.name))
   })
+
+  const handlePageChange = (tier: Tier, page: number, totalPages: number) => {
+    setCurrentPages(prev => ({
+      ...prev,
+      [tier]: Math.max(1, Math.min(page, totalPages))
+    }))
+  }
 
   return (
     <div className="h-[calc(100vh-200px)]">
@@ -218,6 +201,8 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
               (isUnranked && unrankedExpanded) || 
               (!isNotForMe && !isUnranked)
             const artists = grouped[tier] || []
+            const totalPages = Math.ceil(artists.length / ITEMS_PER_PAGE)
+            const currentPage = currentPages[tier] || 1
 
             if (artists.length === 0) return null
 
@@ -228,14 +213,39 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                     <span className={isUnranked ? 'italic' : ''}>
                       {TIER_LABELS[tier]} ({artists.length})
                     </span>
-                    {(isNotForMe || isUnranked) && (
-                      <button
-                        onClick={() => isNotForMe ? setNotForMeExpanded(!notForMeExpanded) : setUnrankedExpanded(!unrankedExpanded)}
-                        className="text-sm border border-gray-500 px-2 py-1 rounded"
-                      >
-                        {(isNotForMe ? notForMeExpanded : unrankedExpanded) ? 'Hide' : 'Show'}
-                      </button>
-                    )}
+                    <div className="flex items-center gap-4">
+                      {totalPages > 1 && (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => handlePageChange(tier, currentPage - 1, totalPages)}
+                            disabled={currentPage === 1}
+                            className="p-1 disabled:opacity-50"
+                            aria-label="Previous page"
+                          >
+                            <ChevronLeft className="w-4 h-4" />
+                          </button>
+                          <span className="text-sm">
+                            {currentPage} / {totalPages}
+                          </span>
+                          <button
+                            onClick={() => handlePageChange(tier, currentPage + 1, totalPages)}
+                            disabled={currentPage === totalPages}
+                            className="p-1 disabled:opacity-50"
+                            aria-label="Next page"
+                          >
+                            <ChevronRight className="w-4 h-4" />
+                          </button>
+                        </div>
+                      )}
+                      {(isNotForMe || isUnranked) && (
+                        <button
+                          onClick={() => isNotForMe ? setNotForMeExpanded(!notForMeExpanded) : setUnrankedExpanded(!unrankedExpanded)}
+                          className="text-sm border border-gray-500 px-2 py-1 rounded"
+                        >
+                          {(isNotForMe ? notForMeExpanded : unrankedExpanded) ? 'Hide' : 'Show'}
+                        </button>
+                      )}
+                    </div>
                   </h3>
                 </div>
 
@@ -245,6 +255,8 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                     rankings={rankings}
                     updateTier={updateTier}
                     removeArtist={removeArtist}
+                    currentPage={currentPage}
+                    onPageChange={(page) => handlePageChange(tier, page, totalPages)}
                   />
                 )}
               </div>
