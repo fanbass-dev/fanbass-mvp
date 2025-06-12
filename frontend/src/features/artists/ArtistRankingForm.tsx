@@ -73,6 +73,7 @@ function PaginatedArtistList({
   removeArtist,
   currentPage,
   onPageChange,
+  isUnranked = false,
 }: {
   artists: Artist[]
   rankings: Record<string, Tier>
@@ -80,6 +81,7 @@ function PaginatedArtistList({
   removeArtist?: (id: string) => void
   currentPage: number
   onPageChange: (page: number) => void
+  isUnranked?: boolean
 }) {
   const [menuOpenId, setMenuOpenId] = useState<string | null>(null)
   const menuRefs = useRef<Record<string, HTMLDivElement | null>>({})
@@ -113,42 +115,61 @@ function PaginatedArtistList({
           <div className="text-sm truncate basis-1/2">{artist.name}</div>
           <div className="flex items-center gap-2 relative">
             {removeArtist && (
-              <div 
-                className="relative flex items-center gap-1"
-                ref={(el) => {
-                  menuRefs.current[artist.id] = el
-                }}
-              >
-                {menuOpenId === artist.id && (
-                  <div 
-                    className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg flex items-center"
-                  >
+              isUnranked ? (
+                <div className="relative flex items-center gap-1">
+                  <div className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg flex items-center">
                     <RankDropdown
                       artistId={artist.id}
                       currentTier={rankings[artist.id] || 'unranked'}
                       onUpdateTier={updateTier}
                     />
                     <button
-                      onClick={() => {
-                        removeArtist(artist.id)
-                        setMenuOpenId(null)
-                      }}
+                      onClick={() => removeArtist(artist.id)}
                       className="h-7 flex items-center justify-center text-red-600 hover:text-red-700 px-2"
                       aria-label="Remove artist"
                     >
                       <Trash className="w-4 h-4" />
                     </button>
                   </div>
-                )}
-                <button
-                  onClick={() => {
-                    setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
+                </div>
+              ) : (
+                <div 
+                  className="relative flex items-center gap-1"
+                  ref={(el) => {
+                    menuRefs.current[artist.id] = el
                   }}
-                  className="h-7 text-white text-xl px-2 flex items-center hover:text-gray-300 transition-colors"
                 >
-                  <Pencil className="w-4 h-4" />
-                </button>
-              </div>
+                  {menuOpenId === artist.id && (
+                    <div 
+                      className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg flex items-center"
+                    >
+                      <RankDropdown
+                        artistId={artist.id}
+                        currentTier={rankings[artist.id] || 'unranked'}
+                        onUpdateTier={updateTier}
+                      />
+                      <button
+                        onClick={() => {
+                          removeArtist(artist.id)
+                          setMenuOpenId(null)
+                        }}
+                        className="h-7 flex items-center justify-center text-red-600 hover:text-red-700 px-2"
+                        aria-label="Remove artist"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
+                    </div>
+                  )}
+                  <button
+                    onClick={() => {
+                      setMenuOpenId((prev) => (prev === artist.id ? null : artist.id))
+                    }}
+                    className="h-7 text-white text-xl px-2 flex items-center hover:text-gray-300 transition-colors"
+                  >
+                    <Pencil className="w-4 h-4" />
+                  </button>
+                </div>
+              )
             )}
           </div>
         </div>
@@ -257,6 +278,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                     removeArtist={removeArtist}
                     currentPage={currentPage}
                     onPageChange={(page) => handlePageChange(tier, page, totalPages)}
+                    isUnranked={isUnranked}
                   />
                 )}
               </div>
