@@ -101,7 +101,7 @@ export function EventListPage() {
               <Link
                 key={event.id}
                 to={`/event/${event.slug || event.id}`}
-                className="block bg-gray-800 rounded-lg p-4 hover:bg-gray-750 transition-colors border border-gray-700"
+                className="block bg-background rounded-lg p-4 hover:bg-gray-900/50 transition-colors border border-gray-800/50"
               >
                 <div className="flex flex-col gap-2">
                   <div className="flex items-center justify-between">
