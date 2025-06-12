@@ -119,7 +119,7 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
         <p>No artists added yet. Use search to add.</p>
       ) : (
         <div className="h-full overflow-y-auto">
-          {(Object.keys(TIER_LABELS) as Tier[]).map((tier) => {
+          {(['unranked', ...Object.keys(TIER_LABELS).filter(t => t !== 'unranked')] as Tier[]).map((tier) => {
             const isNotForMe = tier === 'not_for_me'
             const isUnranked = tier === 'unranked'
             const isExpanded = 
