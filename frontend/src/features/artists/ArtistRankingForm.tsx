@@ -37,13 +37,13 @@ function RankDropdown({
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="h-7 w-24 text-sm pl-3 pr-8 bg-gray-800 border border-gray-700 rounded hover:bg-gray-700 transition-colors flex items-center justify-between relative z-[1]"
+        className="h-7 px-2 text-sm text-gray-300 hover:text-white transition-colors flex items-center gap-1"
       >
-        <span className="text-gray-300">Rank</span>
-        <ChevronDown className="absolute right-2 w-4 h-4 text-gray-400" />
+        <span>Rank</span>
+        <ChevronDown className="w-4 h-4" />
       </button>
-              {isOpen && (
-          <div className="absolute top-full right-0 mt-1 w-36 bg-gray-800 border border-gray-700 rounded shadow-lg py-1 z-[41]">
+      {isOpen && (
+        <div className="absolute top-full right-0 mt-1 w-36 bg-gray-800 border border-gray-700 rounded shadow-lg py-1 z-[41]">
           {(Object.keys(TIER_LABELS) as Tier[]).map((tier) => (
             <button
               key={tier}
@@ -158,11 +158,6 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                         <div className="text-sm truncate basis-1/2">{artist.name}</div>
 
                         <div className="flex items-center gap-2 relative">
-                          <RankDropdown
-                            artistId={artist.id}
-                            currentTier={rankings[artist.id] || 'unranked'}
-                            onUpdateTier={updateTier}
-                          />
                           {removeArtist && (
                             <div 
                               className="relative flex items-center gap-1"
@@ -174,6 +169,11 @@ export function ArtistRankingForm({ queue, rankings, updateTier, removeArtist, i
                                 <div 
                                   className="bg-gray-800 text-white border border-gray-600 rounded-md shadow-lg flex items-center"
                                 >
+                                  <RankDropdown
+                                    artistId={artist.id}
+                                    currentTier={rankings[artist.id] || 'unranked'}
+                                    onUpdateTier={updateTier}
+                                  />
                                   <button
                                     onClick={() => {
                                       removeArtist(artist.id)
