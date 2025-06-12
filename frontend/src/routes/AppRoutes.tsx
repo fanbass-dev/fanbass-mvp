@@ -53,6 +53,7 @@ export function AppRoutes({
             rankings={rankings}
             updateTier={updateTier}
             removeArtist={removeArtistFromQueue}
+            currentUser={currentUser}
           />
         }
       />

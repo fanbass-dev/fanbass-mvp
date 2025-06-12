@@ -18,6 +18,7 @@ type Props = {
   rankings: Record<string, Tier>
   updateTier: (id: string, tier: Tier) => void
   removeArtist: (id: string) => void
+  currentUser: any
 }
 
 export function MainLayout({
@@ -31,6 +32,7 @@ export function MainLayout({
   rankings,
   updateTier,
   removeArtist,
+  currentUser,
 }: Props) {
   const [isSearchVisible, setIsSearchVisible] = useState(false)
 
@@ -64,6 +66,7 @@ export function MainLayout({
                   onAddToQueue(artistOrArtists)
                 }}
                 queue={myArtists}
+                currentUser={currentUser}
               />
             </div>
           </div>

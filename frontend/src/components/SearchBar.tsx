@@ -5,6 +5,7 @@ import clsx from 'clsx'
 import './SearchBar.css'
 import type { Artist } from '../types/types'
 import { supabase } from '../supabaseClient'
+import { CreateArtistModal } from './CreateArtistModal'
 
 type Props = {
   searchTerm: string
@@ -13,6 +14,7 @@ type Props = {
   onChange: (term: string) => void
   onAdd: (artist: Artist | Artist[]) => void
   queue: Artist[]
+  currentUser: any
 }
 
 export function SearchBar({
@@ -22,6 +24,7 @@ export function SearchBar({
   onChange,
   onAdd,
   queue,
+  currentUser,
 }: Props) {
   const inputRef = useRef<HTMLInputElement>(null)
   const dropdownRef = useRef<HTMLDivElement>(null)
@@ -31,6 +34,7 @@ export function SearchBar({
   const [isOpen, setIsOpen] = useState(false)
   const [b2bMode, setB2bMode] = useState(false)
   const [b2bQueue, setB2bQueue] = useState<Artist[]>([])
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false)
 
   // Filter out B2B artists in B2B mode and add status flags
   const searchResultsWithStatus = useMemo(
@@ -314,8 +318,8 @@ export function SearchBar({
               !searching && (
                 <div className="searchResultItem">
                   <span>No match found.</span>
-                  <a
-                    href={`/artist/new?name=${encodeURIComponent(inputValue.trim().toUpperCase())}`}
+                  <button
+                    onClick={() => setIsCreateModalOpen(true)}
                     style={{
                       display: 'block',
                       marginTop: '0.5rem',
@@ -323,15 +327,25 @@ export function SearchBar({
                       textDecoration: 'underline',
                       cursor: 'pointer',
                     }}
-                    onClick={() => setIsOpen(false)}
                   >
                     Create: {inputValue.trim().toUpperCase()}
-                  </a>
+                  </button>
                 </div>
               )}
           </div>,
           document.getElementById('dropdown-root')!
         )}
+
+      <CreateArtistModal
+        isOpen={isCreateModalOpen}
+        onClose={() => setIsCreateModalOpen(false)}
+        suggestedName={inputValue.trim().toUpperCase()}
+        currentUser={currentUser}
+        onSuccess={() => {
+          // Trigger a new search to include the newly created artist
+          onChange(inputValue)
+        }}
+      />
     </div>
   )
 }
