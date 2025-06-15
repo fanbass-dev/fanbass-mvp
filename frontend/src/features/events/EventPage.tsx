@@ -9,6 +9,7 @@ import { EventForm } from './EventForm'
 import { useEvent } from './useEvent'
 import { slugify } from './eventUtils'
 import { useEventRankings } from './useEventRankings'
+import { useArtistRankings } from '../artists/useArtistRankings'
 import { normalizeLineupForRanking, areLineupsEqual } from '../../utils/normalizeLineupForRanking'
 import type { Artist, Event } from '../../types/types'
 import { useActivityTracking } from '../../hooks/useActivityTracking'
@@ -46,6 +47,7 @@ export function EventPage({ currentUser }: Props) {
   }, [lineup])
   
   const { rankings, updateTier } = useEventRankings(artistIds)
+  const { removeArtistFromQueue } = useArtistRankings()
 
   const normalizedQueue = useMemo(() => {
     return normalizeLineupForRanking(lineup)
@@ -259,6 +261,7 @@ export function EventPage({ currentUser }: Props) {
             queue={normalizedQueue}
             rankings={rankings}
             updateTier={updateTier}
+            removeArtist={removeArtistFromQueue}
             isSearchVisible={false}
           />
         ) : (

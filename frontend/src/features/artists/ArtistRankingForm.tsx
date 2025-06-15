@@ -190,13 +190,15 @@ function PaginatedArtistList({
                       currentTier={rankings[artist.id] || 'unranked'}
                       onUpdateTier={updateTier}
                     />
-                    <button
-                      onClick={() => handleDelete(artist)}
-                      className="h-7 flex items-center justify-center text-red-600 hover:text-red-700 px-2"
-                      aria-label="Remove artist"
-                    >
-                      <Trash className="w-4 h-4" />
-                    </button>
+                    {rankings[artist.id] === 'unranked' && (
+                      <button
+                        onClick={() => handleDelete(artist)}
+                        className="h-7 flex items-center justify-center text-red-600 hover:text-red-700 px-2"
+                        aria-label="Remove artist"
+                      >
+                        <Trash className="w-4 h-4" />
+                      </button>
+                    )}
                   </div>
                   <div className="w-[32px]" />
                 </div>
