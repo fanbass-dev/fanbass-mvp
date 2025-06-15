@@ -36,3 +36,5 @@ backups/
 
 # Screenshots for testing
 browser_screenshots/
+
+/supabase/config.toml
